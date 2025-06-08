@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yoldagilar</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+      background: #f8f9fa;
+      color: #222;
+    }
+    h2 {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin-bottom: 12px;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 6px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #28a745;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <h2>Bugungi shartlaringizni belgilang</h2>
+  <form id="form">
+    <div id="task-list"></div>
+    <div id="extra-inputs" style="display:none;">
+      <div id="pages-block" style="display:none;">
+        <label>📚 Necha bet o‘qidingiz?
+          <input type="number" id="pages_read" min="1" />
+        </label>
+      </div>
+      <div id="distance-block" style="display:none;">
+        <label>🏃‍♂️ Necha km yugurdingiz?
+          <input type="number" id="distance_km" step="0.1" min="0" />
+        </label>
+      </div>
+    </div>
+    <button type="submit" disabled id="submitBtn">Yuborish</button>
+  </form>
+
+  <script src="script.js"></script>
+</body>
+</html>

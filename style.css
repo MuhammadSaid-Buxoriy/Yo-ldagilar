@@ -1,0 +1,48 @@
+.center {
+    text-align: center;
+    margin: 1rem 0;
+  }
+  
+  .leaderboard-list {
+    padding: 0.5rem;
+  }
+  
+  .leaderboard-item {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 8px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 0 3px rgba(0,0,0,0.1);
+  }
+  
+  .rank {
+    font-weight: bold;
+    width: 30px;
+    text-align: center;
+  }
+  
+  .info {
+    flex-grow: 1;
+    margin: 0 0.5rem;
+  }
+  
+  .progress-wrapper {
+    background: #eee;
+    height: 8px;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 5px;
+  }
+  
+  .progress-bar {
+    height: 8px;
+    border-radius: 5px;
+  }
+  .percent {
+    font-weight: bold;
+    min-width: 40px;
+    text-align: right;
+  }
+  
