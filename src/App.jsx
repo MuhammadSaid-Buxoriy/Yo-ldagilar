@@ -93,7 +93,7 @@ function App() {
   return (
     <AuthCheck>
       <div className="app">
-        <header className="app-header">
+        {/* <header className="app-header">
           <div className="header-content">
             <div className="header-left">
               <h1 className="app-title">Yoldagilar</h1>
@@ -105,7 +105,7 @@ function App() {
               </div>
             </div>
           </div>
-        </header>
+        </header> */}
 
         <main className={`main-content ${isTransitioning ? 'transitioning' : ''}`}>
           <ActiveComponent />

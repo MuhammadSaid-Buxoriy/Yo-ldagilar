@@ -1,424 +1,513 @@
-// src/services/api.js - PROFESSIONAL COMPLETE API SERVICE
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+// Step 2: Create services/api.js - COMPLETE FAKE API
+// Dev mode checker
+const IS_DEV =
+  import.meta.env.DEV === "development" ||
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
 
 class APIService {
-  constructor() {
-    this.baseURL = API_BASE_URL;
-    this.timeout = 30000; // 30 seconds timeout
+  static baseURL = IS_DEV
+    ? "http://localhost:3001/api"
+    : "https://your-real-api.com/api";
+
+  // Simulate network delay
+  static delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  /**
-   * Base request method with error handling and timeout
-   */
-  async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-    
-    const config = {
-      signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    };
+  static async checkUserAuth(userId) {
+    if (IS_DEV) {
+      console.log("🚀 FAKE API: checkUserAuth for user:", userId);
+      await this.delay(800);
 
-    // Handle FormData (for file uploads)
-    if (config.body instanceof FormData) {
-      delete config.headers['Content-Type']; // Let browser set it
-    } else if (config.body && typeof config.body === 'object') {
-      config.body = JSON.stringify(config.body);
-    }
+      // You can change this to test different scenarios:
+      // 'approved', 'not_approved', 'not_registered', 'error'
+      const scenario = "approved";
 
-    try {
-      const response = await fetch(url, config);
-      clearTimeout(timeoutId);
-      
-      let data;
-      const contentType = response.headers.get('content-type');
-      
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        data = await response.text();
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          data?.error || 
-          data?.message || 
-          data || 
-          `HTTP ${response.status}: ${response.statusText}`
-        );
-      }
-
-      return data;
-    } catch (error) {
-      clearTimeout(timeoutId);
-      
-      if (error.name === 'AbortError') {
-        throw new Error('So\'rov vaqti tugadi. Internetni tekshiring.');
-      }
-      
-      console.error(`API Request failed [${endpoint}]:`, error);
-      throw error;
-    }
-  }
-
-  // ==================== AUTH ENDPOINTS ====================
-
-  /**
-   * Check user authentication status
-   * @param {number} tgId - Telegram user ID
-   * @returns {Promise<Object>} Auth status response
-   */
-  async checkUserAuth(tgId) {
-    try {
-      return await this.request(`/auth/check/${tgId}`);
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      throw new Error('Foydalanuvchi ma\'lumotlari tekshirilmadi');
-    }
-  }
-
-  /**
-   * Register new user (called from bot)
-   * @param {Object} userData - User registration data
-   * @returns {Promise<Object>} Registration response
-   */
-  async registerUser(userData) {
-    try {
-      return await this.request('/auth/register', {
-        method: 'POST',
-        body: userData
-      });
-    } catch (error) {
-      console.error('User registration failed:', error);
-      throw new Error('Ro\'yxatdan o\'tishda xatolik');
-    }
-  }
-
-  // ==================== USER PROFILE ENDPOINTS ====================
-
-  /**
-   * Get user statistics and profile data
-   * @param {number} tgId - Telegram user ID
-   * @returns {Promise<Object>} User statistics
-   */
-  async getUserStatistics(tgId) {
-    try {
-      const data = await this.request(`/user/statistics/${tgId}`);
-      
-      // Ensure data structure consistency
-      return {
-        today: {
-          completed: data.today?.completed || 0,
-          pages_read: data.today?.pages_read || 0,
-          distance_km: data.today?.distance_km || 0,
-          date: data.today?.date || new Date().toISOString().split('T')[0]
+      const scenarios = {
+        approved: {
+          success: true,
+          isRegistered: true,
+          isApproved: true,
+          message: "User is approved and can access the app",
         },
-        all_time: {
-          total_points: data.all_time?.total_points || 0,
-          total_pages: data.all_time?.total_pages || 0,
-          total_distance: data.all_time?.total_distance || 0,
-          total_days: data.all_time?.total_days || 0
-        }
-      };
-    } catch (error) {
-      console.error('Get user statistics failed:', error);
-      throw new Error('Statistika ma\'lumotlari yuklanmadi');
-    }
-  }
-
-  /**
-   * Get user profile by ID (for viewing other users)
-   * @param {number} userId - Target user ID
-   * @returns {Promise<Object>} User profile data
-   */
-  async getUserProfile(userId) {
-    try {
-      return await this.request(`/user/profile/${userId}`);
-    } catch (error) {
-      console.error('Get user profile failed:', error);
-      throw new Error('Foydalanuvchi profili topilmadi');
-    }
-  }
-
-  /**
-   * Upload user profile photo
-   * @param {FormData} formData - Photo upload data
-   * @returns {Promise<Object>} Upload response
-   */
-  async uploadUserPhoto(formData) {
-    try {
-      return await this.request('/user/upload-photo', {
-        method: 'POST',
-        body: formData
-      });
-    } catch (error) {
-      console.error('Photo upload failed:', error);
-      throw new Error('Rasm yuklashda xatolik');
-    }
-  }
-
-  // ==================== DAILY TASKS ENDPOINTS ====================
-
-  /**
-   * Get today's tasks for user
-   * @param {number} tgId - Telegram user ID
-   * @returns {Promise<Object>} Today's tasks data
-   */
-  async getDailyTasks(tgId) {
-    try {
-      const data = await this.request(`/tasks/daily/${tgId}`);
-      
-      return {
-        date: data.date || new Date().toISOString().split('T')[0],
-        tasks: data.tasks || {},
-        task_inputs: data.task_inputs || {},
-        pages_read: data.pages_read || 0,
-        distance_km: data.distance_km || 0,
-        completed_count: data.completed_count || 0,
-        is_submitted_today: data.is_submitted_today || false,
-        submission_time: data.submission_time || null
-      };
-    } catch (error) {
-      console.error('Get daily tasks failed:', error);
-      // Return empty state instead of throwing
-      return {
-        date: new Date().toISOString().split('T')[0],
-        tasks: {},
-        task_inputs: {},
-        pages_read: 0,
-        distance_km: 0,
-        completed_count: 0,
-        is_submitted_today: false,
-        submission_time: null
-      };
-    }
-  }
-
-  /**
-   * Submit daily progress/tasks
-   * @param {Object} progressData - Daily progress data
-   * @returns {Promise<Object>} Submission response
-   */
-  async submitDailyProgress(progressData) {
-    try {
-      const response = await this.request('/tasks/submit', {
-        method: 'POST',
-        body: {
-          ...progressData,
-          submission_time: new Date().toISOString()
-        }
-      });
-
-      return {
-        success: response.success || true,
-        message: response.message || 'Ma\'lumotlar saqlandi',
-        totalPoints: response.total_points || response.totalPoints || 0,
-        todayData: response.today_data || {
-          completed: progressData.completed_count || 0,
-          pages_read: progressData.pages_read || 0,
-          distance_km: progressData.distance_km || 0
-        }
-      };
-    } catch (error) {
-      console.error('Submit daily progress failed:', error);
-      throw new Error('Ma\'lumotlarni saqlashda xatolik');
-    }
-  }
-
-  // ==================== LEADERBOARD ENDPOINTS ====================
-
-  /**
-   * Get leaderboard data with filters
-   * @param {Object} params - Filter parameters
-   * @returns {Promise<Object>} Leaderboard data
-   */
-  async getLeaderboard(params = {}) {
-    try {
-      const queryParams = {
-        period: params.period || 'all',
-        type: params.type || 'overall',
-        limit: params.limit || 100,
-        offset: params.offset || 0
+        not_approved: {
+          success: true,
+          isRegistered: true,
+          isApproved: false,
+          message: "User is registered but waiting for admin approval",
+        },
+        not_registered: {
+          success: true,
+          isRegistered: false,
+          isApproved: false,
+          message: "User needs to register first",
+        },
+        error: null,
       };
 
-      const query = new URLSearchParams(queryParams).toString();
-      const data = await this.request(`/leaderboard?${query}`);
+      if (scenario === "error") {
+        throw new Error("Tarmoq xatosi: Server bilan aloqa o'rnatilmadi");
+      }
+
+      return scenarios[scenario];
+    }
+
+    // Real API call for production
+    const response = await fetch(`${this.baseURL}/auth/check`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+    });
+
+    return response.json();
+  }
+
+  static async getUserProfile(userId) {
+    if (IS_DEV) {
+      console.log("🚀 FAKE API: getUserProfile for user:", userId);
+      await this.delay(600);
 
       return {
         success: true,
-        total_participants: data.total_participants || 0,
-        leaderboard: (data.leaderboard || []).map(participant => ({
-          tg_id: participant.tg_id,
-          name: participant.name || 'Unknown',
-          rank: participant.rank,
-          score: participant.score || 0,
-          total_points: participant.total_points || 0,
-          total_pages: participant.total_pages || 0,
-          total_distance: participant.total_distance || 0,
-          photo_url: participant.photo_url || null,
-          achievements: participant.achievements || [],
-          is_premium: participant.is_premium || false
-        }))
+        user: {
+          id: userId,
+          firstName: "Muhammadsaid",
+          lastName: "Buxoriy",
+          username: "muhammadsaid_dev",
+          avatar: null,
+          level: 5,
+          xp: 2450,
+          xpToNextLevel: 550,
+          totalPoints: 15680,
+          todayPoints: 320,
+          weeklyPoints: 1240,
+          monthlyPoints: 4560,
+          streak: 12,
+          longestStreak: 28,
+          joinDate: "2024-12-15",
+          lastActivity: "2025-06-11T10:30:00Z",
+          achievements: ["consistent", "reader"],
+          rank: 3,
+          badges: [
+            {
+              id: 1,
+              name: "Early Bird",
+              icon: "🌅",
+              description: "Bomdod namozini 30 kun ketma-ket o'qish",
+              earned: true,
+              earnedDate: "2025-05-15",
+            },
+            {
+              id: 2,
+              name: "Consistent",
+              icon: "🔥",
+              description: "12 kun ketma-ket faol bo'lish",
+              earned: true,
+              earnedDate: "2025-06-01",
+            },
+            {
+              id: 3,
+              name: "Top Performer",
+              icon: "🏆",
+              description: "Top 3 ga kirish",
+              earned: false,
+            },
+            {
+              id: 4,
+              name: "Helper",
+              icon: "🤝",
+              description: "Boshqalarga 10 marta yordam berish",
+              earned: true,
+              earnedDate: "2025-05-20",
+            },
+          ],
+          stats: {
+            totalPrayers: 156,
+            totalQuranPages: 89,
+            totalZikr: 12450,
+            totalCharity: 28,
+          },
+        },
       };
-    } catch (error) {
-      console.error('Get leaderboard failed:', error);
-      throw new Error('Reyting ma\'lumotlari yuklanmadi');
     }
+
+    const response = await fetch(`${this.baseURL}/users/${userId}`);
+    return response.json();
   }
 
-  /**
-   * Get user's position in leaderboard
-   * @param {number} tgId - Telegram user ID
-   * @param {string} period - Time period filter
-   * @param {string} type - Leaderboard type
-   * @returns {Promise<Object>} User position data
-   */
-  async getUserLeaderboardPosition(tgId, period = 'all', type = 'overall') {
-    try {
-      return await this.request(`/leaderboard/position/${tgId}?period=${period}&type=${type}`);
-    } catch (error) {
-      console.error('Get user position failed:', error);
-      throw new Error('Foydalanuvchi pozitsiyasi topilmadi');
+  static async getUserStatistics(userId) {
+    if (IS_DEV) {
+      console.log("🚀 FAKE API: getUserStatistics for user:", userId);
+      await this.delay(500);
+
+      return {
+        today: {
+          completed: 7,
+          pages_read: 25,
+          distance_km: 3.2,
+        },
+        weekly: {
+          dailyPoints: [7, 3, 9, 8, 4, 10, 0],
+          dailyTotal: 10,
+        },
+        all_time: {
+          total_points: 15680,
+          total_pages: 4560,
+          total_distance: 120.5,
+          total_days: 45,
+        },
+      };
     }
+
+    const response = await fetch(`${this.baseURL}/users/${userId}/statistics`);
+    return response.json();
   }
 
-  // ==================== ACHIEVEMENTS ENDPOINTS ====================
+  static async getDailyTasks(userId) {
+    if (IS_DEV) {
+      console.log("🚀 FAKE API: getDailyTasks for user:", userId);
+      await this.delay(500);
 
-  /**
-   * Get user achievements
-   * @param {number} tgId - Telegram user ID
-   * @returns {Promise<Object>} User achievements
-   */
-  async getUserAchievements(tgId) {
-    try {
-      return await this.request(`/achievements/${tgId}`);
-    } catch (error) {
-      console.error('Get achievements failed:', error);
-      throw new Error('Yutuqlar ma\'lumoti yuklanmadi');
+      const today = new Date().toISOString().split("T")[0];
+
+      return {
+        success: true,
+        date: today,
+        tasks: [
+          {
+            id: 1,
+            title: "Bomdod namozi",
+            description: "Bomdod namozini vaqtida o'qish",
+            points: 50,
+            completed: true,
+            completedAt: "2025-06-11T05:30:00Z",
+            category: "namaz",
+            icon: "🕌",
+            difficulty: "easy",
+          },
+          {
+            id: 2,
+            title: "Peshin namozi",
+            description: "Peshin namozini vaqtida o'qish",
+            points: 50,
+            completed: false,
+            category: "namaz",
+            icon: "🕌",
+            difficulty: "easy",
+          },
+          {
+            id: 3,
+            title: "Asr namozi",
+            description: "Asr namozini vaqtida o'qish",
+            points: 50,
+            completed: false,
+            category: "namaz",
+            icon: "🕌",
+            difficulty: "easy",
+          },
+          {
+            id: 4,
+            title: "Magrib namozi",
+            description: "Magrib namozini vaqtida o'qish",
+            points: 50,
+            completed: false,
+            category: "namaz",
+            icon: "🕌",
+            difficulty: "easy",
+          },
+          {
+            id: 5,
+            title: "Xufton namozi",
+            description: "Xufton namozini vaqtida o'qish",
+            points: 50,
+            completed: false,
+            category: "namaz",
+            icon: "🕌",
+            difficulty: "easy",
+          },
+          {
+            id: 6,
+            title: "Qur'on tilovati",
+            description: "Kamida 1 bet Qur'on o'qish",
+            points: 30,
+            completed: false,
+            category: "quran",
+            icon: "📖",
+            difficulty: "medium",
+          },
+          {
+            id: 7,
+            title: "Zikr va tasbih",
+            description: "100 marta Subhanalloh, Alhamdulilloh, Allohu akbar",
+            points: 25,
+            completed: true,
+            completedAt: "2025-06-11T08:15:00Z",
+            category: "zikr",
+            icon: "📿",
+            difficulty: "easy",
+          },
+          {
+            id: 8,
+            title: "Sadaqa",
+            description: "Biror kishi yoki hayvonga yordam qilish",
+            points: 40,
+            completed: false,
+            category: "charity",
+            icon: "💝",
+            difficulty: "hard",
+          },
+          {
+            id: 9,
+            title: "Duo qilish",
+            description: "Kamida 5 daqiqa duo qilish",
+            points: 20,
+            completed: true,
+            completedAt: "2025-06-11T07:45:00Z",
+            category: "dua",
+            icon: "🤲",
+            difficulty: "easy",
+          },
+          {
+            id: 10,
+            title: "Islomiy kitob o'qish",
+            description: "Islomiy adabiyotdan 10 sahifa o'qish",
+            points: 35,
+            completed: false,
+            category: "knowledge",
+            icon: "📚",
+            difficulty: "medium",
+          },
+        ],
+        completedCount: 3,
+        totalTasks: 10,
+        totalPoints: 365,
+        earnedPoints: 95,
+        completionPercentage: 30,
+      };
     }
+
+    const response = await fetch(`${this.baseURL}/tasks/daily/${userId}`);
+    return response.json();
   }
 
-  // ==================== ADMIN ENDPOINTS ====================
+  static async completeTask(userId, taskId) {
+    if (IS_DEV) {
+      console.log("🚀 FAKE API: completeTask", { userId, taskId });
+      await this.delay(300);
 
-  /**
-   * Get pending users for approval (admin only)
-   * @returns {Promise<Object>} Pending users list
-   */
-  async getPendingUsers() {
-    try {
-      return await this.request('/admin/pending-users');
-    } catch (error) {
-      console.error('Get pending users failed:', error);
-      throw new Error('Kutilayotgan foydalanuvchilar yuklanmadi');
+      return {
+        success: true,
+        message: "Vazifa muvaffaqiyatli bajarildi!",
+        pointsEarned: Math.floor(Math.random() * 50) + 20,
+        newTotal: Math.floor(Math.random() * 1000) + 15000,
+      };
     }
+
+    const response = await fetch(`${this.baseURL}/tasks/complete`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, taskId }),
+    });
+
+    return response.json();
   }
 
-  /**
-   * Approve user (admin only)
-   * @param {number} tgId - User Telegram ID
-   * @returns {Promise<Object>} Approval response
-   */
-  async approveUser(tgId) {
-    try {
-      return await this.request(`/admin/approve/${tgId}`, {
-        method: 'POST'
-      });
-    } catch (error) {
-      console.error('Approve user failed:', error);
-      throw new Error('Foydalanuvchini tasdiqlashda xatolik');
+  static async getLeaderboard(period = "weekly") {
+    if (IS_DEV) {
+      console.log("🚀 FAKE API: getLeaderboard period:", period);
+      await this.delay(700);
+
+      const fakeUsers = [
+        {
+          tg_id: 1,
+          name: "Ahmad Qodirov",
+          points: 25680,
+          streak: 45,
+          avatar: null,
+          score: 95,
+          total_pages: 120,
+          total_distance: 7,
+          achievements: ["consistent", "perfectionist"],
+        },
+        {
+          tg_id: 2,
+          name: "Fotima Rahimova",
+          points: 23450,
+          streak: 38,
+          avatar: null,
+          score: 88,
+          total_pages: 70,
+          total_distance: 5,
+          achievements: ["reader"],
+        },
+        {
+          tg_id: 3,
+          name: "Muhammadsaid Buxoriy",
+          points: 15680,
+          streak: 12,
+          avatar: null,
+          isCurrentUser: true,
+          score: 75,
+          total_pages: 58,
+          total_distance: 12,
+          achievements: ["athlete"],
+        },
+        {
+          tg_id: 4,
+          name: "Oybek Toshmatov",
+          points: 14920,
+          streak: 28,
+          avatar: null,
+          score: 72,
+          total_pages: 58,
+          total_distance: 12,
+          achievements: ["consistent", "athlete"],
+        },
+        {
+          tg_id: 5,
+          name: "Zarina Karimova",
+          points: 13750,
+          streak: 22,
+          avatar: null,
+          score: 68,
+          total_pages: 58,
+          total_distance: 12,
+          achievements: ["consistent", "reader"],
+        },
+        {
+          tg_id: 6,
+          name: "Bobur Rahmonov",
+          points: 12890,
+          streak: 19,
+          avatar: null,
+          score: 65,
+          total_pages: 58,
+          total_distance: 12,
+          achievements: ["reader"],
+        },
+        {
+          tg_id: 7,
+          name: "Muslima Abdullayeva",
+          points: 11980,
+          streak: 15,
+          avatar: null,
+          score: 60,
+          total_pages: 58,
+          total_distance: 12,
+          achievements: ["athlete", "reader"],
+        },
+        {
+          tg_id: 8,
+          name: "Javohir Ergashev",
+          points: 10540,
+          streak: 31,
+          avatar: null,
+          score: 55,
+          total_pages: 58,
+          total_distance: 12,
+          achievements: ["perfectionist", "reader"],
+        },
+        {
+          tg_id: 9,
+          name: "Diyora Karimova",
+          points: 9850,
+          streak: 8,
+          avatar: null,
+          score: 50,
+          total_pages: 58,
+          total_distance: 12,
+          achievements: ["perfectionist"],
+        },
+        {
+          tg_id: 123456789,
+          name: "Muhammadsaid Buxoriy",
+          points: 8960,
+          streak: 12,
+          avatar: null,
+          score: 40,
+          total_pages: 58,
+          total_distance: 150,
+          achievements: ["consistent", "reader"],
+        },
+        {
+          tg_id: 10,
+          name: "Sanjar Tursunov",
+          points: 8960,
+          streak: 12,
+          avatar: null,
+          score: 45,
+          total_pages: 58,
+          total_distance: 12,
+          achievements: ["perfectionist", "athlete", "reader"],
+        },
+      ];
+
+      return {
+        success: true,
+        period: period,
+        leaderboard: fakeUsers.map((user, index) => ({
+          rank: index + 1,
+          ...user,
+          change: Math.floor(Math.random() * 6) - 3, // -3 to +3 rank change
+        })),
+        currentUserRank: 3,
+        totalUsers: 1247,
+      };
     }
+
+    const response = await fetch(
+      `${this.baseURL}/leaderboard?period=${period}`
+    );
+    return response.json();
   }
 
-  /**
-   * Reject user (admin only)
-   * @param {number} tgId - User Telegram ID
-   * @param {string} reason - Rejection reason
-   * @returns {Promise<Object>} Rejection response
-   */
-  async rejectUser(tgId, reason = '') {
-    try {
-      return await this.request(`/admin/reject/${tgId}`, {
-        method: 'POST',
-        body: { reason }
-      });
-    } catch (error) {
-      console.error('Reject user failed:', error);
-      throw new Error('Foydalanuvchini rad etishda xatolik');
+  static async getWeeklyStats(userId) {
+    if (IS_DEV) {
+      console.log("🚀 FAKE API: getWeeklyStats for user:", userId);
+      await this.delay(400);
+
+      return {
+        success: true,
+        stats: {
+          weeklyPoints: 1240,
+          dailyPoints: [45, 78, 65, 89, 123, 95, 0], // Last 7 days
+          completedTasks: 23,
+          totalTasks: 35,
+          streak: 12,
+          bestDay: { day: "Payshanba", points: 123 },
+          improvement: "+15%",
+        },
+      };
     }
+
+    const response = await fetch(`${this.baseURL}/stats/weekly/${userId}`);
+    return response.json();
   }
 
-  // ==================== UTILITY ENDPOINTS ====================
+  static async submitDailyProgress(data) {
+    if (IS_DEV) {
+      console.log("🚀 FAKE API: submitDailyProgress", data);
+      await this.delay(500);
+      // Demo natija qaytaramiz
+      return {
+        success: true,
+        totalPoints: Object.keys(data).filter(
+          (k) => k.startsWith("shart_") && data[k] === 1
+        ).length,
+        message: "Ma'lumotlar muvaffaqiyatli saqlandi!",
+      };
+    }
 
-  /**
-   * Health check endpoint
-   * @returns {Promise<Object>} Server health status
-   */
-  async healthCheck() {
-    try {
-      return await this.request('/health');
-    } catch (error) {
-      console.error('Health check failed:', error);
-      throw new Error('Server bilan aloqa yo\'q');
-    }
-  }
+    // Real API
+    const response = await fetch(`${this.baseURL}/tasks/submit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
 
-  /**
-   * Get server time
-   * @returns {Promise<Object>} Server time info
-   */
-  async getServerTime() {
-    try {
-      return await this.request('/time');
-    } catch (error) {
-      console.error('Get server time failed:', error);
-      throw new Error('Server vaqti olinmadi');
-    }
-  }
-
-  // ==================== HELPER METHODS ====================
-
-  /**
-   * Validate required fields
-   * @param {Object} data - Data to validate
-   * @param {Array} requiredFields - Required field names
-   * @throws {Error} If validation fails
-   */
-  validateRequired(data, requiredFields) {
-    const missing = requiredFields.filter(field => !data[field]);
-    if (missing.length > 0) {
-      throw new Error(`Majburiy maydonlar to'ldirilmagan: ${missing.join(', ')}`);
-    }
-  }
-
-  /**
-   * Format error message for user display
-   * @param {Error} error - Original error
-   * @returns {string} User-friendly error message
-   */
-  formatErrorMessage(error) {
-    if (error.message.includes('fetch')) {
-      return 'Internet aloqasini tekshiring';
-    }
-    if (error.message.includes('timeout')) {
-      return 'So\'rov vaqti tugadi';
-    }
-    if (error.message.includes('404')) {
-      return 'Ma\'lumot topilmadi';
-    }
-    if (error.message.includes('500')) {
-      return 'Server xatosi. Keyinroq urinib ko\'ring';
-    }
-    
-    return error.message || 'Noma\'lum xatolik yuz berdi';
+    return response.json();
   }
 }
 
-// Export singleton instance
-export default new APIService();
+export default APIService;
