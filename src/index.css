@@ -1,0 +1,339 @@
+/* index.css - FIXED FOR YOLDAGILAR APP */
+
+/* Reset problematic Vite defaults */
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* REMOVE PROBLEMATIC BODY STYLES */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* REMOVED: display: flex; place-items: center; */
+  /* REMOVED: min-width: 320px; min-height: 100vh; */
+}
+
+/* General styles */
+* {
+  box-sizing: border-box;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Professional animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes unlock {
+  0% {
+    transform: scale(0.8) rotate(-5deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) rotate(2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes progressFill {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--progress-width);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 20px;
+    opacity: 1;
+  }
+}
+
+@keyframes ripple {
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Smooth focus styles */
+input:focus {
+  border-color: #4facfe !important;
+  box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1) !important;
+}
+
+/* Button hover effects - ONLY FOR NON-APP BUTTONS */
+button:not(.nav-item):not(.share-icon-button):not(.retry-button):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+button:not(.nav-item):not(.share-icon-button):not(.retry-button):active {
+  transform: translateY(0);
+}
+
+/* Loading shimmer effect */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Participant card animations */
+.participant-card {
+  animation: slideInUp 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+.participant-card:nth-child(1) { animation-delay: 0.1s; }
+.participant-card:nth-child(2) { animation-delay: 0.2s; }
+.participant-card:nth-child(3) { animation-delay: 0.3s; }
+.participant-card:nth-child(4) { animation-delay: 0.4s; }
+.participant-card:nth-child(5) { animation-delay: 0.5s; }
+
+/* Hover effects for better UX */
+.participant-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.1) !important;
+}
+
+.filter-option:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+/* Real-time indicator */
+.real-time-indicator {
+  position: relative;
+}
+
+.real-time-indicator::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -8px;
+  width: 4px;
+  height: 4px;
+  background: #4facfe;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+  .chart {
+    height: 100px !important;
+  }
+  
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .achievementsGrid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .nav-item {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+@media (max-width: 640px) {
+  .filter-options-horizontal {
+    flex-direction: column !important;
+  }
+  
+  .stats-overview {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .participant-content {
+    gap: 8px !important;
+  }
+  
+  .participant-details {
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+  
+  .current-user-content {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+  
+  .current-user-score {
+    text-align: left !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .filters-container {
+    flex-direction: row;
+    gap: 20px;
+  }
+  
+  .filter-group {
+    flex: 1;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .container {
+    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%) !important;
+  }
+  
+  .participant-card,
+  .filter-group,
+  .error-container,
+  .empty-container {
+    background: #2d3748 !important;
+    color: #e2e8f0 !important;
+  }
+  
+  .participant-name,
+  .filter-title,
+  .error-title,
+  .empty-title {
+    color: #e2e8f0 !important;
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* Better focus styles for accessibility */
+button:focus,
+input:focus {
+  outline: 2px solid #4facfe;
+  outline-offset: 2px;
+}
+
+/* Enhanced scroll behavior */
+.leaderboard-list {
+  scroll-behavior: smooth;
+}
+
+.main-content {
+  scroll-behavior: smooth;
+}
+
+/* Performance optimizations */
+.participant-avatar img,
+.current-user-avatar img,
+.nav-item,
+.nav-item-content {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Enhanced focus styles */
+.nav-item:focus {
+  outline: 2px solid #4facfe;
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
