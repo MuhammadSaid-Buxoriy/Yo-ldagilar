@@ -1,4 +1,4 @@
-// hooks/useTelegram.js
+// hooks/useTelegram.js - FIXED VERSION
 import { useEffect, useState } from 'react';
 
 export const useTelegram = () => {
@@ -16,17 +16,23 @@ export const useTelegram = () => {
       setTg(app);
       setUser(app.initDataUnsafe?.user);
       setIsReady(true);
+      
+      // Debug log
+      console.log('Telegram WebApp User:', app.initDataUnsafe?.user);
     } else {
-      // Development mode - test uchun mock data
+      // Development mode - test uchun HAQIQIY USER ID
       const mockUser = {
-        id: 123456789,
-        first_name: 'Test',
-        last_name: 'User',
-        username: 'testuser',
+        id: 6133914331,  // ✅ Haqiqiy registered user ID
+        first_name: 'Soliha',
+        last_name: 'Sultonova',
+        username: 'muhammadsaid_buxoriy',
         photo_url: null
       };
       setUser(mockUser);
       setIsReady(true);
+      
+      // Debug log
+      console.log('Development Mock User:', mockUser);
     }
   }, []);
 
