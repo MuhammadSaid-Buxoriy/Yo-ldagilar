@@ -141,56 +141,7 @@ ${shareLink}`;
   );
 };
 
-const ProfileHeader = ({
-  user,
-  stats,
-  onShare,
-  isOwnProfile,
-  onUserUpdate,
-}) => {
-  const [uploading, setUploading] = useState(false);
-  const { hapticFeedback, showAlert } = useTelegram();
-
-  const handlePhotoUpload = async (event) => {
-    if (!isOwnProfile) return;
-
-    const file = event.target.files[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      showAlert("❌ Faqat rasm fayllarini yuklash mumkin");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      showAlert("❌ Rasm hajmi 5MB dan kichik bo'lishi kerak");
-      return;
-    }
-
-    try {
-      setUploading(true);
-      hapticFeedback("light");
-
-      const formData = new FormData();
-      formData.append("photo", file);
-      formData.append("tg_id", user.id);
-
-      // Use the uploadUserPhoto method
-      await APIService.uploadUserPhoto(formData);
-
-      // Refresh user data after successful upload
-      const updatedUser = await APIService.getUserProfile(user.id);
-      onUserUpdate(updatedUser);
-      showAlert("✅ Rasm muvaffaqiyatli yuklandi!");
-      hapticFeedback("success");
-    } catch (error) {
-      console.error("Photo upload failed:", error);
-      showAlert("❌ Rasm yuklashda xatolik");
-    } finally {
-      setUploading(false);
-    }
-  };
-
+const ProfileHeader = ({ user, stats, onShare }) => {
   const getAvatarContent = () => {
     // Use photo_url from API user data only
     const photoUrl = user?.photo_url || user?.avatar_url;
@@ -292,27 +243,9 @@ const ProfileHeader = ({
 
         <div className="profile-info">
           <div className="avatar-section">
-            {isOwnProfile ? (
-              <label className="avatar-upload-label profile-upload-label">
-                {getAvatarContent()}
-                {uploading && (
-                  <div className="avatar-loading">
-                    <div className="loading-spinner"></div>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoUpload}
-                  disabled={uploading}
-                  className="avatar-upload-input"
-                />
-              </label>
-            ) : (
-              <div className="avatar-display profile-display">
-                {getAvatarContent()}
-              </div>
-            )}
+            <div className="avatar-display profile-display">
+              {getAvatarContent()}
+            </div>
           </div>
 
           <div className="user-info">
