@@ -127,8 +127,8 @@ function App() {
     return <LoadingScreen />;
   }
 
-  if (loading) return <div>Yuklanmoqda...</div>;
-  if (error) return <div>Xatolik: {error}</div>;
+  // if (loading) return <div>Yuklanmoqda...</div>;
+  // if (error) return <div>Xatolik: {error}</div>;
 
   return (
     <AuthCheck>
