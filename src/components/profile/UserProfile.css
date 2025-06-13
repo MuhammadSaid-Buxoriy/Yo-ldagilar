@@ -64,7 +64,8 @@
 }
 
 .profile-avatar {
-  width: 80px;
+  width: 48px !important;
+  height: 48px !important;
 }
 
 .avatar-image,
