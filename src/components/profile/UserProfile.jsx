@@ -1,4 +1,4 @@
-// components/profile/UserProfile.jsx
+// components/profile/UserProfile.jsx - API DATA FIRST VERSION
 import { useState, useEffect, useCallback } from "react";
 import { useTelegram } from "../../hooks/useTelegram";
 import APIService from "../../services/api";
@@ -12,13 +12,8 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  console.log("MAN USERMAN:", telegramUser);
-
   // Use userId prop or telegram user id as fallback
   const targetUserId = userId || telegramUser?.id;
-
-  // Always use profileUser from API, fallback to telegram user only if API fails
-  const displayUser = profileUser || telegramUser;
 
   useEffect(() => {
     if (targetUserId) {
@@ -31,7 +26,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       setLoading(true);
       setError(null);
 
-      // Always fetch user profile from API
+      // Always fetch user profile and stats from API
       const [statsResponse, userResponse] = await Promise.all([
         APIService.getUserStatistics(targetUserId),
         APIService.getUserProfile(targetUserId),
@@ -43,10 +38,9 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       console.error("Failed to load user data:", error);
       setError(APIService.getErrorMessage(error));
 
-      // If it's own profile and API fails, we can still show some basic info from Telegram
+      // Only set fallback data if it's own profile and we have telegram data
       if (isOwnProfile && telegramUser) {
-        console.warn("Using Telegram user data as fallback");
-        // You might want to set some default stats structure here
+        console.warn("Using minimal fallback data structure");
         setStats({
           today: { completed: 0, pages_read: 0, distance_km: 0 },
           weekly: { dailyPoints: [0, 0, 0, 0, 0, 0, 0] },
@@ -57,6 +51,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
             total_days: 0,
           },
         });
+        // Don't set profileUser - let it remain null to show error
       }
     } finally {
       setLoading(false);
@@ -64,19 +59,15 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
   };
 
   const shareProfile = useCallback(async () => {
-    if (!stats || !displayUser) return;
+    if (!stats || !profileUser) return;
 
     hapticFeedback("light");
 
     const dailyPercent = Math.round((stats.today.completed / 10) * 100);
-    const shareLink = `https://t.me/yoldagilar_bot/app?startapp=profile_${displayUser.id}`;
+    const shareLink = `https://t.me/yoldagilar_bot/app?startapp=profile_${profileUser.id}`;
 
     // Use API user data for sharing
-    const userName =
-      displayUser.name ||
-      displayUser.first_name ||
-      displayUser.username ||
-      `User ${displayUser.id}`;
+    const userName = getUserDisplayName(profileUser);
 
     const shareText = `🎯 ${
       isOwnProfile ? "Mening" : `${userName}ning`
@@ -118,20 +109,27 @@ ${shareLink}`;
         showAlert("❌ Ulashishda xatolik");
       }
     }
-  }, [stats, displayUser, isOwnProfile, hapticFeedback, showAlert]);
+  }, [stats, profileUser, isOwnProfile, hapticFeedback, showAlert]);
+
+  // Helper function to get display name from API user data
+  const getUserDisplayName = (user) => {
+    if (!user) return "Unknown User";
+
+    return user.name || user.first_name || user.username || `User ${user.id}`;
+  };
 
   if (loading) {
     return <LoadingSkeleton />;
   }
 
-  if (error && !displayUser) {
+  if (error && !profileUser) {
     return <ErrorState error={error} onRetry={loadUserData} />;
   }
 
   return (
     <div className="profile-container">
       <ProfileHeader
-        user={displayUser}
+        user={profileUser}
         stats={stats}
         onShare={shareProfile}
         isOwnProfile={isOwnProfile}
@@ -180,20 +178,14 @@ const ProfileHeader = ({
       formData.append("photo", file);
       formData.append("tg_id", user.id);
 
-      // TODO: Add this endpoint to your APIService
-      // const response = await APIService.uploadUserPhoto(formData);
+      // Use the uploadUserPhoto method
+      await APIService.uploadUserPhoto(formData);
 
-      // For now, simulate success and refresh user data
-      setTimeout(async () => {
-        try {
-          const updatedUser = await APIService.getUserProfile(user.id);
-          onUserUpdate(updatedUser);
-          showAlert("✅ Rasm muvaffaqiyatli yuklandi!");
-          hapticFeedback("success");
-        } catch (error) {
-          console.error("Failed to refresh user data:", error);
-        }
-      }, 1000);
+      // Refresh user data after successful upload
+      const updatedUser = await APIService.getUserProfile(user.id);
+      onUserUpdate(updatedUser);
+      showAlert("✅ Rasm muvaffaqiyatli yuklandi!");
+      hapticFeedback("success");
     } catch (error) {
       console.error("Photo upload failed:", error);
       showAlert("❌ Rasm yuklashda xatolik");
@@ -203,7 +195,7 @@ const ProfileHeader = ({
   };
 
   const getAvatarContent = () => {
-    // Use photo_url from API user data
+    // Use photo_url from API user data only
     const photoUrl = user?.photo_url || user?.avatar_url;
 
     if (photoUrl) {
@@ -222,6 +214,7 @@ const ProfileHeader = ({
       );
     }
 
+    // Generate placeholder based on API user data
     const colors = [
       "#3b82f6",
       "#ef4444",
@@ -245,11 +238,13 @@ const ProfileHeader = ({
   };
 
   const getUserDisplayName = () => {
-    // Prioritize API data over Telegram data
-    const name =
-      user?.name || user?.first_name || user?.username || `User ${user?.id}`;
+    if (!user) return "Unknown User";
 
-    if (user?.achievements && user.achievements.length > 0) {
+    const name =
+      user.name || user.first_name || user.username || `User ${user.id}`;
+
+    // Add achievement badges if available
+    if (user.achievements && user.achievements.length > 0) {
       return (
         <span
           className="user-display-name-badge-wrap"
@@ -282,11 +277,13 @@ const ProfileHeader = ({
   };
 
   const getUserSubtitle = () => {
+    if (!user) return "Unknown";
+
     // Show username from API data, fallback to ID
-    if (user?.username) {
+    if (user.username) {
       return `@${user.username}`;
     }
-    return `User ID: ${user?.id}`;
+    return `User ID: ${user.id}`;
   };
 
   return (
@@ -354,7 +351,7 @@ const ProfileHeader = ({
   );
 };
 
-// Rest of the components remain the same...
+// StatCard component
 const StatCard = ({ label, value, icon }) => (
   <div className="stat-card">
     <div className="stat-icon">
@@ -376,10 +373,8 @@ const StatisticsSection = ({ stats }) => {
     0, 0, 0, 0, 0, 0, 0,
   ];
 
-  const weeklyCompleted = stats?.weekly?.dailyPoints.reduce(
-    (sum, val) => sum + val,
-    0
-  );
+  const weeklyCompleted =
+    stats?.weekly?.dailyPoints?.reduce((sum, val) => sum + val, 0) || 0;
   const weeklyPercent = Math.round((weeklyCompleted / 70) * 100);
 
   const getProgressColor = (percent) => {
