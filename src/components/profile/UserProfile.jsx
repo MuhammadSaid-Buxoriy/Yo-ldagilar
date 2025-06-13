@@ -401,7 +401,7 @@ const StatisticsSection = ({ stats }) => {
         />
 
         <div className="weekly-chart" style={{ minHeight: "170px" }}>
-          {weeklyData.map((day, index) => (
+          {weeklyData.map((day) => (
             <div
               key={day.day}
               className="chart-column"
