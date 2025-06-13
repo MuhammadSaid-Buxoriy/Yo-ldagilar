@@ -6,7 +6,7 @@ import UserProfile from "./components/profile/UserProfile";
 import DailyTasks from "./components/tasks/DailyTasks";
 import Leaderboard from "./components/leaderboard/Leaderboard";
 import "./App.css";
-import { AuthProvider, useAuth } from "./components/context/AuthContext";
+import { useAuth } from "./components/context/AuthContext";
 
 const NAVIGATION_ITEMS = [
   {
@@ -126,38 +126,36 @@ function App() {
   }
 
   return (
-    <AuthProvider>
-      <AuthCheck>
-        <div className="app">
-          <main
-            className={`main-content ${isTransitioning ? "transitioning" : ""}`}
-          >
-            {renderActiveComponent()}
-          </main>
+    <AuthCheck>
+      <div className="app">
+        <main
+          className={`main-content ${isTransitioning ? "transitioning" : ""}`}
+        >
+          {renderActiveComponent()}
+        </main>
 
-          <nav className="bottom-nav">
-            <div className="nav-content">
-              {NAVIGATION_ITEMS.map((item) => {
-                const isActive = activeTab === item.id;
+        <nav className="bottom-nav">
+          <div className="nav-content">
+            {NAVIGATION_ITEMS.map((item) => {
+              const isActive = activeTab === item.id;
 
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => handleTabChange(item.id)}
-                    disabled={isTransitioning}
-                    className={`nav-item ${isActive ? "nav-item-active" : ""}`}
-                  >
-                    <span className="nav-icon">{item.icon}</span>
-                    <span className="nav-label">{item.label}</span>
-                    {isActive && <div className="nav-indicator"></div>}
-                  </button>
-                );
-              })}
-            </div>
-          </nav>
-        </div>
-      </AuthCheck>
-    </AuthProvider>
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleTabChange(item.id)}
+                  disabled={isTransitioning}
+                  className={`nav-item ${isActive ? "nav-item-active" : ""}`}
+                >
+                  <span className="nav-icon">{item.icon}</span>
+                  <span className="nav-label">{item.label}</span>
+                  {isActive && <div className="nav-indicator"></div>}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+      </div>
+    </AuthCheck>
   );
 }
 
