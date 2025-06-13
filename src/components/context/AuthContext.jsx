@@ -1,7 +1,7 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
-import { useTelegram } from "../hooks/useTelegram";
-import APIService from "../services/api";
+import { useTelegram } from "../../hooks/useTelegram";
+import APIService from "../../services/api";
 
 const AuthContext = createContext();
 
