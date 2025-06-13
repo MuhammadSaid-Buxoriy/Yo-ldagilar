@@ -30,7 +30,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       ]);
 
       setStats(statsResponse);
-      setProfileUser(userResponse);
+      setProfileUser(userResponse.user);
     } catch (error) {
       console.error("Failed to load user data:", error);
       setError(APIService.getErrorMessage(error));
