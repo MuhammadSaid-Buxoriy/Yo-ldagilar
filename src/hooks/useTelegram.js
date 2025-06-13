@@ -1,17 +1,20 @@
-// =====================================================
-// TELEGRAM HOOK - PRODUCTION READY VERSION
-// =====================================================
 import { useState, useEffect } from 'react';
 
-// Development mode detection
-const IS_DEV = import.meta.env.DEV || 
-  window.location.hostname === 'localhost' || 
-  window.location.hostname === '127.0.0.1';
+// Window objects uchun type checking
+const isTelegramAvailable = () => {
+  return typeof window !== 'undefined' && 
+         window.Telegram && 
+         window.Telegram.WebApp;
+};
 
-// ⚠️ DEVELOPMENT ONLY: Fake user for testing
-// Remove this in production or when testing with real Telegram
+const IS_DEV = import.meta.env.DEV || 
+  (typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' || 
+    window.location.hostname === '127.0.0.1'
+  ));
+
 const FAKE_USER_FOR_TESTING = {
-  id: 1176941228, // Your real Telegram ID
+  id: 1176941228,
   first_name: "Muhammadsaid",
   last_name: "Buxoriy", 
   username: "muhammadsaid_buxoriy",
@@ -28,116 +31,141 @@ export const useTelegram = () => {
 
   useEffect(() => {
     let mounted = true;
+    let checkInterval;
 
     const initializeTelegram = () => {
-      try {
-        // Check if we're in Telegram WebApp environment
-        if (window.Telegram?.WebApp) {
-          const telegram = window.Telegram.WebApp;
+      console.log('🔍 Checking Telegram availability...');
+      console.log('🔍 window.Telegram:', !!window.Telegram);
+      console.log('🔍 window.Telegram.WebApp:', !!window.Telegram?.WebApp);
+      
+      if (isTelegramAvailable()) {
+        const telegram = window.Telegram.WebApp;
+        
+        console.log('✅ Telegram WebApp detected!');
+        console.log('📱 Platform:', telegram.platform);
+        console.log('📱 Version:', telegram.version);
+        console.log('🎨 Color scheme:', telegram.colorScheme);
+        console.log('👤 Init data unsafe:', telegram.initDataUnsafe);
+        
+        if (mounted) {
+          setTg(telegram);
           
-          console.log('🚀 Telegram WebApp detected');
-          console.log('📱 Platform:', telegram.platform);
-          console.log('🎨 Color scheme:', telegram.colorScheme);
+          const telegramUser = telegram.initDataUnsafe?.user;
+          
+          if (telegramUser) {
+            console.log('👤 Real Telegram user found:', telegramUser);
+            setUser(telegramUser);
+          } else {
+            console.warn('⚠️ No user data in initDataUnsafe');
+            if (IS_DEV) {
+              console.log('🔧 Using fake user for development');
+              setUser(FAKE_USER_FOR_TESTING);
+            } else {
+              setError('Telegram user data not available');
+            }
+          }
+          
+          // Initialize Telegram WebApp
+          telegram.ready();
+          telegram.expand();
+          telegram.setHeaderColor('#ffffff');
+          telegram.setBackgroundColor('#f8fafc');
+          
+          setIsReady(true);
+          
+          // Clear interval once initialized
+          if (checkInterval) {
+            clearInterval(checkInterval);
+          }
+        }
+      } else {
+        console.warn('❌ Telegram WebApp not available');
+        
+        if (IS_DEV) {
+          console.log('🔧 Development mode: Using fake objects');
+          
+          const fakeTelegram = {
+            ready: () => console.log('🚀 Fake TG: ready()'),
+            expand: () => console.log('🚀 Fake TG: expand()'),
+            close: () => console.log('🚀 Fake TG: close()'),
+            platform: 'web',
+            version: '6.0',
+            colorScheme: 'light',
+            themeParams: {
+              bg_color: '#ffffff',
+              text_color: '#000000',
+              hint_color: '#999999',
+              link_color: '#3b82f6',
+              button_color: '#3b82f6',
+              button_text_color: '#ffffff',
+            },
+            setHeaderColor: (color) => console.log('🚀 Fake setHeaderColor:', color),
+            setBackgroundColor: (color) => console.log('🚀 Fake setBackgroundColor:', color),
+            MainButton: {
+              hide: () => console.log('🚀 Fake MainButton.hide()'),
+              show: () => console.log('🚀 Fake MainButton.show()'),
+              setText: (text) => console.log('🚀 Fake MainButton.setText:', text),
+              onClick: (callback) => console.log('🚀 Fake MainButton.onClick'),
+            },
+            BackButton: {
+              hide: () => console.log('🚀 Fake BackButton.hide()'),
+              show: () => console.log('🚀 Fake BackButton.show()'),
+              onClick: (callback) => console.log('🚀 Fake BackButton.onClick'),
+            },
+            HapticFeedback: {
+              impactOccurred: (style) => console.log('🚀 Fake Haptic:', style),
+              notificationOccurred: (type) => console.log('🚀 Fake Notification:', type),
+              selectionChanged: () => console.log('🚀 Fake Selection Changed'),
+            },
+          };
           
           if (mounted) {
-            setTg(telegram);
-            
-            // Get user data from Telegram
-            const telegramUser = telegram.initDataUnsafe?.user;
-            
-            if (telegramUser) {
-              console.log('👤 Telegram user:', telegramUser);
-              setUser(telegramUser);
-            } else {
-              console.warn('⚠️ No user data from Telegram');
-              
-              // 🚧 DEVELOPMENT FALLBACK ONLY
-              if (IS_DEV) {
-                console.log('🔧 Using fake user for development');
-                setUser(FAKE_USER_FOR_TESTING);
-              } else {
-                setError('Telegram user data not available');
-              }
-            }
-            
-            // Initialize Telegram WebApp
-            telegram.ready();
-            telegram.expand();
-            
-            // Set theme colors
-            telegram.setHeaderColor(telegram.themeParams.bg_color || '#ffffff');
-            telegram.setBackgroundColor(telegram.themeParams.bg_color || '#ffffff');
-            
+            setTg(fakeTelegram);
+            setUser(FAKE_USER_FOR_TESTING);
             setIsReady(true);
           }
         } else {
-          console.warn('❌ Telegram WebApp not detected');
-          
-          // 🚧 DEVELOPMENT FALLBACK ONLY  
-          if (IS_DEV) {
-            console.log('🔧 Development mode: Using fake Telegram object');
-            
-            // Create minimal fake Telegram object for development
-            const fakeTelegram = {
-              ready: () => console.log('🚀 Fake TG: ready()'),
-              expand: () => console.log('🚀 Fake TG: expand()'),
-              close: () => console.log('🚀 Fake TG: close()'),
-              colorScheme: 'light',
-              themeParams: {
-                bg_color: '#ffffff',
-                text_color: '#000000',
-                hint_color: '#999999',
-                link_color: '#3b82f6',
-                button_color: '#3b82f6',
-                button_text_color: '#ffffff',
-              },
-              MainButton: {
-                hide: () => console.log('🚀 Fake TG: MainButton.hide()'),
-                show: () => console.log('🚀 Fake TG: MainButton.show()'),
-                setText: (text) => console.log('🚀 Fake TG: MainButton.setText:', text),
-                onClick: (callback) => console.log('🚀 Fake TG: MainButton.onClick'),
-              },
-              BackButton: {
-                hide: () => console.log('🚀 Fake TG: BackButton.hide()'),
-                show: () => console.log('🚀 Fake TG: BackButton.show()'),
-                onClick: (callback) => console.log('🚀 Fake TG: BackButton.onClick'),
-              },
-              HapticFeedback: {
-                impactOccurred: (style) => console.log('🚀 Fake Haptic:', style),
-                notificationOccurred: (type) => console.log('🚀 Fake Notification:', type),
-                selectionChanged: () => console.log('🚀 Fake Selection Changed'),
-              },
-            };
-            
-            if (mounted) {
-              setTg(fakeTelegram);
-              setUser(FAKE_USER_FOR_TESTING);
-              setIsReady(true);
-            }
-          } else {
-            if (mounted) {
-              setError('This app must be opened through Telegram');
-            }
+          if (mounted) {
+            setError('This app must be opened through Telegram');
           }
-        }
-      } catch (err) {
-        console.error('❌ Error initializing Telegram:', err);
-        if (mounted) {
-          setError(err.message);
         }
       }
     };
 
-    // Small delay to ensure Telegram WebApp script is loaded
-    const timer = setTimeout(initializeTelegram, 100);
+    // Immediately try to initialize
+    if (typeof window !== 'undefined') {
+      // Wait a bit for scripts to load
+      setTimeout(initializeTelegram, 2000);
+      
+      // Set up interval to keep checking (for slow connections)
+      checkInterval = setInterval(() => {
+        if (!isReady && !isTelegramAvailable()) {
+          console.log('🔄 Still waiting for Telegram script...');
+        } else if (isTelegramAvailable() && !isReady) {
+          initializeTelegram();
+        }
+      }, 1000);
+      
+      // Stop checking after 10 seconds
+      setTimeout(() => {
+        if (checkInterval) {
+          clearInterval(checkInterval);
+          if (!isReady && !IS_DEV) {
+            setError('Telegram WebApp script failed to load');
+          }
+        }
+      }, 10000);
+    }
 
     return () => {
       mounted = false;
-      clearTimeout(timer);
+      if (checkInterval) {
+        clearInterval(checkInterval);
+      }
     };
   }, []);
 
-  // Haptic feedback helper
+  // ... rest of the methods remain the same
   const hapticFeedback = (type = 'light') => {
     if (!tg?.HapticFeedback) {
       console.log(`🚀 Haptic (${IS_DEV ? 'fake' : 'unavailable'}): ${type}`);
@@ -175,39 +203,34 @@ export const useTelegram = () => {
     }
   };
 
-  // Alert helper with fallback
   const showAlert = (message) => {
     try {
       if (tg?.showAlert) {
         tg.showAlert(message);
       } else {
-        // Fallback to browser alert
         alert(message);
       }
     } catch (err) {
       console.error('❌ Error showing alert:', err);
-      alert(message); // Ultimate fallback
+      alert(message);
     }
   };
 
-  // Confirm helper with fallback
   const showConfirm = (message) => {
     return new Promise((resolve) => {
       try {
         if (tg?.showConfirm) {
           tg.showConfirm(message, resolve);
         } else {
-          // Fallback to browser confirm
           resolve(confirm(message));
         }
       } catch (err) {
         console.error('❌ Error showing confirm:', err);
-        resolve(confirm(message)); // Ultimate fallback
+        resolve(confirm(message));
       }
     });
   };
 
-  // Close app helper
   const closeApp = () => {
     try {
       if (tg?.close) {
@@ -220,7 +243,6 @@ export const useTelegram = () => {
     }
   };
 
-  // Main button helper
   const mainButton = {
     show: (text, onClick) => {
       try {
@@ -248,7 +270,6 @@ export const useTelegram = () => {
     },
   };
 
-  // Back button helper
   const backButton = {
     show: (onClick) => {
       try {
@@ -276,24 +297,17 @@ export const useTelegram = () => {
   };
 
   return {
-    // Core Telegram data
     tg,
     user,
     isReady,
     error,
-    
-    // Helper methods
     hapticFeedback,
     showAlert,
     showConfirm,
     closeApp,
     mainButton,
     backButton,
-    
-    // Development info
     isDev: IS_DEV,
-    
-    // Theme data
     colorScheme: tg?.colorScheme || 'light',
     themeParams: tg?.themeParams || {},
   };
