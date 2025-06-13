@@ -6,20 +6,17 @@ import "./UserProfile.css";
 import { ACHIEVEMENT_BADGES } from "../leaderboard/Leaderboard";
 
 const UserProfile = ({ isOwnProfile = true, userId = null }) => {
-  const { user: telegramUser, hapticFeedback, showAlert } = useTelegram();
+  const { hapticFeedback, showAlert } = useTelegram();
   const [stats, setStats] = useState(null);
   const [profileUser, setProfileUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Use userId prop or telegram user id as fallback
-  const targetUserId = userId || telegramUser?.id;
-
   useEffect(() => {
-    if (targetUserId) {
+    if (userId) {
       loadUserData();
     }
-  }, [targetUserId]);
+  }, [userId]);
 
   const loadUserData = async () => {
     try {
@@ -28,8 +25,8 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
 
       // Always fetch user profile and stats from API
       const [statsResponse, userResponse] = await Promise.all([
-        APIService.getUserStatistics(targetUserId),
-        APIService.getUserProfile(targetUserId),
+        APIService.getUserStatistics(userId),
+        APIService.getUserProfile(userId),
       ]);
 
       setStats(statsResponse);
@@ -39,7 +36,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       setError(APIService.getErrorMessage(error));
 
       // Only set fallback data if it's own profile and we have telegram data
-      if (isOwnProfile && telegramUser) {
+      if (isOwnProfile && userId) {
         console.warn("Using minimal fallback data structure");
         setStats({
           today: { completed: 0, pages_read: 0, distance_km: 0 },

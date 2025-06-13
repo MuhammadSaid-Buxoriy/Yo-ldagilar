@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useTelegram } from "../../hooks/useTelegram";
 import APIService from "../../services/api";
 import "./DailyTasks.css";
+import { useAuth } from "../context/AuthContext";
 
 const TASKS_CONFIG = [
   {
@@ -92,13 +93,14 @@ const TASKS_CONFIG = [
 ];
 
 const DailyTasks = () => {
-  const { user, hapticFeedback, showAlert } = useTelegram();
+  const { hapticFeedback, showAlert } = useTelegram();
   const [tasks, setTasks] = useState({});
   const [taskInputs, setTaskInputs] = useState({});
   const [todayStats, setTodayStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (user?.id) {
@@ -399,7 +401,6 @@ const TaskItem = ({ task, isChecked, inputValue, onToggle, onInputChange }) => {
   );
 };
 
-// Icon Components (matching UserProfile design)
 const getTaskIcon = (iconType) => {
   const icons = {
     prayer: () => (

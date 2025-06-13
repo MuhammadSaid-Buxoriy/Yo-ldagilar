@@ -4,6 +4,7 @@ import { useTelegram } from "../../hooks/useTelegram";
 import UserProfile from "../profile/UserProfile";
 import APIService from "../../services/api";
 import "./Leaderboard.css";
+import { useAuth } from "../context/AuthContext";
 
 const PERIOD_OPTIONS = [
   {
@@ -188,7 +189,7 @@ export const ACHIEVEMENT_BADGES = {
 };
 
 const Leaderboard = () => {
-  const { user, hapticFeedback } = useTelegram();
+  const { hapticFeedback } = useTelegram();
   const [leaderboardData, setLeaderboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState("all");
@@ -196,6 +197,7 @@ const Leaderboard = () => {
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const { user } = useAuth();
 
   // Real-time refresh
   useEffect(() => {
@@ -480,7 +482,7 @@ const FiltersSection = ({
   </div>
 );
 
-const CurrentUserPosition = ({ user, scoreLabel, typeConfig, onClick }) => (
+const CurrentUserPosition = ({ user, scoreLabel, onClick }) => (
   <div className="current-user-section">
     <button onClick={onClick} className="current-user-card">
       <div className="current-user-badge">
