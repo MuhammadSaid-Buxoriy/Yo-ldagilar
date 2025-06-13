@@ -5,7 +5,7 @@ import APIService from "../../services/api";
 import "./AuthCheck.css";
 
 const AuthCheck = ({ children }) => {
-  const { user, isReady, tg, } = useTelegram();
+  const { user, isReady, tg, isDev } = useTelegram();
   const [authStatus, setAuthStatus] = useState("checking");
   const [error, setError] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -70,6 +70,27 @@ const AuthCheck = ({ children }) => {
       setAuthStatus("no_user");
     }
   };
+
+  // DEV MODE: Show main app directly with dev banner
+  // if (isDev && authStatus === "approved") {
+  //   return (
+  //     <div>
+  //       <div
+  //         style={{
+  //           background: "#f59e0b",
+  //           color: "white",
+  //           padding: "8px 16px",
+  //           textAlign: "center",
+  //           fontWeight: "bold",
+  //           fontSize: "14px",
+  //         }}
+  //       >
+  //         🚀 DEV MODE: {user?.first_name} ({user?.id}) - Using Fake Data
+  //       </div>
+  //       {children}
+  //     </div>
+  //   );
+  // }
 
   // If approved, show main app
   if (authStatus === "approved") {

@@ -3,8 +3,7 @@
 // =====================================================
 
 // Environment-based API URL
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "https://yuldagilar-backend.onrender.com/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://yuldagilar-backend.onrender.com/api';
 
 class APIService {
   static baseURL = API_BASE_URL;
@@ -15,26 +14,24 @@ class APIService {
       const url = `${this.baseURL}${endpoint}`;
       const config = {
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           ...options.headers,
         },
         ...options,
       };
 
-      console.log(`🌐 API Call: ${config.method || "GET"} ${url}`);
-
+      console.log(`🌐 API Call: ${config.method || 'GET'} ${url}`);
+      
       const response = await fetch(url, config);
-
+      
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message || `HTTP ${response.status}: ${response.statusText}`
-        );
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
       console.log(`✅ API Response:`, data);
-
+      
       return data;
     } catch (error) {
       console.error(`❌ API Error:`, error);
@@ -47,8 +44,8 @@ class APIService {
   // =====================================================
 
   static async checkUserAuth(userId) {
-    return this.apiCall("/auth/check", {
-      method: "POST",
+    return this.apiCall('/auth/check', {
+      method: 'POST',
       body: JSON.stringify({ userId }),
     });
   }
@@ -70,7 +67,7 @@ class APIService {
   }
 
   static async getUserDailyProgress(userId, date) {
-    const dateParam = date || new Date().toISOString().split("T")[0];
+    const dateParam = date || new Date().toISOString().split('T')[0];
     return this.apiCall(`/tasks/progress/${userId}/${dateParam}`);
   }
 
@@ -79,8 +76,8 @@ class APIService {
   }
 
   static async submitDailyProgress(data) {
-    return this.apiCall("/tasks/submit", {
-      method: "POST",
+    return this.apiCall('/tasks/submit', {
+      method: 'POST',
       body: JSON.stringify(data),
     });
   }
@@ -90,9 +87,9 @@ class APIService {
     // Convert to the new format expected by submitDailyProgress
     const data = {
       tg_id: userId,
-      [`shart_${taskId}`]: 1,
+      [`shart_${taskId}`]: 1
     };
-
+    
     return this.submitDailyProgress(data);
   }
 
@@ -100,14 +97,12 @@ class APIService {
   // LEADERBOARD & RANKINGS
   // =====================================================
 
-  static async getLeaderboard(period = "weekly") {
+  static async getLeaderboard(period = 'weekly') {
     return this.apiCall(`/leaderboard?period=${period}`);
   }
 
-  static async getUserRank(userId, period = "weekly", metric = "overall") {
-    return this.apiCall(
-      `/users/${userId}/rank?period=${period}&metric=${metric}`
-    );
+  static async getUserRank(userId, period = 'weekly', metric = 'overall') {
+    return this.apiCall(`/users/${userId}/rank?period=${period}&metric=${metric}`);
   }
 
   // =====================================================
@@ -127,8 +122,8 @@ class APIService {
   // =====================================================
 
   static async approveUser(adminId, userId) {
-    return this.apiCall("/admin/approve-user", {
-      method: "POST",
+    return this.apiCall('/admin/approve-user', {
+      method: 'POST',
       body: JSON.stringify({ adminId, userId }),
     });
   }
@@ -138,9 +133,7 @@ class APIService {
   }
 
   static async getAllUsers(adminId, page = 1, limit = 50) {
-    return this.apiCall(
-      `/admin/users?adminId=${adminId}&page=${page}&limit=${limit}`
-    );
+    return this.apiCall(`/admin/users?adminId=${adminId}&page=${page}&limit=${limit}`);
   }
 
   // =====================================================
@@ -148,11 +141,11 @@ class APIService {
   // =====================================================
 
   static async healthCheck() {
-    return this.apiCall("/health");
+    return this.apiCall('/health');
   }
 
   static async testDatabase() {
-    return this.apiCall("/test-db");
+    return this.apiCall('/test-db');
   }
 
   // =====================================================
@@ -164,7 +157,7 @@ class APIService {
   }
 
   static async getAvailableBadges() {
-    return this.apiCall("/badges");
+    return this.apiCall('/badges');
   }
 
   // =====================================================
@@ -172,7 +165,7 @@ class APIService {
   // =====================================================
 
   static formatDate(date) {
-    return new Date(date).toISOString().split("T")[0];
+    return new Date(date).toISOString().split('T')[0];
   }
 
   static getTodayDate() {
@@ -196,34 +189,32 @@ class APIService {
   // =====================================================
 
   static isNetworkError(error) {
-    return (
-      error.message.includes("Failed to fetch") ||
-      error.message.includes("Network request failed")
-    );
+    return error.message.includes('Failed to fetch') || 
+           error.message.includes('Network request failed');
   }
 
   static isServerError(error) {
-    return error.message.includes("HTTP 5");
+    return error.message.includes('HTTP 5');
   }
 
   static isClientError(error) {
-    return error.message.includes("HTTP 4");
+    return error.message.includes('HTTP 4');
   }
 
   static getErrorMessage(error) {
     if (this.isNetworkError(error)) {
-      return "Internetga ulanishda xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring.";
+      return 'Internetga ulanishda xatolik yuz berdi. Iltimos, qaytadan urinib ko\'ring.';
     }
-
+    
     if (this.isServerError(error)) {
-      return "Serverda xatolik yuz berdi. Iltimos, keyinroq qaytadan urinib ko'ring.";
+      return 'Serverda xatolik yuz berdi. Iltimos, keyinroq qaytadan urinib ko\'ring.';
     }
-
+    
     if (this.isClientError(error)) {
-      return error.message || "Ma'lumotlarni yuborishda xatolik yuz berdi.";
+      return error.message || 'Ma\'lumotlarni yuborishda xatolik yuz berdi.';
     }
-
-    return error.message || "Noma'lum xatolik yuz berdi.";
+    
+    return error.message || 'Noma\'lum xatolik yuz berdi.';
   }
 }
 
