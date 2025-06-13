@@ -5,7 +5,7 @@ import APIService from "../../services/api";
 import "./AuthCheck.css";
 
 const AuthCheck = ({ children }) => {
-  const { user, isReady, tg, isDev } = useTelegram();
+  const { user, isReady, tg } = useTelegram();
   const [authStatus, setAuthStatus] = useState("checking");
   const [error, setError] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);

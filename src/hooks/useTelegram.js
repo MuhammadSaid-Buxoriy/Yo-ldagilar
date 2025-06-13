@@ -105,12 +105,12 @@ export const useTelegram = () => {
               hide: () => console.log('🚀 Fake MainButton.hide()'),
               show: () => console.log('🚀 Fake MainButton.show()'),
               setText: (text) => console.log('🚀 Fake MainButton.setText:', text),
-              onClick: (callback) => console.log('🚀 Fake MainButton.onClick'),
+              onClick: () => console.log('🚀 Fake MainButton.onClick'),
             },
             BackButton: {
               hide: () => console.log('🚀 Fake BackButton.hide()'),
               show: () => console.log('🚀 Fake BackButton.show()'),
-              onClick: (callback) => console.log('🚀 Fake BackButton.onClick'),
+              onClick: () => console.log('🚀 Fake BackButton.onClick'),
             },
             HapticFeedback: {
               impactOccurred: (style) => console.log('🚀 Fake Haptic:', style),
