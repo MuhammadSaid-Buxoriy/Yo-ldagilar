@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover" />
+    <title>Yoldagilar</title>
+    
+    <!-- ✅ TELEGRAM SCRIPT - ENG BIRINCHI -->
+    <script src="https://telegram.org/js/telegram-web-app.js?57"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- 🔧 TELEGRAM DEBUG -->
+    <script>
+      setTimeout(() => {
+        console.log('🔍 Telegram check after 1s:', !!window.Telegram);
+        console.log('🔍 WebApp check:', !!window.Telegram?.WebApp);
+        if (window.Telegram?.WebApp) {
+          console.log('✅ Platform:', window.Telegram.WebApp.platform);
+          console.log('✅ Version:', window.Telegram.WebApp.version);
+          console.log('✅ InitData:', window.Telegram.WebApp.initData);
+        }
+      }, 1000);
+    </script>
+  </body>
+</html>

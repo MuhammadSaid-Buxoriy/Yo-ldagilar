@@ -1,553 +1,314 @@
-// Step 1: Create hooks/useTelegram.js - COMPLETE VERSION
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
-// Dev mode checker
-const IS_DEV =
-  import.meta.env.DEV === "development" ||
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1";
-
-// FAKE USER DATA for development
-const FAKE_USER = {
-  id: 123456789,
-  first_name: "Muhammadsaid",
-  last_name: "Buxoriy",
-  username: "muhammadsaid_dev",
-  language_code: "uz",
-  is_premium: true,
-  achievements: ["consistent", "reader"],
-  photo_url: null,
+// Window objects uchun type checking
+const isTelegramAvailable = () => {
+  return typeof window !== 'undefined' && 
+         window.Telegram && 
+         window.Telegram.WebApp;
 };
 
-// FAKE TELEGRAM OBJECT
-const FAKE_TELEGRAM = {
-  ready: () => console.log("🚀 FAKE TG: ready()"),
-  expand: () => console.log("🚀 FAKE TG: expand()"),
-  close: () => console.log("🚀 FAKE TG: close()"),
-  enableClosingConfirmation: () =>
-    console.log("🚀 FAKE TG: enableClosingConfirmation()"),
-  setHeaderColor: (color) => console.log("🚀 FAKE TG: setHeaderColor:", color),
-  setBackgroundColor: (color) =>
-    console.log("🚀 FAKE TG: setBackgroundColor:", color),
-  MainButton: {
-    hide: () => console.log("🚀 FAKE TG: MainButton.hide()"),
-    show: () => console.log("🚀 FAKE TG: MainButton.show()"),
-    setText: (text) => console.log("🚀 FAKE TG: MainButton.setText:", text),
-    onClick: (callback) =>
-      console.log("🚀 FAKE TG: MainButton.onClick:", callback),
-  },
-  BackButton: {
-    hide: () => console.log("🚀 FAKE TG: BackButton.hide()"),
-    show: () => console.log("🚀 FAKE TG: BackButton.show()"),
-    onClick: (callback) =>
-      console.log("🚀 FAKE TG: BackButton.onClick:", callback),
-  },
-  HapticFeedback: {
-    impactOccurred: (style) => console.log("🚀 FAKE HAPTIC:", style),
-    notificationOccurred: (type) => console.log("🚀 FAKE NOTIFICATION:", type),
-    selectionChanged: () => console.log("🚀 FAKE SELECTION CHANGED"),
-  },
-  colorScheme: "light",
-  themeParams: {
-    bg_color: "#ffffff",
-    text_color: "#000000",
-    hint_color: "#999999",
-    link_color: "#3b82f6",
-    button_color: "#3b82f6",
-    button_text_color: "#ffffff",
-  },
+const IS_DEV = import.meta.env.DEV || 
+  (typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' || 
+    window.location.hostname === '127.0.0.1'
+  ));
+
+const FAKE_USER_FOR_TESTING = {
+  id: 1176941228,
+  first_name: "Muhammadsaid",
+  last_name: "Buxoriy", 
+  username: "muhammadsaid_buxoriy",
+  language_code: "uz",
+  is_premium: false,
+  photo_url: null,
 };
 
 export const useTelegram = () => {
   const [isReady, setIsReady] = useState(false);
   const [user, setUser] = useState(null);
   const [tg, setTg] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (IS_DEV) {
-      // DEVELOPMENT MODE - USE FAKE DATA
-      console.log("🚀 DEVELOPMENT MODE ACTIVATED");
-      console.log("🚀 Using fake user:", FAKE_USER);
+    let mounted = true;
+    let checkInterval;
 
-      setTg(FAKE_TELEGRAM);
-      setUser(FAKE_USER);
-
-      // Simulate loading delay like real Telegram
-      setTimeout(() => {
-        setIsReady(true);
-        console.log("🚀 Fake Telegram ready!");
-      }, 1000);
-    } else {
-      // PRODUCTION MODE - USE REAL TELEGRAM
-      if (window.Telegram?.WebApp) {
+    const initializeTelegram = () => {
+      console.log('🔍 Checking Telegram availability...');
+      console.log('🔍 window.Telegram:', !!window.Telegram);
+      console.log('🔍 window.Telegram.WebApp:', !!window.Telegram?.WebApp);
+      
+      if (isTelegramAvailable()) {
         const telegram = window.Telegram.WebApp;
-        setTg(telegram);
-        setUser(telegram.initDataUnsafe?.user || null);
-        setIsReady(true);
+        
+        console.log('✅ Telegram WebApp detected!');
+        console.log('📱 Platform:', telegram.platform);
+        console.log('📱 Version:', telegram.version);
+        console.log('🎨 Color scheme:', telegram.colorScheme);
+        console.log('👤 Init data unsafe:', telegram.initDataUnsafe);
+        
+        if (mounted) {
+          setTg(telegram);
+          
+          const telegramUser = telegram.initDataUnsafe?.user;
+          
+          if (telegramUser) {
+            console.log('👤 Real Telegram user found:', telegramUser);
+            setUser(telegramUser);
+          } else {
+            console.warn('⚠️ No user data in initDataUnsafe');
+            if (IS_DEV) {
+              console.log('🔧 Using fake user for development');
+              setUser(FAKE_USER_FOR_TESTING);
+            } else {
+              setError('Telegram user data not available');
+            }
+          }
+          
+          // Initialize Telegram WebApp
+          telegram.ready();
+          telegram.expand();
+          telegram.setHeaderColor('#ffffff');
+          telegram.setBackgroundColor('#f8fafc');
+          
+          setIsReady(true);
+          
+          // Clear interval once initialized
+          if (checkInterval) {
+            clearInterval(checkInterval);
+          }
+        }
       } else {
-        console.error("❌ Telegram WebApp not found");
-        setIsReady(true);
+        console.warn('❌ Telegram WebApp not available');
+        
+        if (IS_DEV) {
+          console.log('🔧 Development mode: Using fake objects');
+          
+          const fakeTelegram = {
+            ready: () => console.log('🚀 Fake TG: ready()'),
+            expand: () => console.log('🚀 Fake TG: expand()'),
+            close: () => console.log('🚀 Fake TG: close()'),
+            platform: 'web',
+            version: '6.0',
+            colorScheme: 'light',
+            themeParams: {
+              bg_color: '#ffffff',
+              text_color: '#000000',
+              hint_color: '#999999',
+              link_color: '#3b82f6',
+              button_color: '#3b82f6',
+              button_text_color: '#ffffff',
+            },
+            setHeaderColor: (color) => console.log('🚀 Fake setHeaderColor:', color),
+            setBackgroundColor: (color) => console.log('🚀 Fake setBackgroundColor:', color),
+            MainButton: {
+              hide: () => console.log('🚀 Fake MainButton.hide()'),
+              show: () => console.log('🚀 Fake MainButton.show()'),
+              setText: (text) => console.log('🚀 Fake MainButton.setText:', text),
+              onClick: (callback) => console.log('🚀 Fake MainButton.onClick'),
+            },
+            BackButton: {
+              hide: () => console.log('🚀 Fake BackButton.hide()'),
+              show: () => console.log('🚀 Fake BackButton.show()'),
+              onClick: (callback) => console.log('🚀 Fake BackButton.onClick'),
+            },
+            HapticFeedback: {
+              impactOccurred: (style) => console.log('🚀 Fake Haptic:', style),
+              notificationOccurred: (type) => console.log('🚀 Fake Notification:', type),
+              selectionChanged: () => console.log('🚀 Fake Selection Changed'),
+            },
+          };
+          
+          if (mounted) {
+            setTg(fakeTelegram);
+            setUser(FAKE_USER_FOR_TESTING);
+            setIsReady(true);
+          }
+        } else {
+          if (mounted) {
+            setError('This app must be opened through Telegram');
+          }
+        }
       }
+    };
+
+    // Immediately try to initialize
+    if (typeof window !== 'undefined') {
+      // Wait a bit for scripts to load
+      setTimeout(initializeTelegram, 2000);
+      
+      // Set up interval to keep checking (for slow connections)
+      checkInterval = setInterval(() => {
+        if (!isReady && !isTelegramAvailable()) {
+          console.log('🔄 Still waiting for Telegram script...');
+        } else if (isTelegramAvailable() && !isReady) {
+          initializeTelegram();
+        }
+      }, 1000);
+      
+      // Stop checking after 10 seconds
+      setTimeout(() => {
+        if (checkInterval) {
+          clearInterval(checkInterval);
+          if (!isReady && !IS_DEV) {
+            setError('Telegram WebApp script failed to load');
+          }
+        }
+      }, 10000);
     }
+
+    return () => {
+      mounted = false;
+      if (checkInterval) {
+        clearInterval(checkInterval);
+      }
+    };
   }, []);
 
-  const hapticFeedback = (type = "light") => {
-    if (IS_DEV) {
-      console.log(`🚀 FAKE HAPTIC: ${type}`);
+  // ... rest of the methods remain the same
+  const hapticFeedback = (type = 'light') => {
+    if (!tg?.HapticFeedback) {
+      console.log(`🚀 Haptic (${IS_DEV ? 'fake' : 'unavailable'}): ${type}`);
       return;
     }
 
-    if (tg?.HapticFeedback) {
+    try {
       switch (type) {
-        case "light":
-          tg.HapticFeedback.impactOccurred("light");
+        case 'light':
+          tg.HapticFeedback.impactOccurred('light');
           break;
-        case "medium":
-          tg.HapticFeedback.impactOccurred("medium");
+        case 'medium':
+          tg.HapticFeedback.impactOccurred('medium');
           break;
-        case "heavy":
-          tg.HapticFeedback.impactOccurred("heavy");
+        case 'heavy':
+          tg.HapticFeedback.impactOccurred('heavy');
           break;
-        case "success":
-          tg.HapticFeedback.notificationOccurred("success");
+        case 'success':
+          tg.HapticFeedback.notificationOccurred('success');
           break;
-        case "error":
-          tg.HapticFeedback.notificationOccurred("error");
+        case 'error':
+          tg.HapticFeedback.notificationOccurred('error');
           break;
-        case "warning":
-          tg.HapticFeedback.notificationOccurred("warning");
+        case 'warning':
+          tg.HapticFeedback.notificationOccurred('warning');
           break;
-        case "selection":
+        case 'selection':
           tg.HapticFeedback.selectionChanged();
           break;
         default:
-          tg.HapticFeedback.impactOccurred("light");
+          tg.HapticFeedback.impactOccurred('light');
       }
+    } catch (err) {
+      console.warn('⚠️ Haptic feedback error:', err);
     }
   };
 
-  // UNIVERSAL ALERT
-  const showAlert = (msg) => {
-    // 1. Telegram WebApp Alert (PRODUCTION)
-    if (!IS_DEV && window.Telegram?.WebApp?.showAlert) {
-      window.Telegram.WebApp.showAlert(msg);
-      return;
+  const showAlert = (message) => {
+    try {
+      if (tg?.showAlert) {
+        tg.showAlert(message);
+      } else {
+        alert(message);
+      }
+    } catch (err) {
+      console.error('❌ Error showing alert:', err);
+      alert(message);
     }
-    // 2. Fallback: window.alert
-    window.alert(msg);
+  };
+
+  const showConfirm = (message) => {
+    return new Promise((resolve) => {
+      try {
+        if (tg?.showConfirm) {
+          tg.showConfirm(message, resolve);
+        } else {
+          resolve(confirm(message));
+        }
+      } catch (err) {
+        console.error('❌ Error showing confirm:', err);
+        resolve(confirm(message));
+      }
+    });
+  };
+
+  const closeApp = () => {
+    try {
+      if (tg?.close) {
+        tg.close();
+      } else {
+        console.log('🚀 Close app (not available outside Telegram)');
+      }
+    } catch (err) {
+      console.error('❌ Error closing app:', err);
+    }
+  };
+
+  const mainButton = {
+    show: (text, onClick) => {
+      try {
+        if (tg?.MainButton) {
+          tg.MainButton.setText(text);
+          tg.MainButton.onClick(onClick);
+          tg.MainButton.show();
+        } else {
+          console.log(`🚀 MainButton show: ${text}`);
+        }
+      } catch (err) {
+        console.error('❌ Error with main button:', err);
+      }
+    },
+    hide: () => {
+      try {
+        if (tg?.MainButton) {
+          tg.MainButton.hide();
+        } else {
+          console.log('🚀 MainButton hide');
+        }
+      } catch (err) {
+        console.error('❌ Error hiding main button:', err);
+      }
+    },
+  };
+
+  const backButton = {
+    show: (onClick) => {
+      try {
+        if (tg?.BackButton) {
+          tg.BackButton.onClick(onClick);
+          tg.BackButton.show();
+        } else {
+          console.log('🚀 BackButton show');
+        }
+      } catch (err) {
+        console.error('❌ Error with back button:', err);
+      }
+    },
+    hide: () => {
+      try {
+        if (tg?.BackButton) {
+          tg.BackButton.hide();
+        } else {
+          console.log('🚀 BackButton hide');
+        }
+      } catch (err) {
+        console.error('❌ Error hiding back button:', err);
+      }
+    },
   };
 
   return {
     tg,
     user,
     isReady,
+    error,
     hapticFeedback,
     showAlert,
+    showConfirm,
+    closeApp,
+    mainButton,
+    backButton,
     isDev: IS_DEV,
+    colorScheme: tg?.colorScheme || 'light',
+    themeParams: tg?.themeParams || {},
   };
 };
-
-// Step 2: Create services/api.js - COMPLETE FAKE API
-class APIService {
-  static baseURL = IS_DEV
-    ? "http://localhost:3001/api"
-    : "https://your-real-api.com/api";
-
-  // Simulate network delay
-  static delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  static async checkUserAuth(userId) {
-    if (IS_DEV) {
-      console.log("🚀 FAKE API: checkUserAuth for user:", userId);
-      await this.delay(800);
-
-      // You can change this to test different scenarios:
-      // 'approved', 'not_approved', 'not_registered', 'error'
-      const scenario = "approved";
-
-      const scenarios = {
-        approved: {
-          success: true,
-          isRegistered: true,
-          isApproved: true,
-          message: "User is approved and can access the app",
-        },
-        not_approved: {
-          success: true,
-          isRegistered: true,
-          isApproved: false,
-          message: "User is registered but waiting for admin approval",
-        },
-        not_registered: {
-          success: true,
-          isRegistered: false,
-          isApproved: false,
-          message: "User needs to register first",
-        },
-        error: null,
-      };
-
-      if (scenario === "error") {
-        throw new Error("Tarmoq xatosi: Server bilan aloqa o'rnatilmadi");
-      }
-
-      return scenarios[scenario];
-    }
-
-    // Real API call for production
-    const response = await fetch(`${this.baseURL}/auth/check`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId }),
-    });
-
-    return response.json();
-  }
-
-  static async getUserProfile(userId) {
-    if (IS_DEV) {
-      console.log("🚀 FAKE API: getUserProfile for user:", userId);
-      await this.delay(600);
-
-      return {
-        success: true,
-        user: {
-          id: userId,
-          firstName: "Muhammadsaid",
-          lastName: "Buxoriy",
-          username: "muhammadsaid_dev",
-          avatar: null,
-          level: 5,
-          xp: 2450,
-          xpToNextLevel: 550,
-          totalPoints: 15680,
-          todayPoints: 320,
-          weeklyPoints: 1240,
-          monthlyPoints: 4560,
-          streak: 12,
-          longestStreak: 28,
-          joinDate: "2024-12-15",
-          lastActivity: "2025-06-11T10:30:00Z",
-          rank: 3,
-          achievements: ["consistent", "reader"],
-          badges: [
-            {
-              id: 1,
-              name: "Early Bird",
-              icon: "🌅",
-              description: "Bomdod namozini 30 kun ketma-ket o'qish",
-              earned: true,
-              earnedDate: "2025-05-15",
-            },
-            {
-              id: 2,
-              name: "Consistent",
-              icon: "🔥",
-              description: "12 kun ketma-ket faol bo'lish",
-              earned: true,
-              earnedDate: "2025-06-01",
-            },
-            {
-              id: 3,
-              name: "Top Performer",
-              icon: "🏆",
-              description: "Top 3 ga kirish",
-              earned: false,
-            },
-            {
-              id: 4,
-              name: "Helper",
-              icon: "🤝",
-              description: "Boshqalarga 10 marta yordam berish",
-              earned: true,
-              earnedDate: "2025-05-20",
-            },
-          ],
-          stats: {
-            totalPrayers: 156,
-            totalQuranPages: 89,
-            totalZikr: 12450,
-            totalCharity: 28,
-          },
-        },
-      };
-    }
-
-    const response = await fetch(`${this.baseURL}/users/${userId}`);
-    return response.json();
-  }
-
-  static async getDailyTasks(userId) {
-    if (IS_DEV) {
-      console.log("🚀 FAKE API: getDailyTasks for user:", userId);
-      await this.delay(500);
-
-      const today = new Date().toISOString().split("T")[0];
-
-      return {
-        success: true,
-        date: today,
-        tasks: [
-          {
-            id: 1,
-            title: "Bomdod namozi",
-            description: "Bomdod namozini vaqtida o'qish",
-            points: 50,
-            completed: true,
-            completedAt: "2025-06-11T05:30:00Z",
-            category: "namaz",
-            icon: "🕌",
-            difficulty: "easy",
-          },
-          {
-            id: 2,
-            title: "Peshin namozi",
-            description: "Peshin namozini vaqtida o'qish",
-            points: 50,
-            completed: false,
-            category: "namaz",
-            icon: "🕌",
-            difficulty: "easy",
-          },
-          {
-            id: 3,
-            title: "Asr namozi",
-            description: "Asr namozini vaqtida o'qish",
-            points: 50,
-            completed: false,
-            category: "namaz",
-            icon: "🕌",
-            difficulty: "easy",
-          },
-          {
-            id: 4,
-            title: "Magrib namozi",
-            description: "Magrib namozini vaqtida o'qish",
-            points: 50,
-            completed: false,
-            category: "namaz",
-            icon: "🕌",
-            difficulty: "easy",
-          },
-          {
-            id: 5,
-            title: "Xufton namozi",
-            description: "Xufton namozini vaqtida o'qish",
-            points: 50,
-            completed: false,
-            category: "namaz",
-            icon: "🕌",
-            difficulty: "easy",
-          },
-          {
-            id: 6,
-            title: "Qur'on tilovati",
-            description: "Kamida 1 bet Qur'on o'qish",
-            points: 30,
-            completed: false,
-            category: "quran",
-            icon: "📖",
-            difficulty: "medium",
-          },
-          {
-            id: 7,
-            title: "Zikr va tasbih",
-            description: "100 marta Subhanalloh, Alhamdulilloh, Allohu akbar",
-            points: 25,
-            completed: true,
-            completedAt: "2025-06-11T08:15:00Z",
-            category: "zikr",
-            icon: "📿",
-            difficulty: "easy",
-          },
-          {
-            id: 8,
-            title: "Sadaqa",
-            description: "Biror kishi yoki hayvonga yordam qilish",
-            points: 40,
-            completed: false,
-            category: "charity",
-            icon: "💝",
-            difficulty: "hard",
-          },
-          {
-            id: 9,
-            title: "Duo qilish",
-            description: "Kamida 5 daqiqa duo qilish",
-            points: 20,
-            completed: true,
-            completedAt: "2025-06-11T07:45:00Z",
-            category: "dua",
-            icon: "🤲",
-            difficulty: "easy",
-          },
-          {
-            id: 10,
-            title: "Islomiy kitob o'qish",
-            description: "Islomiy adabiyotdan 10 sahifa o'qish",
-            points: 35,
-            completed: false,
-            category: "knowledge",
-            icon: "📚",
-            difficulty: "medium",
-          },
-        ],
-        completedCount: 3,
-        totalTasks: 10,
-        totalPoints: 365,
-        earnedPoints: 95,
-        completionPercentage: 30,
-      };
-    }
-
-    const response = await fetch(`${this.baseURL}/tasks/daily/${userId}`);
-    return response.json();
-  }
-
-  static async completeTask(userId, taskId) {
-    if (IS_DEV) {
-      console.log("🚀 FAKE API: completeTask", { userId, taskId });
-      await this.delay(300);
-
-      return {
-        success: true,
-        message: "Vazifa muvaffaqiyatli bajarildi!",
-        pointsEarned: Math.floor(Math.random() * 50) + 20,
-        newTotal: Math.floor(Math.random() * 1000) + 15000,
-      };
-    }
-
-    const response = await fetch(`${this.baseURL}/tasks/complete`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, taskId }),
-    });
-
-    return response.json();
-  }
-
-  static async getLeaderboard(period = "weekly") {
-    if (IS_DEV) {
-      console.log("🚀 FAKE API: getLeaderboard period:", period);
-      await this.delay(700);
-
-      const fakeUsers = [
-        {
-          name: "Ahmad Qodirov",
-          points: 25680,
-          streak: 45,
-          avatar: null,
-          score: 95,
-        },
-        {
-          name: "Fotima Rahimova",
-          points: 23450,
-          streak: 38,
-          avatar: null,
-          score: 88,
-        },
-        {
-          name: "Muhammadsaid Buxoriy",
-          points: 15680,
-          streak: 12,
-          avatar: null,
-          isCurrentUser: true,
-          score: 75,
-        },
-        {
-          name: "Oybek Toshmatov",
-          points: 14920,
-          streak: 28,
-          avatar: null,
-          score: 72,
-        },
-        {
-          name: "Zarina Karimova",
-          points: 13750,
-          streak: 22,
-          avatar: null,
-          score: 68,
-        },
-        {
-          name: "Bobur Rahmonov",
-          points: 12890,
-          streak: 19,
-          avatar: null,
-          score: 65,
-        },
-        {
-          name: "Muslima Abdullayeva",
-          points: 11980,
-          streak: 15,
-          avatar: null,
-          score: 62,
-        },
-        {
-          name: "Javohir Ergashev",
-          points: 10540,
-          streak: 31,
-          avatar: null,
-          score: 58,
-        },
-        {
-          name: "Diyora Karimova",
-          points: 9850,
-          streak: 8,
-          avatar: null,
-          score: 55,
-        },
-        {
-          name: "Sanjar Tursunov",
-          points: 8960,
-          streak: 12,
-          avatar: null,
-          score: 50,
-        },
-      ];
-
-      return {
-        success: true,
-        period: period,
-        leaderboard: fakeUsers.map((user, index) => ({
-          rank: index + 1,
-          ...user,
-          change: Math.floor(Math.random() * 6) - 3, // -3 to +3 rank change
-        })),
-        currentUserRank: 3,
-        totalUsers: 1247,
-      };
-    }
-
-    const response = await fetch(
-      `${this.baseURL}/leaderboard?period=${period}`
-    );
-    return response.json();
-  }
-
-  static async getWeeklyStats(userId) {
-    if (IS_DEV) {
-      console.log("🚀 FAKE API: getWeeklyStats for user:", userId);
-      await this.delay(400);
-
-      return {
-        success: true,
-        stats: {
-          weeklyPoints: 1240,
-          dailyPoints: [45, 78, 65, 89, 123, 95, 0], // Last 7 days
-          completedTasks: 23,
-          totalTasks: 35,
-          streak: 12,
-          bestDay: { day: "Payshanba", points: 123 },
-          improvement: "+15%",
-        },
-      };
-    }
-
-    const response = await fetch(`${this.baseURL}/stats/weekly/${userId}`);
-    return response.json();
-  }
-}
-
-export default APIService;
