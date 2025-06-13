@@ -12,6 +12,8 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  console.log("MAN USERMAN:", telegramUser);
+
   // Use userId prop or telegram user id as fallback
   const targetUserId = userId || telegramUser?.id;
 
