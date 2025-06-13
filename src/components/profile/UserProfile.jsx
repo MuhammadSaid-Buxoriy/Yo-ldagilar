@@ -51,7 +51,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
     const shareLink = `https://t.me/yoldagilar_bot/app?startapp=profile_${displayUser.id}`;
 
     const shareText = `🎯 ${
-      isOwnProfile ? "Mening" : `${displayUser.first_name}ning`
+      isOwnProfile ? "Mening" : `${displayUser.name}ning`
     } Yoldagilar natijalarim:
 
 📊 Bugungi unumdorlik: ${dailyPercent}% (${stats.today.completed}/10)
@@ -73,7 +73,7 @@ ${shareLink}`;
         window.Telegram.WebApp.switchInlineQuery(shareText);
       } else if (navigator.share) {
         await navigator.share({
-          title: `${displayUser.first_name}ning Yoldagilar natijasi`,
+          title: `${displayUser.name}ning Yoldagilar natijasi`,
           text: shareText,
         });
       } else {
@@ -163,7 +163,7 @@ const ProfileHeader = ({ user, stats, onShare, isOwnProfile }) => {
       return (
         <img
           src={user.photo_url}
-          alt={user.first_name || "Profile"}
+          alt={user.name || "Profile"}
           className="avatar-image profile-avatar"
           width={80}
           height={80}
@@ -188,16 +188,13 @@ const ProfileHeader = ({ user, stats, onShare, isOwnProfile }) => {
         className="avatar-placeholder avatar-placeholder-profile"
         style={{ backgroundColor: colors[colorIndex] }}
       >
-        {user?.first_name?.charAt(0) || user?.username?.charAt(0) || "U"}
+        {user?.name?.charAt(0) || user?.username?.charAt(0) || "U"}
       </div>
     );
   };
 
   const getUserDisplayName = () => {
-    const name =
-      user?.first_name && user?.last_name
-        ? `${user.first_name} ${user.last_name}`
-        : user?.first_name || user?.username || `ID: ${user?.id}`;
+    const name = user?.name || user?.username || `ID: ${user?.id}`;
 
     console.log(user?.achievements);
 
