@@ -67,6 +67,8 @@ function App() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const { user, loading, error } = useAuth();
 
+  console.log("ANA MAN :", user);
+
   useEffect(() => {
     // Mobile viewport setup
     const setVH = () => {
