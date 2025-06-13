@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
+    <title>Telegram Script Debug</title>
+    
+    <!-- ✅ TELEGRAM SCRIPT WITH FALLBACK -->
+    <script src="https://telegram.org/js/telegram-web-app.js?57"></script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .debug-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .debug-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .debug-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .debug-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .debug-label {
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .debug-value {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            word-break: break-all;
+            font-size: 14px;
+        }
+        
+        .status-good { color: #4ade80; }
+        .status-bad { color: #f87171; }
+        .status-warning { color: #fbbf24; }
+        
+        .test-button {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .instruction-step {
+            margin-bottom: 15px;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .instruction-step::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #ffd700;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <div class="debug-header">
+            <div class="debug-title">🔍 Telegram Script Debug</div>
+            <p>Telegram WebApp muhitini tekshirish</p>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-label">🌐 Window Telegram Object:</div>
+            <div class="debug-value" id="telegram-object">Tekshirilmoqda...</div>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-label">📱 WebApp Object:</div>
+            <div class="debug-value" id="webapp-object">Tekshirilmoqda...</div>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-label">👤 User Data:</div>
+            <div class="debug-value" id="user-data">Tekshirilmoqda...</div>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-label">🔧 Platform Info:</div>
+            <div class="debug-value" id="platform-info">Tekshirilmoqda...</div>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-label">🔗 Current URL:</div>
+            <div class="debug-value" id="current-url">Tekshirilmoqda...</div>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-label">📋 Init Data:</div>
+            <div class="debug-value" id="init-data">Tekshirilmoqda...</div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="test-button" onclick="runFullTest()">🔄 Qayta Tekshirish</button>
+            <button class="test-button" onclick="showAllDetails()">📊 Batafsil Ma'lumot</button>
+        </div>
+
+        <div class="instructions">
+            <div class="debug-label">📋 Qo'llanma:</div>
+            <div class="instruction-step">Agar "Telegram object" <span class="status-bad">❌ mavjud emas</span> bo'lsa - script yuklanmagan</div>
+            <div class="instruction-step">Agar "WebApp" <span class="status-bad">❌ mavjud emas</span> bo'lsa - Telegram Mini App muhitida emassiz</div>
+            <div class="instruction-step">Agar "User data" bo'sh bo'lsa - foydalanuvchi ma'lumotlari uzatilmagan</div>
+            <div class="instruction-step">Bu sahifani bot orqali ochish kerak: <strong>@yuldagilar_bot</strong></div>
+        </div>
+    </div>
+
+    <script>
+        let checkAttempts = 0;
+        const maxAttempts = 20;
+
+        function updateDebugInfo() {
+            checkAttempts++;
+            
+            // Telegram Object Check
+            const telegramEl = document.getElementById('telegram-object');
+            if (typeof window.Telegram !== 'undefined') {
+                telegramEl.innerHTML = '<span class="status-good">✅ Mavjud</span>';
+                telegramEl.innerHTML += `<br>Keys: ${Object.keys(window.Telegram).join(', ')}`;
+            } else {
+                telegramEl.innerHTML = '<span class="status-bad">❌ Mavjud emas</span>';
+            }
+
+            // WebApp Object Check
+            const webappEl = document.getElementById('webapp-object');
+            if (window.Telegram && window.Telegram.WebApp) {
+                webappEl.innerHTML = '<span class="status-good">✅ Mavjud</span>';
+                webappEl.innerHTML += `<br>Version: ${window.Telegram.WebApp.version || 'N/A'}`;
+                webappEl.innerHTML += `<br>Platform: ${window.Telegram.WebApp.platform || 'N/A'}`;
+            } else {
+                webappEl.innerHTML = '<span class="status-bad">❌ Mavjud emas</span>';
+            }
+
+            // User Data Check
+            const userEl = document.getElementById('user-data');
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+                const user = window.Telegram.WebApp.initDataUnsafe.user;
+                userEl.innerHTML = '<span class="status-good">✅ Mavjud</span>';
+                userEl.innerHTML += `<br>ID: ${user.id}`;
+                userEl.innerHTML += `<br>Ism: ${user.first_name} ${user.last_name || ''}`;
+                userEl.innerHTML += `<br>Username: @${user.username || 'N/A'}`;
+            } else {
+                userEl.innerHTML = '<span class="status-warning">⚠️ Mavjud emas</span>';
+            }
+
+            // Platform Info
+            const platformEl = document.getElementById('platform-info');
+            platformEl.innerHTML = `User Agent: ${navigator.userAgent}<br>`;
+            platformEl.innerHTML += `Is Mobile: ${/Mobi|Android/i.test(navigator.userAgent) ? 'Ha' : 'Yo\'q'}<br>`;
+            platformEl.innerHTML += `Screen: ${screen.width}x${screen.height}<br>`;
+            platformEl.innerHTML += `Viewport: ${window.innerWidth}x${window.innerHeight}`;
+
+            // Current URL
+            const urlEl = document.getElementById('current-url');
+            urlEl.innerHTML = window.location.href;
+
+            // Init Data
+            const initEl = document.getElementById('init-data');
+            if (window.Telegram && window.Telegram.WebApp) {
+                initEl.innerHTML = window.Telegram.WebApp.initData || '<span class="status-warning">Bo\'sh</span>';
+            } else {
+                initEl.innerHTML = '<span class="status-bad">WebApp mavjud emas</span>';
+            }
+
+            // Continue checking if not found and under max attempts
+            if ((!window.Telegram || !window.Telegram.WebApp) && checkAttempts < maxAttempts) {
+                setTimeout(updateDebugInfo, 500);
+            }
+        }
+
+        function runFullTest() {
+            checkAttempts = 0;
+            updateDebugInfo();
+        }
+
+        function showAllDetails() {
+            console.log('=== TELEGRAM DEBUG REPORT ===');
+            console.log('Window object:', window);
+            console.log('Telegram object:', window.Telegram);
+            console.log('WebApp object:', window.Telegram?.WebApp);
+            console.log('Init data unsafe:', window.Telegram?.WebApp?.initDataUnsafe);
+            console.log('Init data raw:', window.Telegram?.WebApp?.initData);
+            console.log('User agent:', navigator.userAgent);
+            console.log('Location:', window.location);
+            
+            alert('Batafsil ma\'lumot console\'da (F12)');
+        }
+
+        // Start checking immediately
+        setTimeout(updateDebugInfo, 100);
+        
+        // Also check when page fully loads
+        window.addEventListener('load', () => {
+            setTimeout(updateDebugInfo, 500);
+        });
+
+        // Check when Telegram script might load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(updateDebugInfo, 200);
+        });
+    </script>
+</body>
+</html>
