@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       APIService.getUserProfile(tgUser.id)
         .then((userData) => {
-          setUser(userData);
+          setUser(userData.user);
           setLoading(false);
         })
         .catch((err) => {
