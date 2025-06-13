@@ -65,7 +65,7 @@ function App() {
   const { tg, isReady, hapticFeedback } = useTelegram();
   const [activeTab, setActiveTab] = useState("profile");
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const { user } = useAuth();
+  const { user, loading, error } = useAuth();
 
   useEffect(() => {
     // Mobile viewport setup
@@ -124,6 +124,9 @@ function App() {
   if (!isReady) {
     return <LoadingScreen />;
   }
+
+  if (loading) return <div>Yuklanmoqda...</div>;
+  if (error) return <div>Xatolik: {error}</div>;
 
   return (
     <AuthCheck>
