@@ -1,20 +1,11 @@
-// src/context/AuthContext.jsx
-import { createContext, useContext, useEffect, useState } from "react";
-import { useTelegram } from "../../hooks/useTelegram";
-import APIService from "../../services/api";
+// components/context/AuthContext.jsx
+import { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const { user: tgUser } = useTelegram();
+  // user holatini bu yerda boshqar
   const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    if (tgUser?.id) {
-      APIService.getUserProfile(tgUser.id).then(setUser);
-    }
-  }, [tgUser]);
-
   return (
     <AuthContext.Provider value={{ user, setUser }}>
       {children}
