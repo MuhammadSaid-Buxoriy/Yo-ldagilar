@@ -122,8 +122,8 @@ export const ACHIEVEMENT_BADGES = {
   consistent: {
     icon: (
       <svg
-        width="8"
-        height="8"
+        width="20"
+        height="20"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -138,8 +138,8 @@ export const ACHIEVEMENT_BADGES = {
   reader: {
     icon: (
       <svg
-        width="8"
-        height="8"
+        width="20"
+        height="20"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -155,8 +155,8 @@ export const ACHIEVEMENT_BADGES = {
   athlete: {
     icon: (
       <svg
-        width="8"
-        height="8"
+        width="20"
+        height="20"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -173,8 +173,8 @@ export const ACHIEVEMENT_BADGES = {
   perfectionist: {
     icon: (
       <svg
-        width="8"
-        height="8"
+        width="20"
+        height="20"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -189,8 +189,8 @@ export const ACHIEVEMENT_BADGES = {
   early_bird: {
     icon: (
       <svg
-        width="8"
-        height="8"
+        width="20"
+        height="20"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"

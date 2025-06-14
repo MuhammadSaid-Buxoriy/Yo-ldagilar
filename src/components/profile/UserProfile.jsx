@@ -717,8 +717,8 @@ const StatIcon = ({ type }) => {
     ),
     zap: (
       <svg
-        width="8"
-        height="8"
+        width="20"
+        height="20"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -729,8 +729,8 @@ const StatIcon = ({ type }) => {
     ),
     moon: (
       <svg
-        width="8"
-        height="8"
+        width="20"
+        height="20"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
