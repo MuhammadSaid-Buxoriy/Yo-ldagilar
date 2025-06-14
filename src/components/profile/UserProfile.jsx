@@ -129,7 +129,7 @@ ${shareLink}`;
       if (!shareSuccess && tg?.openTelegramLink) {
         try {
           console.log("🔄 Trying Telegram openTelegramLink...");
-          const telegramShareUrl = `https://t.me/share/url?url?text=${encodeURIComponent(
+          const telegramShareUrl = `https://t.me/share/url?text=${encodeURIComponent(
             shareText
           )}`;
           await tg.openTelegramLink(telegramShareUrl);
