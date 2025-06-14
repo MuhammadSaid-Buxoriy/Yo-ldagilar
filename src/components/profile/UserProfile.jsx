@@ -70,7 +70,10 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       // const userIdParam = profileUser.id || profileUser.tg_id;
 
       // ✅ To'g'ri start parameter formati
-      const shareLink = "https://t.me/yuldagilar_bot";
+      const shareLink = isOwnProfile
+        ? `https://t.me/${botUsername}/start?startapp=self`
+        : `https://t.me/yuldagilar_bot`;
+
       console.log("🔗 Share link:", shareLink);
 
       // ✅ Ma'lumotlarni xavfsiz olish
