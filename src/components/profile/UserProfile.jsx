@@ -66,13 +66,11 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
 
     try {
       // ✅ TUZATILDI: To'g'ri bot link formati
-      const botUsername = "yuldagilar_bot";
+      // const botUsername = "yuldagilar_bot";
       // const userIdParam = profileUser.id || profileUser.tg_id;
 
       // ✅ To'g'ri start parameter formati
-      const shareLink = isOwnProfile
-        ? `https://t.me/${botUsername}/start?startapp=self`
-        : `https://t.me/yuldagilar_bot`;
+      const shareLink = "https://t.me/yuldagilar_bot";
 
       console.log("🔗 Share link:", shareLink);
 
@@ -128,10 +126,9 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       if (!shareSuccess && tg?.openTelegramLink) {
         try {
           console.log("🔄 Trying Telegram openTelegramLink...");
-          const finalShareText = `${shareText}\n\n👉 ${shareLink}`;
-          const telegramShareUrl = `https://t.me/share/url?text=${encodeURIComponent(
-            finalShareText
-          )}`;
+          const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(
+            shareLink
+          )}&text=${encodeURIComponent(shareText)}`;
 
           await tg.openTelegramLink(telegramShareUrl);
           shareSuccess = true;
