@@ -129,7 +129,7 @@ export const ACHIEVEMENT_BADGES = {
         stroke="currentColor"
         strokeWidth="2"
       >
-        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+        <polygon points="13 2 3 14 12 14 11 22 21 10 13 10 13 2" />
       </svg>
     ),
     color: "#ef4444",
@@ -185,6 +185,23 @@ export const ACHIEVEMENT_BADGES = {
     ),
     color: "#f59e0b",
     title: "Olov",
+  },
+  early_bird: {
+    icon: (
+      <svg
+        width="8"
+        height="8"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        <path d="M12 6v6l4 2" />
+      </svg>
+    ),
+    color: "#8b5cf6",
+    title: "Uyg'oq",
   },
 };
 

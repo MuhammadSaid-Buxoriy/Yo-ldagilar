@@ -528,9 +528,9 @@ const AchievementsSection = ({ stats }) => {
   const achievements = [
     {
       id: "consistent",
-      title: "Doimiy faol",
-      description: "30 kun har kuni faol",
-      target: 30,
+      title: "Faol",
+      description: "21 kun har kuni faol",
+      target: 21,
       current: stats?.all_time?.total_days || 0,
       icon: "flame",
       color: "#ef4444",
@@ -538,8 +538,8 @@ const AchievementsSection = ({ stats }) => {
     {
       id: "reader",
       title: "Kitobxon",
-      description: "20,000 bet kitob o'qish",
-      target: 20000,
+      description: "10,000 bet kitob o'qish",
+      target: 10000,
       current: stats?.all_time?.total_pages || 0,
       icon: "book",
       color: "#3b82f6",
@@ -556,11 +556,20 @@ const AchievementsSection = ({ stats }) => {
     {
       id: "perfectionist",
       title: "Olov",
-      description: "Ketma-ket 30 kun 100%",
-      target: 30,
+      description: "21 kun ketma-ket 10/10 vazifa bajarish",
+      target: 21,
       current: 0,
       icon: "fire",
       color: "#f59e0b",
+    },
+    {
+      id: "early_bird",
+      title: "Uyg'oq",
+      description: "21 kun ketma-ket erta turish",
+      target: 21,
+      current: 0,
+      icon: "fire",
+      color: "#8b5cf6",
     },
   ];
 
