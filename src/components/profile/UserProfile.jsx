@@ -68,9 +68,9 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       // ✅ TUZATILDI: To'g'ri bot link formati
       const botUsername = "yuldagilar_bot"; // Bot username (@ belgisisiz)
       const userIdParam = profileUser.id || profileUser.tg_id;
-      
+
       // ✅ To'g'ri start parameter formati
-      const shareLink = isOwnProfile 
+      const shareLink = isOwnProfile
         ? `https://t.me/${botUsername}/start?startapp=self`
         : `https://t.me/${botUsername}/start?startapp=profile_${userIdParam}`;
 
@@ -86,7 +86,9 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       const totalDays = stats.all_time?.total_days || 0;
 
       // ✅ TUZATILDI: Ulashish matni
-      const shareText = `🎯 ${isOwnProfile ? "Mening" : `${userName}ning`} Yoldagilar natijalarim:
+      const shareText = `🎯 ${
+        isOwnProfile ? "Mening" : `${userName}ning`
+      } Yoldagilar natijalarim:
 
 📊 Bugungi unumdorlik: ${dailyPercent}% (${dailyCompleted}/10)
 📚 Bugun o'qigan: ${stats.today?.pages_read || 0} bet
@@ -102,7 +104,10 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
 
 ${shareLink}`;
 
-      console.log("📝 Share text prepared:", shareText.substring(0, 100) + "...");
+      console.log(
+        "📝 Share text prepared:",
+        shareText.substring(0, 100) + "..."
+      );
 
       // ✅ TUZATILDI: Telegram sharing usullari
       let shareSuccess = false;
@@ -124,7 +129,9 @@ ${shareLink}`;
       if (!shareSuccess && tg?.openTelegramLink) {
         try {
           console.log("🔄 Trying Telegram openTelegramLink...");
-          const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(shareText)}`;
+          const telegramShareUrl = `https://t.me/share/url?url?text=${encodeURIComponent(
+            shareText
+          )}`;
           await tg.openTelegramLink(telegramShareUrl);
           shareSuccess = true;
           hapticFeedback("success");
@@ -141,7 +148,7 @@ ${shareLink}`;
           await navigator.share({
             title: `${userName}ning Yoldagilar natijasi`,
             text: shareText,
-            url: shareLink
+            url: shareLink,
           });
           shareSuccess = true;
           hapticFeedback("success");
@@ -165,7 +172,6 @@ ${shareLink}`;
           fallbackCopyToClipboard(shareText);
         }
       }
-
     } catch (error) {
       console.error("❌ Share error:", error);
       hapticFeedback("error");
@@ -184,10 +190,10 @@ ${shareLink}`;
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
-      
-      const successful = document.execCommand('copy');
+
+      const successful = document.execCommand("copy");
       document.body.removeChild(textArea);
-      
+
       if (successful) {
         showAlert("✅ Matn nusxalandi!");
         hapticFeedback("success");
@@ -205,7 +211,9 @@ ${shareLink}`;
     if (!user) return "Unknown User";
     if (user.name) return user.name;
     if (user.first_name) {
-      return user.last_name ? `${user.first_name} ${user.last_name}` : user.first_name;
+      return user.last_name
+        ? `${user.first_name} ${user.last_name}`
+        : user.first_name;
     }
     if (user.username) return `@${user.username}`;
     return `User ${user.id || user.tg_id}`;
@@ -335,7 +343,11 @@ const ProfileHeader = ({ user, stats, onShare }) => {
     <div className="profile-header">
       <div className="profile-header-content">
         {/* ✅ TUZATILDI: Share tugmasi */}
-        <button onClick={onShare} className="share-icon-button" title="Ulashish">
+        <button
+          onClick={onShare}
+          className="share-icon-button"
+          title="Ulashish"
+        >
           <ShareIcon />
         </button>
 
@@ -711,11 +723,11 @@ const ShareIcon = () => (
     stroke="currentColor"
     strokeWidth="2"
   >
-    <circle cx="18" cy="5" r="3"/>
-    <circle cx="6" cy="12" r="3"/>
-    <circle cx="18" cy="19" r="3"/>
-    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+    <circle cx="18" cy="5" r="3" />
+    <circle cx="6" cy="12" r="3" />
+    <circle cx="18" cy="19" r="3" />
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
   </svg>
 );
 
