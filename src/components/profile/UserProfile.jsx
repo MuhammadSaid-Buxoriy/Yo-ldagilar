@@ -66,13 +66,13 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
 
     try {
       // ✅ TUZATILDI: To'g'ri bot link formati
-      const botUsername = "yoldagilar_bot"; // Bot username (@ belgisisiz)
+      const botUsername = "yuldagilar_bot"; // Bot username (@ belgisisiz)
       const userIdParam = profileUser.id || profileUser.tg_id;
       
       // ✅ To'g'ri start parameter formati
       const shareLink = isOwnProfile 
-        ? `https://t.me/${botUsername}/app`
-        : `https://t.me/${botUsername}?start=profile_${userIdParam}`;
+        ? `https://t.me/${botUsername}/start?startapp=self`
+        : `https://t.me/${botUsername}/start?startapp=profile_${userIdParam}`;
 
       console.log("🔗 Share link:", shareLink);
 
