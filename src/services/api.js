@@ -1,5 +1,5 @@
 // =====================================================
-// API SERVICE - PRODUCTION READY VERSION
+// API SERVICE - PRODUCTION READY VERSION + Photo Update
 // =====================================================
 
 // Environment-based API URL
@@ -61,7 +61,16 @@ class APIService {
     return this.apiCall(`/users/${userId}/statistics`);
   }
 
-  // Add this method to your APIService class
+  // =====================================================
+  // ✅ YANGI: Profil rasmi yangilash
+  // =====================================================
+
+  static async updateUserPhoto(userId, photoUrl) {
+    return this.apiCall(`/auth/update-photo/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ photo_url: photoUrl }),
+    });
+  }
 
   // =====================================================
   // USER PROFILE MANAGEMENT

@@ -1,4 +1,4 @@
-// components/leaderboard/Leaderboard.jsx - Mukammal UI versiya
+// components/leaderboard/Leaderboard.jsx - Mukammal UI versiya + Sortlash tuzatilgan
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useTelegram } from "../../hooks/useTelegram";
 import UserProfile from "../profile/UserProfile";
@@ -6,9 +6,10 @@ import APIService from "../../services/api";
 import "./Leaderboard.css";
 import { useAuth } from "../context/AuthContext";
 
+// ✅ TUZATILDI: Vaqt turlari
 const PERIOD_OPTIONS = [
   {
-    value: "all",
+    value: "all_time",
     label: "Barcha",
     icon: (
       <svg
@@ -66,6 +67,7 @@ const TYPE_OPTIONS = [
     value: "overall",
     label: "Ball",
     color: "#3b82f6",
+    unit: "ball",
     icon: (
       <svg
         width="12"
@@ -83,6 +85,7 @@ const TYPE_OPTIONS = [
     value: "reading",
     label: "Kitob",
     color: "#10b981",
+    unit: "bet",
     icon: (
       <svg
         width="12"
@@ -101,6 +104,7 @@ const TYPE_OPTIONS = [
     value: "distance",
     label: "Sport",
     color: "#f59e0b",
+    unit: "km",
     icon: (
       <svg
         width="12"
@@ -159,7 +163,7 @@ export const ACHIEVEMENT_BADGES = {
         height="8"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="currentColor"
+        stroke="currentError"
         strokeWidth="2"
       >
         <path d="M6 2v6h.01L8 14.01V22h8v-7.99L17.99 8H18V2" />
@@ -192,12 +196,96 @@ const Leaderboard = () => {
   const { hapticFeedback } = useTelegram();
   const [leaderboardData, setLeaderboardData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState("all");
+  const [selectedPeriod, setSelectedPeriod] = useState("weekly");
   const [selectedType, setSelectedType] = useState("overall");
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const { user } = useAuth();
+
+  // ✅ YANGI FUNKSIYA: Har xil tur va vaqt uchun to'g'ri score olish
+  const getCurrentScore = useCallback((userdata, period, type) => {
+    let scoreValue = 0;
+
+    // Vaqt bo'yicha
+    if (period === "daily") {
+      if (type === "reading") {
+        scoreValue = userdata.daily_pages || 0;
+      } else if (type === "distance") {
+        scoreValue = parseFloat(userdata.daily_distance) || 0;
+      } else {
+        scoreValue = userdata.daily_points || 0;
+      }
+    } else if (period === "weekly") {
+      if (type === "reading") {
+        scoreValue = userdata.weekly_pages || 0;
+      } else if (type === "distance") {
+        scoreValue = parseFloat(userdata.weekly_distance) || 0;
+      } else {
+        scoreValue = userdata.weekly_points || 0;
+      }
+    } else { // all_time
+      if (type === "reading") {
+        scoreValue = userdata.total_pages || 0;
+      } else if (type === "distance") {
+        scoreValue = parseFloat(userdata.total_distance) || 0;
+      } else {
+        scoreValue = userdata.total_points || 0;
+      }
+    }
+
+    return scoreValue;
+  }, []);
+
+  // ✅ TUZATILDI: Leaderboard yuklash
+  const loadLeaderboard = useCallback(async (silent = false) => {
+    if (!silent) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
+    setError(null);
+
+    try {
+      console.log(`📊 Leaderboard yuklanyapti: ${selectedPeriod} - ${selectedType}`);
+
+      // ✅ TUZATILDI: To'g'ri API chaqirish
+      const response = await APIService.getLeaderboard({
+        period: selectedPeriod,
+        type: selectedType,
+        limit: 100,
+        tg_id: user?.id // Foydalanuvchi pozitsiyasi uchun
+      });
+
+      console.log("📨 Leaderboard javob:", response);
+
+      if (response.success !== false) {
+        // ✅ TUZATILDI: Ma'lumotlarni to'g'ri formatda saqlash
+        setLeaderboardData({
+          ...response,
+          // Backend dan kelgan ma'lumotlarni normalize qilish
+          leaderboard: (response.leaderboard || []).map((user, index) => ({
+            ...user,
+            rank: index + 1,
+            // ✅ Har xil turdagi scoreni to'g'ri ko'rsatish
+            currentScore: getCurrentScore(user, selectedPeriod, selectedType)
+          }))
+        });
+        
+        if (!silent) {
+          hapticFeedback("light");
+        }
+      } else {
+        throw new Error(response.message || 'Leaderboard yuklashda xatolik');
+      }
+    } catch (error) {
+      console.error("❌ Leaderboard yuklashda xatolik:", error);
+      setError(APIService.getErrorMessage(error));
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [selectedPeriod, selectedType, user?.id, hapticFeedback, getCurrentScore]);
 
   // Real-time refresh
   useEffect(() => {
@@ -208,59 +296,32 @@ const Leaderboard = () => {
     }, 15000);
 
     return () => clearInterval(interval);
-  }, [loading, refreshing, selectedPeriod, selectedType, selectedUserId]);
+  }, [loading, refreshing, selectedPeriod, selectedType, selectedUserId, loadLeaderboard]);
 
+  // ✅ Effect: Period yoki type o'zgarsa qayta yuklash
   useEffect(() => {
-    loadLeaderboard();
-  }, [selectedPeriod, selectedType]);
+    if (user?.id) {
+      loadLeaderboard();
+    }
+  }, [selectedPeriod, selectedType, user?.id, loadLeaderboard]);
 
-  const loadLeaderboard = useCallback(
-    async (silent = false) => {
-      if (!silent) {
-        setLoading(true);
-      } else {
-        setRefreshing(true);
-      }
-      setError(null);
-
-      try {
-        const response = await APIService.getLeaderboard({
-          period: selectedPeriod,
-          type: selectedType,
-          limit: 100,
-        });
-
-        setLeaderboardData(response);
-
-        if (!silent) {
-          hapticFeedback("light");
-        }
-      } catch (error) {
-        console.error("Failed to load leaderboard:", error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-      }
-    },
-    [selectedPeriod, selectedType, hapticFeedback]
-  );
-
-  const handlePeriodChange = useCallback(
-    (period) => {
+  // ✅ TUZATILDI: Vaqt o'zgartirilganda
+  const handlePeriodChange = useCallback((newPeriod) => {
+    if (newPeriod !== selectedPeriod) {
+      console.log(`📅 Vaqt o'zgartirildi: ${selectedPeriod} -> ${newPeriod}`);
+      setSelectedPeriod(newPeriod);
       hapticFeedback("light");
-      setSelectedPeriod(period);
-    },
-    [hapticFeedback]
-  );
+    }
+  }, [selectedPeriod, hapticFeedback]);
 
-  const handleTypeChange = useCallback(
-    (type) => {
+  // ✅ TUZATILDI: Tur o'zgartirilganda
+  const handleTypeChange = useCallback((newType) => {
+    if (newType !== selectedType) {
+      console.log(`🔄 Tur o'zgartirildi: ${selectedType} -> ${newType}`);
+      setSelectedType(newType);
       hapticFeedback("light");
-      setSelectedType(type);
-    },
-    [hapticFeedback]
-  );
+    }
+  }, [selectedType, hapticFeedback]);
 
   const handleUserClick = useCallback(
     (userId) => {
@@ -275,6 +336,7 @@ const Leaderboard = () => {
     setSelectedUserId(null);
   }, [hapticFeedback]);
 
+  // ✅ TUZATILDI: Manual yangilash
   const manualRefresh = useCallback(() => {
     hapticFeedback("medium");
     loadLeaderboard();
@@ -285,21 +347,37 @@ const Leaderboard = () => {
     [selectedType]
   );
 
+  // ✅ TUZATILDI: Score label olish
   const getScoreLabel = useCallback(() => {
-    switch (selectedType) {
-      case "reading":
-        return "bet";
-      case "distance":
-        return "km";
-      default:
-        return "ball";
-    }
+    const typeOption = TYPE_OPTIONS.find(opt => opt.value === selectedType);
+    return typeOption?.unit || "ball";
   }, [selectedType]);
 
-  const currentUser = useMemo(
-    () => leaderboardData?.leaderboard?.find((item) => item.tg_id === user?.id),
-    [leaderboardData, user?.id]
-  );
+  // ✅ TUZATILDI: Joriy foydalanuvchi pozitsiyasini topish
+  const currentUser = useMemo(() => {
+    if (!leaderboardData?.leaderboard || !user?.id) return null;
+    
+    const found = leaderboardData.leaderboard.find(item => 
+      item.tg_id === user.id || item.tg_id === parseInt(user.id)
+    );
+
+    if (found) {
+      return {
+        ...found,
+        currentScore: getCurrentScore(found, selectedPeriod, selectedType)
+      };
+    }
+
+    // Agar top listda yo'q bo'lsa, current_user dan olish
+    if (leaderboardData.current_user) {
+      return {
+        ...leaderboardData.current_user,
+        currentScore: getCurrentScore(leaderboardData.current_user, selectedPeriod, selectedType)
+      };
+    }
+
+    return null;
+  }, [leaderboardData, user?.id, selectedPeriod, selectedType, getCurrentScore]);
 
   if (selectedUserId) {
     return (
@@ -359,6 +437,9 @@ const Leaderboard = () => {
           onRetry={loadLeaderboard}
           typeConfig={selectedTypeConfig}
           onUserClick={handleUserClick}
+          selectedPeriod={selectedPeriod}
+          selectedType={selectedType}
+          getCurrentScore={getCurrentScore}
         />
       </div>
     </div>
@@ -499,7 +580,7 @@ const CurrentUserPosition = ({ user, scoreLabel, onClick }) => (
         </div>
 
         <div className="current-user-score">
-          <div className="current-user-score-value">{}</div>
+          <div className="current-user-score-value">{user.currentScore || 0}</div>
           <div className="current-user-score-label">{scoreLabel}</div>
         </div>
       </div>
@@ -515,6 +596,9 @@ const LeaderboardList = ({
   onRetry,
   typeConfig,
   onUserClick,
+  selectedPeriod,
+  selectedType,
+  getCurrentScore
 }) => {
   if (error) {
     return <ErrorState error={error} onRetry={onRetry} />;
@@ -540,6 +624,9 @@ const LeaderboardList = ({
             isCurrentUser={participant.tg_id === currentUserId}
             typeConfig={typeConfig}
             onClick={() => onUserClick(participant.tg_id)}
+            selectedPeriod={selectedPeriod}
+            selectedType={selectedType}
+            getCurrentScore={getCurrentScore}
           />
         ))}
       </div>
@@ -554,6 +641,9 @@ const LeaderboardItem = ({
   isCurrentUser,
   typeConfig,
   onClick,
+  selectedPeriod,
+  selectedType,
+  getCurrentScore
 }) => {
   const isTopThree = index < 3;
   const isGold = index === 0;
@@ -622,8 +712,6 @@ const LeaderboardItem = ({
     return <span className="rank-number">{participant.rank}</span>;
   };
 
-  console.log(typeConfig);
-
   return (
     <button
       onClick={onClick}
@@ -670,6 +758,7 @@ const LeaderboardItem = ({
               )}
           </div>
 
+          {/* ✅ TUZATILDI: Top 3 uchun qo'shimcha ma'lumotlar */}
           {isTopThree && (
             <div className="participant-details participant-details-leaderboard">
               <span className="detail-item detail-item-leaderboard">
@@ -683,7 +772,7 @@ const LeaderboardItem = ({
                 >
                   <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
                 </svg>
-                {participant.points}
+                {participant.total_points || 0}
               </span>
               <span className="detail-item detail-item-leaderboard">
                 <svg
@@ -697,7 +786,7 @@ const LeaderboardItem = ({
                   <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
                   <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
                 </svg>
-                {participant.total_pages}
+                {participant.total_pages || 0}
               </span>
               <span className="detail-item detail-item-leaderboard">
                 <svg
@@ -712,16 +801,14 @@ const LeaderboardItem = ({
                   <path d="M8 22v-7" />
                   <path d="M16 22v-7" />
                 </svg>
-                {participant.total_distance}
+                {parseFloat(participant.total_distance || 0)}km
               </span>
             </div>
           )}
         </div>
         <div className="participant-score">
           <div className="participant-score-value">
-            {scoreLabel === "ball" && participant.score}
-            {scoreLabel === "bet" && participant.total_pages}
-            {scoreLabel === "km" && participant.total_distance}
+            {participant.currentScore || getCurrentScore(participant, selectedPeriod, selectedType) || 0}
           </div>
           <div className="participant-score-label">{scoreLabel}</div>
         </div>

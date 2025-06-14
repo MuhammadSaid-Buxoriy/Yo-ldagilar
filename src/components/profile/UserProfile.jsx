@@ -1,4 +1,4 @@
-// components/profile/UserProfile.jsx - API DATA FIRST VERSION
+// components/profile/UserProfile.jsx - API DATA FIRST VERSION + Ulashish tuzatilgan
 import { useState, useEffect, useCallback } from "react";
 import { useTelegram } from "../../hooks/useTelegram";
 import APIService from "../../services/api";
@@ -6,7 +6,7 @@ import "./UserProfile.css";
 import { ACHIEVEMENT_BADGES } from "../leaderboard/Leaderboard";
 
 const UserProfile = ({ isOwnProfile = true, userId = null }) => {
-  const { hapticFeedback, showAlert } = useTelegram();
+  const { hapticFeedback, showAlert, tg } = useTelegram();
   const [stats, setStats] = useState(null);
   const [profileUser, setProfileUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -55,64 +55,160 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
     }
   };
 
+  // ✅ TUZATILDI: Ulashish funksiyasi
   const shareProfile = useCallback(async () => {
-    if (!stats || !profileUser) return;
+    if (!stats || !profileUser) {
+      showAlert("❌ Ma'lumotlar yuklanmagan");
+      return;
+    }
 
     hapticFeedback("light");
 
-    const dailyPercent = Math.round((stats.today.completed / 10) * 100);
-    const shareLink = `https://t.me/yoldagilar_bot/app?startapp=profile_${profileUser.id}`;
+    try {
+      // ✅ TUZATILDI: To'g'ri bot link formati
+      const botUsername = "yoldagilar_bot"; // Bot username (@ belgisisiz)
+      const userIdParam = profileUser.id || profileUser.tg_id;
+      
+      // ✅ To'g'ri start parameter formati
+      const shareLink = isOwnProfile 
+        ? `https://t.me/${botUsername}/app`
+        : `https://t.me/${botUsername}?start=profile_${userIdParam}`;
 
-    // Use API user data for sharing
-    const userName = getUserDisplayName(profileUser);
+      console.log("🔗 Share link:", shareLink);
 
-    const shareText = `🎯 ${
-      isOwnProfile ? "Mening" : `${userName}ning`
-    } Yoldagilar natijalarim:
+      // ✅ Ma'lumotlarni xavfsiz olish
+      const dailyCompleted = stats.today?.completed || 0;
+      const dailyPercent = Math.round((dailyCompleted / 10) * 100);
+      const userName = getUserDisplayName(profileUser);
+      const totalPoints = stats.all_time?.total_points || 0;
+      const totalPages = stats.all_time?.total_pages || 0;
+      const totalDistance = stats.all_time?.total_distance || 0;
+      const totalDays = stats.all_time?.total_days || 0;
 
-📊 Bugungi unumdorlik: ${dailyPercent}% (${stats.today.completed}/10)
-📚 Bugun o'qigan: ${stats.today.pages_read} bet
-🏃‍♂️ Bugun yugurgan: ${stats.today.distance_km} km
+      // ✅ TUZATILDI: Ulashish matni
+      const shareText = `🎯 ${isOwnProfile ? "Mening" : `${userName}ning`} Yoldagilar natijalarim:
+
+📊 Bugungi unumdorlik: ${dailyPercent}% (${dailyCompleted}/10)
+📚 Bugun o'qigan: ${stats.today?.pages_read || 0} bet
+🏃‍♂️ Bugun yugurgan: ${stats.today?.distance_km || 0} km
 
 🏆 Umumiy natijalar:
-• Jami ball: ${stats.all_time.total_points}
-• Jami o'qigan: ${stats.all_time.total_pages} bet
-• Jami masofa: ${stats.all_time.total_distance} km
-• Faol kunlar: ${stats.all_time.total_days}
+⭐ Jami ball: ${totalPoints}
+📖 Jami o'qigan: ${totalPages} bet  
+🏃‍♂️ Jami masofa: ${totalDistance} km
+📅 Faol kunlar: ${totalDays}
 
 💪 Yoldagilar jamoasida rivojlanish!
 
 ${shareLink}`;
 
-    try {
-      if (window.Telegram?.WebApp?.switchInlineQuery) {
-        window.Telegram.WebApp.switchInlineQuery(shareText);
-      } else if (navigator.share) {
-        await navigator.share({
-          title: `${userName}ning Yoldagilar natijasi`,
-          text: shareText,
-        });
-      } else {
-        await navigator.clipboard.writeText(shareText);
-        showAlert("✅ Matn nusxalandi!");
-      }
-      hapticFeedback("success");
-    } catch (error) {
-      console.error("Share failed:", error);
-      try {
-        await navigator.clipboard.writeText(shareText);
-        showAlert("✅ Matn nusxalandi!");
-      } catch {
-        showAlert("❌ Ulashishda xatolik");
-      }
-    }
-  }, [stats, profileUser, isOwnProfile, hapticFeedback, showAlert]);
+      console.log("📝 Share text prepared:", shareText.substring(0, 100) + "...");
 
-  // Helper function to get display name from API user data
+      // ✅ TUZATILDI: Telegram sharing usullari
+      let shareSuccess = false;
+
+      // 1-usul: Telegram WebApp sharing (eng yaxshi)
+      if (tg?.switchInlineQuery) {
+        try {
+          console.log("🔄 Trying Telegram switchInlineQuery...");
+          await tg.switchInlineQuery(shareText);
+          shareSuccess = true;
+          hapticFeedback("success");
+          console.log("✅ Telegram switchInlineQuery successful");
+        } catch (error) {
+          console.warn("⚠️ switchInlineQuery failed:", error);
+        }
+      }
+
+      // 2-usul: Telegram share URL (fallback)
+      if (!shareSuccess && tg?.openTelegramLink) {
+        try {
+          console.log("🔄 Trying Telegram openTelegramLink...");
+          const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(shareText)}`;
+          await tg.openTelegramLink(telegramShareUrl);
+          shareSuccess = true;
+          hapticFeedback("success");
+          console.log("✅ Telegram openTelegramLink successful");
+        } catch (error) {
+          console.warn("⚠️ openTelegramLink failed:", error);
+        }
+      }
+
+      // 3-usul: Native Web Share API
+      if (!shareSuccess && navigator.share) {
+        try {
+          console.log("🔄 Trying Web Share API...");
+          await navigator.share({
+            title: `${userName}ning Yoldagilar natijasi`,
+            text: shareText,
+            url: shareLink
+          });
+          shareSuccess = true;
+          hapticFeedback("success");
+          console.log("✅ Web Share API successful");
+        } catch (error) {
+          console.warn("⚠️ Web Share API failed:", error);
+        }
+      }
+
+      // 4-usul: Clipboard (oxirgi variant)
+      if (!shareSuccess) {
+        try {
+          console.log("🔄 Trying clipboard copy...");
+          await navigator.clipboard.writeText(shareText);
+          showAlert("✅ Matn nusxalandi! Endi istalgan joyga ulashing.");
+          hapticFeedback("success");
+          console.log("✅ Clipboard copy successful");
+        } catch (error) {
+          console.warn("⚠️ Clipboard failed:", error);
+          // Oxirgi variant - text area orqali
+          fallbackCopyToClipboard(shareText);
+        }
+      }
+
+    } catch (error) {
+      console.error("❌ Share error:", error);
+      hapticFeedback("error");
+      showAlert("❌ Ulashishda xatolik yuz berdi");
+    }
+  }, [stats, profileUser, isOwnProfile, hapticFeedback, showAlert, tg]);
+
+  // ✅ YANGI: Fallback copy funksiyasi
+  const fallbackCopyToClipboard = (text) => {
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        showAlert("✅ Matn nusxalandi!");
+        hapticFeedback("success");
+      } else {
+        showAlert("❌ Nusxalashda xatolik");
+      }
+    } catch (error) {
+      console.error("Fallback copy failed:", error);
+      showAlert("❌ Nusxalashda xatolik");
+    }
+  };
+
+  // ✅ User display name helper
   const getUserDisplayName = (user) => {
     if (!user) return "Unknown User";
-
-    return user.name || user.first_name || user.username || `User ${user.id}`;
+    if (user.name) return user.name;
+    if (user.first_name) {
+      return user.last_name ? `${user.first_name} ${user.last_name}` : user.first_name;
+    }
+    if (user.username) return `@${user.username}`;
+    return `User ${user.id || user.tg_id}`;
   };
 
   if (loading) {
@@ -142,6 +238,46 @@ ${shareLink}`;
 };
 
 const ProfileHeader = ({ user, stats, onShare }) => {
+  // ✅ User display name helper (lokalni)
+  const getUserDisplayName = () => {
+    if (!user) return "Unknown User";
+
+    const name =
+      user.name || user.first_name || user.username || `User ${user.id}`;
+
+    // Add achievement badges if available
+    if (user.achievements && user.achievements.length > 0) {
+      return (
+        <span
+          className="user-display-name-badge-wrap"
+          style={{ display: "flex", alignItems: "center", gap: 4 }}
+        >
+          {name}
+          {user.achievements.slice(0, 2).map((badgeKey) => {
+            const badge = ACHIEVEMENT_BADGES[badgeKey];
+            if (!badge) return null;
+            return (
+              <span
+                key={badgeKey}
+                className="achievement-badge"
+                style={{
+                  marginLeft: 4,
+                  color: badge.color,
+                  display: "inline-flex",
+                  verticalAlign: "middle",
+                }}
+                title={badge.title}
+              >
+                {badge.icon}
+              </span>
+            );
+          })}
+        </span>
+      );
+    }
+    return name;
+  };
+
   const getAvatarContent = () => {
     // Use photo_url from API user data only
     const photoUrl = user?.photo_url || user?.avatar_url;
@@ -185,45 +321,6 @@ const ProfileHeader = ({ user, stats, onShare }) => {
     );
   };
 
-  const getUserDisplayName = () => {
-    if (!user) return "Unknown User";
-
-    const name =
-      user.name || user.first_name || user.username || `User ${user.id}`;
-
-    // Add achievement badges if available
-    if (user.achievements && user.achievements.length > 0) {
-      return (
-        <span
-          className="user-display-name-badge-wrap"
-          style={{ display: "flex", alignItems: "center", gap: 4 }}
-        >
-          {name}
-          {user.achievements.slice(0, 2).map((badgeKey) => {
-            const badge = ACHIEVEMENT_BADGES[badgeKey];
-            if (!badge) return null;
-            return (
-              <span
-                key={badgeKey}
-                className="achievement-badge"
-                style={{
-                  marginLeft: 4,
-                  color: badge.color,
-                  display: "inline-flex",
-                  verticalAlign: "middle",
-                }}
-                title={badge.title}
-              >
-                {badge.icon}
-              </span>
-            );
-          })}
-        </span>
-      );
-    }
-    return name;
-  };
-
   const getUserSubtitle = () => {
     if (!user) return "Unknown";
 
@@ -237,7 +334,8 @@ const ProfileHeader = ({ user, stats, onShare }) => {
   return (
     <div className="profile-header">
       <div className="profile-header-content">
-        <button onClick={onShare} className="share-icon-button">
+        {/* ✅ TUZATILDI: Share tugmasi */}
+        <button onClick={onShare} className="share-icon-button" title="Ulashish">
           <ShareIcon />
         </button>
 
@@ -603,18 +701,21 @@ const StatIcon = ({ type }) => {
   return icons[type] || icons.star;
 };
 
+// ✅ TUZATILDI: Share icon
 const ShareIcon = () => (
   <svg
-    width="16"
-    height="16"
+    width="20"
+    height="20"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
   >
-    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-    <polyline points="16,6 12,2 8,6" />
-    <line x1="12" y1="2" x2="12" y2="15" />
+    <circle cx="18" cy="5" r="3"/>
+    <circle cx="6" cy="12" r="3"/>
+    <circle cx="18" cy="19" r="3"/>
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
   </svg>
 );
 

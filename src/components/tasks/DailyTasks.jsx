@@ -100,59 +100,93 @@ const DailyTasks = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [dailyData, setDailyData] = useState(null);
   const { user } = useAuth();
 
+  // ✅ TUZATILDI: Sahifa ochilganda bugungi vazifalarni yuklash
   useEffect(() => {
     if (user?.id) {
-      loadTodayData();
+      loadTodayTasks();
     }
   }, [user]);
 
-  const loadTodayData = async () => {
+  // ✅ YANGI FUNKSIYA: Bugungi vazifalarni backend dan yuklash
+  const loadTodayTasks = async () => {
     try {
       setLoading(true);
-      const response = await APIService.getUserStatistics(user.id);
-      setTodayStats(response.today);
+      console.log("📅 Bugungi vazifalarni yuklayapman...", user.id);
 
-      // Initialize tasks state based on existing data
-      const initialTasks = {};
-      const initialInputs = {};
+      // Backend dan bugungi kun ma'lumotlarini olish
+      const response = await APIService.apiCall(`/tasks/daily/${user.id}`);
+      
+      console.log("📊 Backend dan kelgan ma'lumot:", response);
 
-      // If data exists, populate the state
-      if (response.today.completed > 0) {
-        // This would need to come from a more detailed API response
-        // For now, we'll start fresh each day
+      if (response.success) {
+        setDailyData(response);
+        setTodayStats(response.today || response);
+        
+        // ✅ ASOSIY TUZATISH: Backend dan kelgan vazifa holatlarini o'rnatish
+        const loadedTasks = {};
+        const loadedInputs = {};
+        
+        // Har bir vazifa uchun completed holatini tekshirish
+        if (response.tasks && Array.isArray(response.tasks)) {
+          response.tasks.forEach((task) => {
+            if (task.completed) {
+              loadedTasks[task.id] = true;
+              console.log(`✅ Vazifa ${task.id} bajarilgan`);
+            }
+          });
+        }
+        
+        // Pages va distance ma'lumotlarini o'rnatish
+        if (response.pages_read > 0) {
+          loadedTasks[5] = true; // Kitob o'qish vazifasi
+          loadedInputs[5] = response.pages_read;
+        }
+        
+        if (response.distance_km > 0) {
+          loadedTasks[10] = true; // Sport vazifasi
+          loadedInputs[10] = response.distance_km;
+        }
+
+        setTasks(loadedTasks);
+        setTaskInputs(loadedInputs);
+        setHasChanges(false);
+        
+        console.log("✅ Vazifalar yuklandi:", loadedTasks);
+        console.log("✅ Input ma'lumotlar:", loadedInputs);
       }
-
-      if (response.today.pages_read > 0) {
-        initialTasks[5] = true;
-        initialInputs[5] = response.today.pages_read;
-      }
-
-      if (response.today.distance_km > 0) {
-        initialTasks[10] = true;
-        initialInputs[10] = response.today.distance_km;
-      }
-
-      setTasks(initialTasks);
-      setTaskInputs(initialInputs);
-      setHasChanges(false);
     } catch (error) {
-      console.error("Failed to load today data:", error);
-      showAlert("❌ Ma'lumotlarni yuklashda xatolik");
+      console.error("❌ Vazifalarni yuklashda xatolik:", error);
+      // Xatolik bo'lsa ham ishni davom ettirish
+      setDailyData({ 
+        success: true, 
+        tasks: [], 
+        completedCount: 0, 
+        pages_read: 0, 
+        distance_km: 0 
+      });
+      setTodayStats({
+        completed: 0,
+        pages_read: 0,
+        distance_km: 0
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ TUZATILDI: Vazifa holati o'zgartirilganda
   const handleTaskToggle = useCallback(
     (taskId) => {
       hapticFeedback("light");
-
-      setTasks((prev) => {
+      
+      setTasks(prev => {
         const newTasks = { ...prev };
         if (newTasks[taskId]) {
           delete newTasks[taskId];
+          console.log(`❌ Vazifa ${taskId} bekor qilindi`);
           // Clear input when unchecking
           setTaskInputs((prevInputs) => {
             const newInputs = { ...prevInputs };
@@ -161,10 +195,11 @@ const DailyTasks = () => {
           });
         } else {
           newTasks[taskId] = true;
+          console.log(`✅ Vazifa ${taskId} belgilandi`);
         }
         return newTasks;
       });
-
+      
       setHasChanges(true);
     },
     [hapticFeedback]
@@ -200,6 +235,7 @@ const DailyTasks = () => {
     return true;
   };
 
+  // ✅ TUZATILDI: Vazifa yuborilgandan keyin qayta yuklash
   const handleSubmit = async () => {
     if (!isSubmitEnabled()) return;
 
@@ -209,7 +245,7 @@ const DailyTasks = () => {
     try {
       const submitData = {
         tg_id: user.id,
-        name: `${user.first_name} ${user.last_name || ""}`.trim(),
+        name: user.name || user.first_name || `User ${user.id}`,
         shart_1: tasks[1] ? 1 : 0,
         shart_2: tasks[2] ? 1 : 0,
         shart_3: tasks[3] ? 1 : 0,
@@ -220,24 +256,30 @@ const DailyTasks = () => {
         shart_8: tasks[8] ? 1 : 0,
         shart_9: tasks[9] ? 1 : 0,
         shart_10: tasks[10] ? 1 : 0,
-        pages_read: tasks[5] ? taskInputs[5] || 0 : 0,
-        distance_km: tasks[10] ? taskInputs[10] || 0 : 0,
+        pages_read: tasks[5] ? (taskInputs[5] || 0) : 0,
+        distance_km: tasks[10] ? (taskInputs[10] || 0) : 0,
       };
+
+      console.log("📤 Yuborilayotgan ma'lumot:", submitData);
 
       const response = await APIService.submitDailyProgress(submitData);
 
-      hapticFeedback("success");
-      showAlert(
-        `✅ Muvaffaqiyatli saqlandi!\n🎯 Bugungi ball: ${
-          response.totalPoints || Object.keys(tasks).length
-        }/10`
-      );
+      console.log("📨 Yuborish natijasi:", response);
 
-      setHasChanges(false);
-      loadTodayData(); // Refresh data
+      if (response.success !== false) {
+        hapticFeedback("success");
+        const totalPoints = response.totalPoints || Object.keys(tasks).length;
+        showAlert(`✅ Muvaffaqiyatli saqlandi!\n🎯 Bugungi ball: ${totalPoints}/10`);
+
+        // ✅ MUHIM: Yuborish muvaffaqiyatli bo'lsa, qayta yuklash
+        await loadTodayTasks();
+      } else {
+        throw new Error(response.message || "Yuborishda xatolik");
+      }
     } catch (error) {
       hapticFeedback("error");
-      showAlert(`❌ ${error.message || "Saqlashda xatolik yuz berdi"}`);
+      console.error("❌ Yuborishda xatolik:", error);
+      showAlert(`❌ ${APIService.getErrorMessage(error)}`);
     } finally {
       setSubmitting(false);
     }
@@ -272,10 +314,6 @@ const DailyTasks = () => {
                 style={{ width: `${progress}%` }}
               />
             </div>
-
-            {/* <p className="progress-percentage">
-              {Math.round(progress)}% bajarildi
-            </p> */}
           </div>
 
           {todayStats && (

@@ -1,4 +1,4 @@
-/* components/profile/UserProfile.css - TOZA OPTIMIZATSIYA QILINGAN */
+/* components/profile/UserProfile.css - TOZA OPTIMIZATSIYA QILINGAN + PHOTO REFRESH */
 
 .profile-container {
   height: 100%;
@@ -68,6 +68,12 @@
   height: 48px !important;
 }
 
+/* ✅ YANGI: Avatar wrapper va refresh button */
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .avatar-image,
 .avatar-placeholder {
   width: 80px;
@@ -94,6 +100,59 @@
 .avatar-placeholder-profile {
   width: 48px !important;
   height: 48px !important;
+}
+
+/* ✅ YANGI: Profil rasmi yangilash tugmasi */
+.photo-refresh-button {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: white;
+  border: 2px solid white;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: all 0.2s ease;
+}
+
+.photo-refresh-button:hover {
+  background: #2563eb;
+  transform: scale(1.05);
+}
+
+.photo-refresh-button:active {
+  transform: scale(0.95);
+}
+
+/* ✅ YANGI: Rasm holati haqida ma'lumot */
+.photo-status {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.refresh-link {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.refresh-link:hover {
+  color: #2563eb;
 }
 
 .avatar-upload-input {
@@ -521,11 +580,6 @@
   border: 1px solid rgba(0, 0, 0, 0.1);
   color: white;
 }
-
-/* .chart-value {
-    background: rgba(0, 0, 0, 0.8);
-    border-color: rgba(255, 255, 255, 0.2);
-  } */
 
 /* Achievements Section */
 .achievements-section {
