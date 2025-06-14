@@ -101,8 +101,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
 📅 Faol kunlar: ${totalDays}
 
 💪 Yoldagilar jamoasida rivojlanish!
-
-${shareLink}`;
+`;
 
       console.log(
         "📝 Share text prepared:",
@@ -129,9 +128,9 @@ ${shareLink}`;
       if (!shareSuccess && tg?.openTelegramLink) {
         try {
           console.log("🔄 Trying Telegram openTelegramLink...");
-          const telegramShareUrl = `https://t.me/share/url?text=${encodeURIComponent(
-            shareText
-          )}`;
+          const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(
+            shareLink
+          )}&text=${encodeURIComponent(shareText)}`;
           await tg.openTelegramLink(telegramShareUrl);
           shareSuccess = true;
           hapticFeedback("success");
