@@ -62,7 +62,10 @@ class APIService {
   }
 
   static async getUserAchievementsProgress(userId) {
-    return this.apiCall(`/users/${userId}/achievements/progress`);
+    const response = await this.apiCall(
+      `/users/${userId}/achievements/progress`
+    );
+    return response.data || [];
   }
 
   // =====================================================

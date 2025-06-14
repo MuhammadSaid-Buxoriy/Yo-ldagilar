@@ -35,7 +35,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
 
       setStats(statsResponse);
       setProfileUser(userResponse.user);
-      setAchievementsProgress(progressResponse);
+      setAchievementsProgress(progressResponse || []);
     } catch (error) {
       console.error("Failed to load user data:", error);
       setError(APIService.getErrorMessage(error));
