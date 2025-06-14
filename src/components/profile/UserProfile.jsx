@@ -51,6 +51,8 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
             total_pages: 0,
             total_distance: 0,
             total_days: 0,
+            perfectionist_streak: 0,
+            early_bird_streak: 0,
           },
         });
         // Don't set profileUser - let it remain null to show error
@@ -569,7 +571,7 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
       title: "Olov",
       description: "21 kun ketma-ket 10/10 vazifa bajarish",
       target: 21,
-      current: achievementMap.get("perfectionist")?.current || 0,
+      current: stats?.all_time?.perfectionist_streak || 0,
       icon: "fire",
       color: "#f59e0b",
     },
@@ -578,7 +580,7 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
       title: "Uyg'oq",
       description: "21 kun ketma-ket erta turish",
       target: 21,
-      current: achievementMap.get("early_bird")?.current || 0,
+      current: stats?.all_time?.early_bird_streak || 0,
       icon: "moon",
       color: "#8b5cf6",
     },
