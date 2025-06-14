@@ -66,7 +66,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
 
     try {
       // ✅ TUZATILDI: To'g'ri bot link formati
-      // const botUsername = "yuldagilar_bot";
+      const botUsername = "yuldagilar_bot";
       // const userIdParam = profileUser.id || profileUser.tg_id;
 
       // ✅ To'g'ri start parameter formati
