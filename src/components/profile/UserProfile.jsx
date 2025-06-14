@@ -72,7 +72,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       // ✅ To'g'ri start parameter formati
       const shareLink = isOwnProfile
         ? `https://t.me/${botUsername}/start?startapp=self`
-        : `https://t.me/${botUsername}/start?startapp=profile_${userIdParam}`;
+        : `https://t.me/yuldagilar_bot`;
 
       console.log("🔗 Share link:", shareLink);
 
