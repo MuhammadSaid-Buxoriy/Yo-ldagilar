@@ -61,13 +61,17 @@ class APIService {
     return this.apiCall(`/users/${userId}/statistics`);
   }
 
+  static async getUserAchievementsProgress(userId) {
+    return this.apiCall(`/users/${userId}/achievements/progress`);
+  }
+
   // =====================================================
   // ✅ YANGI: Profil rasmi yangilash
   // =====================================================
 
   static async updateUserPhoto(userId, photoUrl) {
     return this.apiCall(`/auth/update-photo/${userId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify({ photo_url: photoUrl }),
     });
   }

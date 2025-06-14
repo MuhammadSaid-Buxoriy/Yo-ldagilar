@@ -11,6 +11,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
   const [profileUser, setProfileUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [achievementsProgress, setAchievementsProgress] = useState([]);
 
   useEffect(() => {
     if (userId) {
@@ -24,13 +25,17 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       setError(null);
 
       // Always fetch user profile and stats from API
-      const [statsResponse, userResponse] = await Promise.all([
-        APIService.getUserStatistics(userId),
-        APIService.getUserProfile(userId),
-      ]);
+      const [statsResponse, userResponse, progressResponse] = await Promise.all(
+        [
+          APIService.getUserStatistics(userId),
+          APIService.getUserProfile(userId),
+          APIService.getUserAchievementsProgress(userId),
+        ]
+      );
 
       setStats(statsResponse);
       setProfileUser(userResponse.user);
+      setAchievementsProgress(progressResponse);
     } catch (error) {
       console.error("Failed to load user data:", error);
       setError(APIService.getErrorMessage(error));
@@ -237,7 +242,10 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
 
       <div className="profile-content">
         <StatisticsSection stats={stats} />
-        <AchievementsSection stats={stats} />
+        <AchievementsSection
+          stats={stats}
+          achievementsProgress={achievementsProgress}
+        />
       </div>
     </div>
   );
@@ -524,7 +532,10 @@ const ProgressBar = ({ percentage, color }) => (
   </div>
 );
 
-const AchievementsSection = ({ stats }) => {
+const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
+  const achievementMap = new Map();
+  achievementsProgress.forEach((a) => achievementMap.set(a.id, a));
+
   const achievements = [
     {
       id: "consistent",
@@ -558,7 +569,7 @@ const AchievementsSection = ({ stats }) => {
       title: "Olov",
       description: "21 kun ketma-ket 10/10 vazifa bajarish",
       target: 21,
-      current: 0,
+      current: achievementMap.get("perfectionist")?.current || 0,
       icon: "fire",
       color: "#f59e0b",
     },
@@ -567,7 +578,7 @@ const AchievementsSection = ({ stats }) => {
       title: "Uyg'oq",
       description: "21 kun ketma-ket erta turish",
       target: 21,
-      current: 0,
+      current: achievementMap.get("early_bird")?.current || 0,
       icon: "moon",
       color: "#8b5cf6",
     },
