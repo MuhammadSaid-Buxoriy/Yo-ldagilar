@@ -81,7 +81,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       const totalDays = stats.all_time?.total_days || 0;
 
       // ✅ YANGILANGAN: Yaxshiroq share text formati
-      const shareText = `🚀 ${isOwnProfile ? "Mening Yo'ldagilar challenge natijalarim" : `${userName}ning Yo'ldagilar challenge natijalari`}:
+      const shareText = `🎯 ${isOwnProfile ? "Mening Yo'ldagilar challenge natijalarim" : `${userName}ning Yo'ldagilar challenge natijalari`}:
 
 📈 Bugungi unumdorlik: ${dailyPercent}% (${dailyCompleted}/10 vazifa)
 📚 Bugun o'qilgan betlar: ${stats.today?.pages_read || 0} bet
@@ -116,6 +116,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
             await navigator.share({
               title: `${userName}ning Yo'ldagilar challenge natijalari`,
               text: shareText,
+              url: "https://t.me/yuldagilar_bot"
             });
             return true;
           }
