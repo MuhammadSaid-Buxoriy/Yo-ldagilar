@@ -119,7 +119,9 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       if (!shareSuccess && tg?.openTelegramLink) {
         try {
           console.log("🔄 Trying Telegram openTelegramLink...");
-          const telegramShareUrl = `https://t.me/share/url?text=${encodeURIComponent(shareText)}`;
+          const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(
+            "https://t.me/yuldagilar_bot"
+          )}&text=${encodeURIComponent(shareText)}`;
 
           await tg.openTelegramLink(telegramShareUrl);
           shareSuccess = true;
@@ -130,14 +132,13 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
         }
       }
 
-      // 3-usul: Native Web Share API
+      // 3-usul: Native Web Share API (url siz - tepada link chiqmasin)
       if (!shareSuccess && navigator.share) {
         try {
           console.log("🔄 Trying Web Share API...");
           await navigator.share({
             title: `${userName}ning Yo'ldagilar challenge natijalari`,
-            text: shareText,
-            url: "https://t.me/yuldagilar_bot"
+            text: shareText
           });
           shareSuccess = true;
           hapticFeedback("success");
