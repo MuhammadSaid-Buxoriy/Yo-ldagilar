@@ -80,8 +80,8 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       const totalDistance = stats.all_time?.total_distance || 0;
       const totalDays = stats.all_time?.total_days || 0;
 
-      // ✅ REAL YECHIM: Platform-specific share text
-      const shareTextWithLink = `🚀 ${isOwnProfile ? "Mening Yo'ldagilar challenge natijalarim" : `${userName}ning Yo'ldagilar challenge natijalari`}:
+      // ✅ YANGILANGAN: Yaxshiroq share text formati
+      const shareText = `🚀 ${isOwnProfile ? "Mening Yo'ldagilar challenge natijalarim" : `${userName}ning Yo'ldagilar challenge natijalari`}:
 
 📈 Bugungi unumdorlik: ${dailyPercent}% (${dailyCompleted}/10 vazifa)
 📚 Bugun o'qilgan betlar: ${stats.today?.pages_read || 0} bet
@@ -97,30 +97,16 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
 
 👉🏻 https://t.me/yuldagilar_bot`;
 
-      const shareTextWithoutLink = `🚀 ${isOwnProfile ? "Mening Yo'ldagilar challenge natijalarim" : `${userName}ning Yo'ldagilar challenge natijalari`}:
-
-📈 Bugungi unumdorlik: ${dailyPercent}% (${dailyCompleted}/10 vazifa)
-📚 Bugun o'qilgan betlar: ${stats.today?.pages_read || 0} bet
-🏃‍♂️ Bugun yugurgan masofa: ${stats.today?.distance_km || 0} km
-
-🏆 Umumiy yutuqlar:
-⭐ Jami ball: ${totalPoints.toLocaleString()} ball
-📖 Jami betlar: ${totalPages.toLocaleString()} bet
-🏃‍♂️ Umumiy masofa: ${totalDistance} km
-📅 Faol kunlar: ${totalDays} kun
-
-🔥 Yo'lga chiq-Yo'ldan chiqma!`;
-
       console.log("📝 Share text prepared:", shareText.substring(0, 100) + "...");
 
       // ✅ TUZATILDI: Desktop uchun Telegram Share URL qo'shildi
       let shareSuccess = false;
 
-      // 1-usul: Telegram WebApp sharing (Mobile/Web - link yo'q)
+      // 1-usul: Telegram WebApp sharing (eng yaxshi)
       if (tg?.switchInlineQuery) {
         try {
           console.log("🔄 Trying Telegram switchInlineQuery...");
-          await tg.switchInlineQuery(shareTextWithLink); // Link bilan
+          await tg.switchInlineQuery(shareText);
           shareSuccess = true;
           hapticFeedback("success");
           console.log("✅ Telegram switchInlineQuery successful");
@@ -129,13 +115,13 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
         }
       }
 
-      // 2-usul: Telegram share URL (Desktop - avtomatik link + bizning link)
+      // 2-usul: Telegram share URL (Desktop uchun muhim!)
       if (!shareSuccess && tg?.openTelegramLink) {
         try {
           console.log("🔄 Trying Telegram openTelegramLink...");
           const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(
             "https://t.me/yuldagilar_bot"
-          )}&text=${encodeURIComponent(shareTextWithoutLink)}`; // Link YO'Q
+          )}&text=${encodeURIComponent(shareText)}`;
 
           await tg.openTelegramLink(telegramShareUrl);
           shareSuccess = true;
@@ -146,13 +132,14 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
         }
       }
 
-      // 3-usul: Native Web Share API (Mobile/Web - link bilan)
+      // 3-usul: Native Web Share API
       if (!shareSuccess && navigator.share) {
         try {
           console.log("🔄 Trying Web Share API...");
           await navigator.share({
             title: `${userName}ning Yo'ldagilar challenge natijalari`,
-            text: shareTextWithLink // Link bilan
+            text: shareText,
+            url: "https://t.me/yuldagilar_bot"
           });
           shareSuccess = true;
           hapticFeedback("success");
@@ -162,11 +149,11 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
         }
       }
 
-      // 4-usul: Clipboard (Link bilan)
+      // 4-usul: Clipboard (oxirgi variant)
       if (!shareSuccess && navigator.clipboard) {
         try {
           console.log("🔄 Trying clipboard copy...");
-          await navigator.clipboard.writeText(shareTextWithLink); // Link bilan
+          await navigator.clipboard.writeText(shareText);
           showAlert("✅ Matn nusxalandi! Endi istalgan joyga ulashing.");
           shareSuccess = true;
           hapticFeedback("success");
@@ -176,9 +163,9 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
         }
       }
 
-      // 5-usul: Oxirgi fallback - eski usul bilan copy (Link bilan)
+      // 5-usul: Oxirgi fallback - eski usul bilan copy
       if (!shareSuccess) {
-        fallbackCopyToClipboard(shareTextWithLink); // Link bilan
+        fallbackCopyToClipboard(shareText);
       }
 
     } catch (error) {
