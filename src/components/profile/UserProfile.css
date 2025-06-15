@@ -68,10 +68,11 @@
   height: 48px !important;
 }
 
-/* ✅ YANGI: Avatar wrapper va refresh button */
+/* ✅ YANGI: Avatar wrapper va refresh button - faqat shu qismlar qo'shildi */
 .avatar-wrapper {
   position: relative;
   display: inline-block;
+  cursor: pointer;
 }
 
 .avatar-image,
@@ -102,43 +103,72 @@
   height: 48px !important;
 }
 
-/* ✅ YANGI: Profil rasmi yangilash tugmasi */
-.photo-refresh-button {
+/* ✅ YANGI: Avatar hover effect - faqat o'z profileda */
+.avatar-wrapper.own-profile:hover .avatar-image,
+.avatar-wrapper.own-profile:hover .avatar-placeholder {
+  transform: scale(1.05);
+  border-color: var(--primary-color);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+/* ✅ YANGI: Photo refresh overlay - faqat o'z profileda ko'rinadi */
+.photo-refresh-overlay {
   position: absolute;
-  bottom: -5px;
-  right: -5px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #3b82f6;
-  color: white;
-  border: 2px solid white;
-  font-size: 12px;
-  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(59, 130, 246, 0.8);
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s ease;
+  opacity: 0;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(2px);
 }
 
-.photo-refresh-button:hover {
-  background: #2563eb;
-  transform: scale(1.05);
+.avatar-wrapper.own-profile:hover .photo-refresh-overlay {
+  opacity: 1;
 }
 
-.photo-refresh-button:active {
-  transform: scale(0.95);
+.photo-refresh-icon {
+  color: white;
+  font-size: 24px;
+  animation: none;
+  transition: transform 0.3s ease;
 }
 
-/* ✅ YANGI: Rasm holati haqida ma'lumot */
+.avatar-wrapper.own-profile:hover .photo-refresh-icon {
+  transform: rotate(180deg);
+}
+
+/* ✅ YANGI: Photo syncing state */
+.avatar-wrapper.syncing .photo-refresh-overlay {
+  opacity: 1;
+  background: rgba(59, 130, 246, 0.9);
+}
+
+.avatar-wrapper.syncing .photo-refresh-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ✅ YANGI: Photo status info */
 .photo-status {
   font-size: 12px;
   color: #666;
   margin-top: 4px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  text-align: center;
+  opacity: 0.8;
 }
 
 .refresh-link {
@@ -184,15 +214,6 @@
   border-top: 3px solid white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
 }
 
 .user-info {
@@ -961,6 +982,15 @@
   .skeleton-stats {
     grid-template-columns: repeat(2, 1fr);
     max-width: 320px;
+  }
+
+  /* ✅ Mobile responsive uchun photo refresh */
+  .photo-refresh-overlay {
+    border-radius: 18px;
+  }
+  
+  .photo-refresh-icon {
+    font-size: 20px;
   }
 }
 
