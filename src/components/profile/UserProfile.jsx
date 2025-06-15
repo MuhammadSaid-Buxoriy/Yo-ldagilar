@@ -80,8 +80,10 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       const totalDistance = stats.all_time?.total_distance || 0;
       const totalDays = stats.all_time?.total_days || 0;
 
-      // ✅ YANGILANGAN: Share text formati (link qaytarildi)
-      const shareText = `🚀 ${isOwnProfile ? "Mening Yo'ldagilar challenge natijalarim" : `${userName}ning Yo'ldagilar challenge natijalari`}:
+      // ✅ YANGILANGAN: Link yuqorida, pastda yo'q
+      const shareText = `👉🏻 https://t.me/yuldagilar_bot
+
+🚀 ${isOwnProfile ? "Mening Yo'ldagilar challenge natijalarim" : `${userName}ning Yo'ldagilar challenge natijalari`}:
 
 📈 Bugungi unumdorlik: ${dailyPercent}% (${dailyCompleted}/10 vazifa)
 📚 Bugun o'qilgan betlar: ${stats.today?.pages_read || 0} bet
@@ -93,9 +95,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
 🏃‍♂️ Umumiy masofa: ${totalDistance} km
 📅 Faol kunlar: ${totalDays} kun
 
-🔥 Yo'lga chiq-Yo'ldan chiqma! 
-
-👉🏻 https://t.me/yuldagilar_bot`;
+🔥 Yo'lga chiq-Yo'ldan chiqma!`;
 
       console.log("📝 Share text prepared:", shareText.substring(0, 100) + "...");
 
