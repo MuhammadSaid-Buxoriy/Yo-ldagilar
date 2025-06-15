@@ -1,4 +1,4 @@
-// components/profile/UserProfile.jsx - API DATA FIRST VERSION + Ulashish tuzatilgan
+// components/profile/UserProfile.jsx - API DATA FIRST VERSION + Ulashish optimallashtirilgan
 import { useState, useEffect, useCallback } from "react";
 import { useTelegram } from "../../hooks/useTelegram";
 import APIService from "../../services/api";
@@ -52,7 +52,6 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
             total_distance: 0,
             total_days: 0,
             perfectionist_streak: 0,
-            early_bird_streak: 0,
           },
         });
         // Don't set profileUser - let it remain null to show error
@@ -62,7 +61,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
     }
   };
 
-  // ✅ TUZATILDI: Ulashish funksiyasi
+  // ✅ OPTIMALLASHTIRILGAN: Share funksiyasi
   const shareProfile = useCallback(async () => {
     if (!stats || !profileUser) {
       showAlert("❌ Ma'lumotlar yuklanmagan");
@@ -72,16 +71,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
     hapticFeedback("light");
 
     try {
-      // ✅ TUZATILDI: To'g'ri bot link formati
-      // const botUsername = "yuldagilar_bot";
-      // const userIdParam = profileUser.id || profileUser.tg_id;
-
-      // ✅ To'g'ri start parameter formati
-      const shareLink = "https://t.me/yuldagilar_bot";
-
-      console.log("🔗 Share link:", shareLink);
-
-      // ✅ Ma'lumotlarni xavfsiz olish
+      // Ma'lumotlarni tayyorlash
       const dailyCompleted = stats.today?.completed || 0;
       const dailyPercent = Math.round((dailyCompleted / 10) * 100);
       const userName = getUserDisplayName(profileUser);
@@ -90,93 +80,87 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       const totalDistance = stats.all_time?.total_distance || 0;
       const totalDays = stats.all_time?.total_days || 0;
 
-      // ✅ TUZATILDI: Ulashish matni
-      const shareText = `🎯 ${
-        isOwnProfile ? "Mening" : `${userName}ning`
-      } Yoldagilar natijalarim:
+      // ✅ YANGILANGAN: Yaxshiroq share text formati
+      const shareText = `🚀 ${isOwnProfile ? "Mening Yo'ldagilar challenge natijalarim" : `${userName}ning Yo'ldagilar challenge natijalari`}:
 
-📊 Bugungi unumdorlik: ${dailyPercent}% (${dailyCompleted}/10)
-📚 Bugun o'qigan: ${stats.today?.pages_read || 0} bet
-🏃‍♂️ Bugun yugurgan: ${stats.today?.distance_km || 0} km
+📈 Bugungi unumdorlik: ${dailyPercent}% (${dailyCompleted}/10 vazifa)
+📚 Bugun o'qilgan betlar: ${stats.today?.pages_read || 0} bet
+🏃‍♂️ Bugun yugurgan masofa: ${stats.today?.distance_km || 0} km
 
-🏆 Umumiy natijalar:
-⭐ Jami ball: ${totalPoints}
-📖 Jami o'qigan: ${totalPages} bet  
-🏃‍♂️ Jami masofa: ${totalDistance} km
-📅 Faol kunlar: ${totalDays}
+🏆 Umumiy yutuqlar:
+⭐ Jami ball: ${totalPoints.toLocaleString()} ball
+📖 Jami betlar: ${totalPages.toLocaleString()} bet
+🏃‍♂️ Umumiy masofa: ${totalDistance} km
+📅 Faol kunlar: ${totalDays} kun
 
-💪 Yoldagilar jamoasida rivojlanish!
-`;
+🚀 Yo'lga chiq-Yo'ldan chiqma! 
 
-      console.log(
-        "📝 Share text prepared:",
-        shareText.substring(0, 100) + "..."
-      );
+👉🏻 https://t.me/yuldagilar_bot`;
 
-      // ✅ TUZATILDI: Telegram sharing usullari
-      let shareSuccess = false;
+      console.log("📝 Share text prepared:", shareText.substring(0, 100) + "...");
 
-      // 1-usul: Telegram WebApp sharing (eng yaxshi)
-      if (tg?.switchInlineQuery) {
-        try {
-          console.log("🔄 Trying Telegram switchInlineQuery...");
-          await tg.switchInlineQuery(shareText);
-          shareSuccess = true;
-          hapticFeedback("success");
-          console.log("✅ Telegram switchInlineQuery successful");
-        } catch (error) {
-          console.warn("⚠️ switchInlineQuery failed:", error);
+      // ✅ OPTIMALLASHTIRILGAN: Share usullari prioritet bo'yicha
+      const shareStrategies = [
+        {
+          name: "Telegram WebApp",
+          condition: () => tg?.switchInlineQuery,
+          execute: async () => {
+            await tg.switchInlineQuery(shareText);
+            return true;
+          }
+        },
+        {
+          name: "Native Web Share",
+          condition: () => navigator.share,
+          execute: async () => {
+            await navigator.share({
+              title: `${userName}ning Yo'ldagilar challenge natijalari`,
+              text: shareText,
+            });
+            return true;
+          }
+        },
+        {
+          name: "Telegram Share URL", 
+          condition: () => tg?.openTelegramLink,
+          execute: async () => {
+            const shareUrl = `https://t.me/share/url?text=${encodeURIComponent(shareText)}`;
+            await tg.openTelegramLink(shareUrl);
+            return true;
+          }
+        },
+        {
+          name: "Clipboard",
+          condition: () => navigator.clipboard,
+          execute: async () => {
+            await navigator.clipboard.writeText(shareText);
+            showAlert("✅ Matn nusxalandi! Endi istalgan joyga ulashing.");
+            return true;
+          }
+        }
+      ];
+
+      // ✅ Share strategiyalarini ketma-ket sinash
+      for (const strategy of shareStrategies) {
+        if (strategy.condition()) {
+          try {
+            console.log(`🔄 Trying ${strategy.name}...`);
+            const success = await strategy.execute();
+            if (success) {
+              hapticFeedback("success");
+              console.log(`✅ ${strategy.name} successful`);
+              return; // Muvaffaqiyatli bo'lsa, chiqish
+            }
+          } catch (error) {
+            console.warn(`⚠️ ${strategy.name} failed:`, error);
+            // Keyingi strategiyaga o'tish
+          }
         }
       }
 
-      // 2-usul: Telegram share URL (fallback)
-      if (!shareSuccess && tg?.openTelegramLink) {
-        try {
-          console.log("🔄 Trying Telegram openTelegramLink...");
-          const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(
-            shareLink
-          )}&text=${encodeURIComponent(shareText)}`;
+      // ✅ Oxirgi fallback - eski usul bilan copy
+      fallbackCopyToClipboard(shareText);
 
-          await tg.openTelegramLink(telegramShareUrl);
-          shareSuccess = true;
-          hapticFeedback("success");
-          console.log("✅ Telegram openTelegramLink successful");
-        } catch (error) {
-          console.warn("⚠️ openTelegramLink failed:", error);
-        }
-      }
-
-      // 3-usul: Native Web Share API
-      if (!shareSuccess && navigator.share) {
-        try {
-          console.log("🔄 Trying Web Share API...");
-          await navigator.share({
-            title: `${userName}ning Yoldagilar natijasi`,
-            text: shareText,
-            url: shareLink,
-          });
-          shareSuccess = true;
-          hapticFeedback("success");
-          console.log("✅ Web Share API successful");
-        } catch (error) {
-          console.warn("⚠️ Web Share API failed:", error);
-        }
-      }
-
-      // 4-usul: Clipboard (oxirgi variant)
-      if (!shareSuccess) {
-        try {
-          console.log("🔄 Trying clipboard copy...");
-          await navigator.clipboard.writeText(shareText);
-          showAlert("✅ Matn nusxalandi! Endi istalgan joyga ulashing.");
-          hapticFeedback("success");
-          console.log("✅ Clipboard copy successful");
-        } catch (error) {
-          console.warn("⚠️ Clipboard failed:", error);
-          // Oxirgi variant - text area orqali
-          fallbackCopyToClipboard(shareText);
-        }
-      }
     } catch (error) {
       console.error("❌ Share error:", error);
       hapticFeedback("error");
@@ -184,7 +168,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
     }
   }, [stats, profileUser, isOwnProfile, hapticFeedback, showAlert, tg]);
 
-  // ✅ YANGI: Fallback copy funksiyasi
+  // ✅ Fallback copy funksiyasi (o'zgarishsiz)
   const fallbackCopyToClipboard = (text) => {
     try {
       const textArea = document.createElement("textarea");
@@ -211,7 +195,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
     }
   };
 
-  // ✅ User display name helper
+  // ✅ User display name helper (o'zgarishsiz)
   const getUserDisplayName = (user) => {
     if (!user) return "Unknown User";
     if (user.name) return user.name;
@@ -350,7 +334,7 @@ const ProfileHeader = ({ user, stats, onShare }) => {
   return (
     <div className="profile-header">
       <div className="profile-header-content">
-        {/* ✅ TUZATILDI: Share tugmasi */}
+        {/* ✅ Share tugmasi (o'zgarishsiz) */}
         <button
           onClick={onShare}
           className="share-icon-button"
@@ -399,7 +383,7 @@ const ProfileHeader = ({ user, stats, onShare }) => {
   );
 };
 
-// StatCard component
+// StatCard component (o'zgarishsiz)
 const StatCard = ({ label, value, icon }) => (
   <div className="stat-card">
     <div className="stat-icon">
@@ -575,15 +559,6 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
       icon: "fire",
       color: "#f59e0b",
     },
-    {
-      id: "early_bird",
-      title: "Uyg'oq",
-      description: "21 kun ketma-ket erta turish",
-      target: 21,
-      current: achievementMap.get("early_bird")?.current || 0,
-      icon: "moon",
-      color: "#8b5cf6",
-    },
   ];
 
   return (
@@ -647,7 +622,7 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
   );
 };
 
-// Icon Components
+// Icon Components (o'zgarishsiz)
 const StatIcon = ({ type }) => {
   const icons = {
     star: (
@@ -740,25 +715,12 @@ const StatIcon = ({ type }) => {
         <polygon points="13 2 3 14 12 14 11 22 21 10 13 10 13 2" />
       </svg>
     ),
-    moon: (
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-        <path d="M12 6v6l4 2" />
-      </svg>
-    ),
   };
 
   return icons[type] || icons.star;
 };
 
-// ✅ TUZATILDI: Share icon
+// Share icon (o'zgarishsiz)
 const ShareIcon = () => (
   <svg
     width="16"
@@ -776,7 +738,7 @@ const ShareIcon = () => (
   </svg>
 );
 
-// Loading & Error States
+// Loading & Error States (o'zgarishsiz)
 const LoadingSkeleton = () => (
   <div className="profile-container">
     <div className="profile-header">
