@@ -80,7 +80,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       const totalDistance = stats.all_time?.total_distance || 0;
       const totalDays = stats.all_time?.total_days || 0;
 
-      // ✅ YANGILANGAN: Yaxshiroq share text formati
+      // ✅ YANGILANGAN: Share text formati (link qaytarildi)
       const shareText = `🚀 ${isOwnProfile ? "Mening Yo'ldagilar challenge natijalarim" : `${userName}ning Yo'ldagilar challenge natijalari`}:
 
 📈 Bugungi unumdorlik: ${dailyPercent}% (${dailyCompleted}/10 vazifa)
@@ -93,7 +93,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
 🏃‍♂️ Umumiy masofa: ${totalDistance} km
 📅 Faol kunlar: ${totalDays} kun
 
-🚀 Yo'lga chiq-Yo'ldan chiqma! 
+🔥 Yo'lga chiq-Yo'ldan chiqma! 
 
 👉🏻 https://t.me/yuldagilar_bot`;
 
@@ -119,9 +119,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       if (!shareSuccess && tg?.openTelegramLink) {
         try {
           console.log("🔄 Trying Telegram openTelegramLink...");
-          const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(
-            "https://t.me/yuldagilar_bot"
-          )}&text=${encodeURIComponent(shareText)}`;
+          const telegramShareUrl = `https://t.me/share/url?text=${encodeURIComponent(shareText)}`;
 
           await tg.openTelegramLink(telegramShareUrl);
           shareSuccess = true;
