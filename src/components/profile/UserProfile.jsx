@@ -1,4 +1,4 @@
-// components/profile/UserProfile.jsx - Avatar Click Photo Sync
+// components/profile/UserProfile.jsx - API DATA FIRST VERSION + Ulashish optimallashtirilgan
 import { useState, useEffect, useCallback } from "react";
 import { useTelegram } from "../../hooks/useTelegram";
 import APIService from "../../services/api";
@@ -12,7 +12,6 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [achievementsProgress, setAchievementsProgress] = useState([]);
-  const [photoSyncing, setPhotoSyncing] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -29,7 +28,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       const [statsResponse, userResponse, progressResponse] = await Promise.all(
         [
           APIService.getUserStatistics(userId),
-          APIService.getUserProfile(userId), // ✅ Auto photo sync ichida
+          APIService.getUserProfile(userId),
           APIService.getUserAchievementsProgress(userId),
         ]
       );
@@ -55,51 +54,12 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
             perfectionist_streak: 0,
           },
         });
+        // Don't set profileUser - let it remain null to show error
       }
     } finally {
       setLoading(false);
     }
   };
-
-  // =====================================================
-  // ✅ YANGI: Avatar Click Photo Sync Function
-  // =====================================================
-  const handleAvatarClick = useCallback(async () => {
-    // Faqat o'z profileda ishlaydi
-    if (!isOwnProfile || !userId || photoSyncing) return;
-
-    try {
-      setPhotoSyncing(true);
-      hapticFeedback("light");
-
-      console.log(`🔄 Avatar clicked - syncing photo for user: ${userId}`);
-      
-      const result = await APIService.syncUserPhoto(userId);
-      
-      if (result.success) {
-        // Update profileUser with new photo
-        setProfileUser(prev => ({
-          ...prev,
-          photo_url: result.data.photo_url,
-          avatar: result.data.photo_url
-        }));
-
-        if (result.data.changed) {
-          hapticFeedback("success");
-          showAlert(`✅ Profil rasmi yangilandi!`);
-        } else {
-          showAlert(`ℹ️ Profil rasmi allaqachon yangi`);
-        }
-      }
-
-    } catch (error) {
-      console.error("Avatar photo sync failed:", error);
-      hapticFeedback("error");
-      showAlert("❌ Rasmni yangilashda xatolik yuz berdi");
-    } finally {
-      setPhotoSyncing(false);
-    }
-  }, [isOwnProfile, userId, photoSyncing, hapticFeedback, showAlert]);
 
   // ✅ OPTIMALLASHTIRILGAN: Share funksiyasi
   const shareProfile = useCallback(async () => {
@@ -263,8 +223,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
         stats={stats}
         onShare={shareProfile}
         isOwnProfile={isOwnProfile}
-        onAvatarClick={handleAvatarClick}
-        photoSyncing={photoSyncing}
+        onUserUpdate={setProfileUser}
       />
 
       <div className="profile-content">
@@ -278,14 +237,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
   );
 };
 
-const ProfileHeader = ({ 
-  user, 
-  stats, 
-  onShare, 
-  isOwnProfile, 
-  onAvatarClick, 
-  photoSyncing 
-}) => {
+const ProfileHeader = ({ user, stats, onShare }) => {
   // ✅ User display name helper (lokalni)
   const getUserDisplayName = () => {
     if (!user) return "Unknown User";
@@ -330,51 +282,26 @@ const ProfileHeader = ({
     // Use photo_url from API user data only
     const photoUrl = user?.photo_url || user?.avatar_url;
 
-    return (
-      <div 
-        className={`avatar-wrapper ${isOwnProfile ? 'own-profile' : ''} ${photoSyncing ? 'syncing' : ''}`}
-        onClick={onAvatarClick}
-        style={{ cursor: isOwnProfile ? 'pointer' : 'default' }}
-      >
-        {photoUrl ? (
-          <img
-            src={photoUrl}
-            alt={getUserDisplayName()}
-            className="avatar-image"
-            width={80}
-            height={80}
-            onError={(e) => {
-              // If image fails to load, hide it and show placeholder
-              e.target.style.display = "none";
-            }}
-          />
-        ) : (
-          <div
-            className="avatar-placeholder"
-            style={{
-              backgroundColor: getAvatarColor(user?.id || 0)
-            }}
-          >
-            {getUserDisplayName()?.charAt(0) || "U"}
-          </div>
-        )}
-        
-        {/* ✅ YANGI: Photo refresh overlay - faqat o'z profileda */}
-        {isOwnProfile && (
-          <div className="photo-refresh-overlay">
-            <div className="photo-refresh-icon">
-              {photoSyncing ? "⟳" : "🔄"}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
+    if (photoUrl) {
+      return (
+        <img
+          src={photoUrl}
+          alt={getUserDisplayName()}
+          className="avatar-image profile-avatar"
+          width={80}
+          height={80}
+          onError={(e) => {
+            // If image fails to load, hide it and show placeholder
+            e.target.style.display = "none";
+          }}
+        />
+      );
+    }
 
-  const getAvatarColor = (userId) => {
+    // Generate placeholder based on API user data
     const colors = [
       "#3b82f6",
-      "#ef4444", 
+      "#ef4444",
       "#10b981",
       "#f59e0b",
       "#8b5cf6",
@@ -382,7 +309,16 @@ const ProfileHeader = ({
       "#06b6d4",
       "#84cc16",
     ];
-    return colors[userId % colors.length];
+    const colorIndex = (user?.id || 0) % colors.length;
+
+    return (
+      <div
+        className="avatar-placeholder avatar-placeholder-profile"
+        style={{ backgroundColor: colors[colorIndex] }}
+      >
+        {getUserDisplayName()?.charAt(0) || "U"}
+      </div>
+    );
   };
 
   const getUserSubtitle = () => {
@@ -398,7 +334,7 @@ const ProfileHeader = ({
   return (
     <div className="profile-header">
       <div className="profile-header-content">
-        {/* ✅ Share tugmasi */}
+        {/* ✅ Share tugmasi (o'zgarishsiz) */}
         <button
           onClick={onShare}
           className="share-icon-button"
@@ -417,16 +353,6 @@ const ProfileHeader = ({
           <div className="user-info">
             <h1 className="user-name">{getUserDisplayName()}</h1>
             <p className="user-subtitle">{getUserSubtitle()}</p>
-            {/* ✅ YANGI: Photo status info */}
-            {isOwnProfile && (
-              <div className="photo-status">
-                {photoSyncing ? (
-                  "Rasm yangilanmoqda..."
-                ) : (
-                  "Rasmni yangilash uchun ustiga bosing"
-                )}
-              </div>
-            )}
           </div>
         </div>
 

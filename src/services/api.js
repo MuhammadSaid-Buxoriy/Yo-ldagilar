@@ -1,5 +1,5 @@
 // =====================================================
-// API SERVICE - PRODUCTION READY VERSION + Photo Sync
+// API SERVICE - PRODUCTION READY VERSION + Photo Update
 // =====================================================
 
 // Environment-based API URL
@@ -69,31 +69,9 @@ class APIService {
   }
 
   // =====================================================
-  // ✅ YANGI: PHOTO SYNC FUNCTIONS
+  // ✅ YANGI: Profil rasmi yangilash
   // =====================================================
 
-  /**
-   * Sync user profile photo from Telegram
-   */
-  static async syncUserPhoto(userId) {
-    return this.apiCall(`/users/${userId}/sync-photo`, {
-      method: "POST",
-    });
-  }
-
-  /**
-   * Batch sync photos for multiple users (Admin only)
-   */
-  static async batchSyncPhotos(adminId) {
-    return this.apiCall("/users/batch-sync-photos", {
-      method: "POST",
-      body: JSON.stringify({ adminId }),
-    });
-  }
-
-  /**
-   * Update user photo URL directly
-   */
   static async updateUserPhoto(userId, photoUrl) {
     return this.apiCall(`/auth/update-photo/${userId}`, {
       method: "PUT",
