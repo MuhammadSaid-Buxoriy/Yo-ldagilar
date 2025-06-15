@@ -81,7 +81,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       const totalDays = stats.all_time?.total_days || 0;
 
       // ✅ YANGILANGAN: Yaxshiroq share text formati
-      const shareText = `🎯 ${isOwnProfile ? "Mening Yo'ldagilar challenge natijalarim" : `${userName}ning Yo'ldagilar challenge natijalari`}:
+      const shareText = `🚀 ${isOwnProfile ? "Mening Yo'ldagilar challenge natijalarim" : `${userName}ning Yo'ldagilar challenge natijalari`}:
 
 📈 Bugungi unumdorlik: ${dailyPercent}% (${dailyCompleted}/10 vazifa)
 📚 Bugun o'qilgan betlar: ${stats.today?.pages_read || 0} bet
@@ -99,68 +99,74 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
 
       console.log("📝 Share text prepared:", shareText.substring(0, 100) + "...");
 
-      // ✅ OPTIMALLASHTIRILGAN: Share usullari prioritet bo'yicha
-      const shareStrategies = [
-        {
-          name: "Telegram WebApp",
-          condition: () => tg?.switchInlineQuery,
-          execute: async () => {
-            await tg.switchInlineQuery(shareText);
-            return true;
-          }
-        },
-        {
-          name: "Native Web Share",
-          condition: () => navigator.share,
-          execute: async () => {
-            await navigator.share({
-              title: `${userName}ning Yo'ldagilar challenge natijalari`,
-              text: shareText,
-              url: "https://t.me/yuldagilar_bot"
-            });
-            return true;
-          }
-        },
-        {
-          name: "Telegram Share URL", 
-          condition: () => tg?.openTelegramLink,
-          execute: async () => {
-            const shareUrl = `https://t.me/share/url?text=${encodeURIComponent(shareText)}`;
-            await tg.openTelegramLink(shareUrl);
-            return true;
-          }
-        },
-        {
-          name: "Clipboard",
-          condition: () => navigator.clipboard,
-          execute: async () => {
-            await navigator.clipboard.writeText(shareText);
-            showAlert("✅ Matn nusxalandi! Endi istalgan joyga ulashing.");
-            return true;
-          }
-        }
-      ];
+      // ✅ TUZATILDI: Desktop uchun Telegram Share URL qo'shildi
+      let shareSuccess = false;
 
-      // ✅ Share strategiyalarini ketma-ket sinash
-      for (const strategy of shareStrategies) {
-        if (strategy.condition()) {
-          try {
-            console.log(`🔄 Trying ${strategy.name}...`);
-            const success = await strategy.execute();
-            if (success) {
-              hapticFeedback("success");
-              console.log(`✅ ${strategy.name} successful`);
-              return; // Muvaffaqiyatli bo'lsa, chiqish
-            }
-          } catch (error) {
-            console.warn(`⚠️ ${strategy.name} failed:`, error);
-            // Keyingi strategiyaga o'tish
-          }
+      // 1-usul: Telegram WebApp sharing (eng yaxshi)
+      if (tg?.switchInlineQuery) {
+        try {
+          console.log("🔄 Trying Telegram switchInlineQuery...");
+          await tg.switchInlineQuery(shareText);
+          shareSuccess = true;
+          hapticFeedback("success");
+          console.log("✅ Telegram switchInlineQuery successful");
+        } catch (error) {
+          console.warn("⚠️ switchInlineQuery failed:", error);
         }
       }
 
-      // ✅ Oxirgi fallback - eski usul bilan copy
-      fallbackCopyToClipboard(shareText);
+      // 2-usul: Telegram share URL (Desktop uchun muhim!)
+      if (!shareSuccess && tg?.openTelegramLink) {
+        try {
+          console.log("🔄 Trying Telegram openTelegramLink...");
+          const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(
+            "https://t.me/yuldagilar_bot"
+          )}&text=${encodeURIComponent(shareText)}`;
+
+          await tg.openTelegramLink(telegramShareUrl);
+          shareSuccess = true;
+          hapticFeedback("success");
+          console.log("✅ Telegram openTelegramLink successful");
+        } catch (error) {
+          console.warn("⚠️ openTelegramLink failed:", error);
+        }
+      }
+
+      // 3-usul: Native Web Share API
+      if (!shareSuccess && navigator.share) {
+        try {
+          console.log("🔄 Trying Web Share API...");
+          await navigator.share({
+            title: `${userName}ning Yo'ldagilar challenge natijalari`,
+            text: shareText,
+            url: "https://t.me/yuldagilar_bot"
+          });
+          shareSuccess = true;
+          hapticFeedback("success");
+          console.log("✅ Web Share API successful");
+        } catch (error) {
+          console.warn("⚠️ Web Share API failed:", error);
+        }
+      }
+
+      // 4-usul: Clipboard (oxirgi variant)
+      if (!shareSuccess && navigator.clipboard) {
+        try {
+          console.log("🔄 Trying clipboard copy...");
+          await navigator.clipboard.writeText(shareText);
+          showAlert("✅ Matn nusxalandi! Endi istalgan joyga ulashing.");
+          shareSuccess = true;
+          hapticFeedback("success");
+          console.log("✅ Clipboard copy successful");
+        } catch (error) {
+          console.warn("⚠️ Clipboard failed:", error);
+        }
+      }
+
+      // 5-usul: Oxirgi fallback - eski usul bilan copy
+      if (!shareSuccess) {
+        fallbackCopyToClipboard(shareText);
+      }
 
     } catch (error) {
       console.error("❌ Share error:", error);
