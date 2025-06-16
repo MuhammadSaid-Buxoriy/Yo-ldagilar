@@ -85,6 +85,11 @@ function App() {
   useEffect(() => {
     if (tg) {
       tg.ready();
+      
+      if (tg.requestViewport) {
+        tg.requestViewport({ is_expanded: true }); // 💥 FULLSCREEN mode
+      }
+  
       tg.expand();
       tg.MainButton.hide();
       tg.BackButton.hide();
