@@ -396,18 +396,60 @@ const StatCard = ({ label, value, icon }) => (
   </div>
 );
 
+// ✅ TUZATILGAN: StatisticsSection component'da haftalik logic
 const StatisticsSection = ({ stats }) => {
   const dailyCompleted = stats?.today?.completed || 0;
   const dailyPercent = Math.round((dailyCompleted / 10) * 100);
 
-  const days = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"];
-  const dailyCompletedFromWeek = stats?.weekly?.dailyPoints || [
-    0, 0, 0, 0, 0, 0, 0,
-  ];
+  // ✅ HAFTALIK LOGIC TUZATISH
+  const getCurrentWeekDailyData = () => {
+    const today = new Date();
+    const currentDayOfWeek = today.getDay(); // 0 = Yakshanba, 1 = Dushanba, ...
+    
+    // Dushanba = 1, Seshanba = 2, ..., Yakshanba = 0 (7)
+    // O'zbek hafta tartibiga o'tkazish: Du=0, Se=1, Ch=2, Pa=3, Ju=4, Sh=5, Ya=6
+    const uzbekDayIndex = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    
+    console.log('📅 Current week calculation:', {
+      today: today.toDateString(),
+      jsDay: currentDayOfWeek,
+      uzbekDay: uzbekDayIndex,
+      todayName: ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'][currentDayOfWeek]
+    });
 
-  const weeklyCompleted =
-    stats?.weekly?.dailyPoints?.reduce((sum, val) => sum + val, 0) || 0;
-  const weeklyPercent = Math.round((weeklyCompleted / 70) * 100);
+    // Backend'dan kelgan haftalik ma'lumotlar (bu haftadagi barcha kunlar uchun)
+    const weeklyPointsFromAPI = stats?.weekly?.dailyPoints || [0, 0, 0, 0, 0, 0, 0];
+    
+    // Yangi haftalik array yaratish
+    const currentWeekData = [0, 0, 0, 0, 0, 0, 0]; // Du, Se, Ch, Pa, Ju, Sh, Ya
+    
+    // Faqat o'tgan kunlar va bugungi kunni ko'rsatish
+    for (let i = 0; i <= uzbekDayIndex; i++) {
+      // Backend ma'lumotlaridan tegishli kun ma'lumotini olish
+      currentWeekData[i] = weeklyPointsFromAPI[i] || 0;
+    }
+    
+    // Kelajakdagi kunlar 0 bo'lib qoladi (ko'rsatilmaydi)
+    
+    console.log('📊 Weekly data processing:', {
+      apiData: weeklyPointsFromAPI,
+      currentWeekData: currentWeekData,
+      todayIndex: uzbekDayIndex
+    });
+    
+    return currentWeekData;
+  };
+
+  const days = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"];
+  const dailyCompletedFromWeek = getCurrentWeekDailyData();
+
+  // Haftaning o'tgan kunlari uchun foiz hisoblanadi
+  const weeklyCompleted = dailyCompletedFromWeek
+    .slice(0, (new Date().getDay() === 0 ? 6 : new Date().getDay() - 1) + 1) // Faqat o'tgan va bugungi kunlar
+    .reduce((sum, val) => sum + val, 0);
+    
+  const maxPossiblePoints = ((new Date().getDay() === 0 ? 6 : new Date().getDay() - 1) + 1) * 10; // O'tgan kunlar * 10
+  const weeklyPercent = maxPossiblePoints > 0 ? Math.round((weeklyCompleted / maxPossiblePoints) * 100) : 0;
 
   const getProgressColor = (percent) => {
     if (percent >= 90) return "#16ce40";
@@ -416,15 +458,38 @@ const StatisticsSection = ({ stats }) => {
     return "#dc2626";
   };
 
-  const weeklyData = days.map((day, i) => ({
-    day,
-    percent: Math.round((dailyCompletedFromWeek[i] / 10) * 100),
-  }));
+  // ✅ HAFTALIK CHART DATA TUZATISH
+  const weeklyData = days.map((day, i) => {
+    const today = new Date();
+    const currentUzbekDayIndex = today.getDay() === 0 ? 6 : today.getDay() - 1;
+    
+    // Kun o'tganmi yoki bugunmi?
+    const isDayPassed = i <= currentUzbekDayIndex;
+    const isFutureDay = i > currentUzbekDayIndex;
+    
+    // Foizni hisoblash
+    let percent = 0;
+    if (isDayPassed) {
+      percent = Math.round((dailyCompletedFromWeek[i] / 10) * 100);
+    }
+    
+    return {
+      day,
+      percent: percent,
+      isPassed: isDayPassed,
+      isFuture: isFutureDay,
+      isToday: i === currentUzbekDayIndex,
+      points: dailyCompletedFromWeek[i] || 0
+    };
+  });
+
+  console.log('📈 Weekly chart data:', weeklyData);
 
   return (
     <div className="statistics-section">
       <h2 className="section-title">Statistika</h2>
 
+      {/* Bugungi natija */}
       <div className="progress-card">
         <div className="progress-header">
           <h3 className="progress-title">Bugungi natija</h3>
@@ -461,6 +526,7 @@ const StatisticsSection = ({ stats }) => {
         </div>
       </div>
 
+      {/* ✅ HAFTALIK NATIJA TUZATILGAN */}
       <div className="progress-card">
         <div className="progress-header">
           <h3 className="progress-title">Haftalik natija</h3>
@@ -477,29 +543,82 @@ const StatisticsSection = ({ stats }) => {
           color={getProgressColor(weeklyPercent)}
         />
 
+        {/* ✅ YANGI HAFTALIK CHART */}
         <div className="weekly-chart" style={{ minHeight: "170px" }}>
-          {weeklyData.map((day) => (
+          {weeklyData.map((dayData) => (
             <div
-              key={day.day}
-              className="chart-column"
+              key={dayData.day}
+              className={`chart-column ${
+                dayData.isFuture ? 'chart-column-future' : ''
+              } ${
+                dayData.isToday ? 'chart-column-today' : ''
+              }`}
               style={{ height: "100%" }}
             >
-              <div
-                className="chart-bar"
-                style={{
-                  height: `${day.percent || 1}px`,
-                  backgroundColor: getProgressColor(day.percent),
-                }}
-              ></div>
-              <span className="chart-label">{day.day}</span>
-              <span
-                className="chart-value"
-                style={{ color: getProgressColor(day.percent) }}
-              >
-                {day.percent}%
+              {/* Chart bar faqat o'tgan va bugungi kunlar uchun */}
+              {!dayData.isFuture && (
+                <div
+                  className="chart-bar"
+                  style={{
+                    height: `${Math.max(dayData.percent || 1, 3)}px`,
+                    backgroundColor: getProgressColor(dayData.percent),
+                    opacity: dayData.percent === 0 ? 0.3 : 1
+                  }}
+                  title={`${dayData.day}: ${dayData.points}/10 vazifa (${dayData.percent}%)`}
+                ></div>
+              )}
+              
+              {/* Kelajakdagi kunlar uchun placeholder */}
+              {dayData.isFuture && (
+                <div
+                  className="chart-bar-placeholder"
+                  style={{
+                    height: "3px",
+                    backgroundColor: "#e5e7eb",
+                    opacity: 0.5
+                  }}
+                ></div>
+              )}
+              
+              <span className={`chart-label ${
+                dayData.isToday ? 'chart-label-today' : ''
+              }`}>
+                {dayData.day}
               </span>
+              
+              {/* Foiz faqat o'tgan va bugungi kunlar uchun */}
+              {!dayData.isFuture && (
+                <span
+                  className="chart-value"
+                  style={{ 
+                    color: getProgressColor(dayData.percent),
+                    opacity: dayData.percent === 0 ? 0.6 : 1
+                  }}
+                >
+                  {dayData.percent}%
+                </span>
+              )}
+              
+              {/* Kelajakdagi kunlar uchun hech narsa ko'rsatilmaydi */}
+              {dayData.isFuture && (
+                <span className="chart-value-future">-</span>
+              )}
             </div>
           ))}
+        </div>
+
+        {/* ✅ QOSHIMCHA HAFTALIK MA'LUMOT */}
+        <div className="weekly-summary">
+          <div className="summary-item">
+            <span className="summary-label">Shu hafta bajarilgan:</span>
+            <span className="summary-value">{weeklyCompleted}/{maxPossiblePoints} ball</span>
+          </div>
+          <div className="summary-item">
+            <span className="summary-label">O'rtacha kunlik:</span>
+            <span className="summary-value">
+              {maxPossiblePoints > 0 ? Math.round(weeklyCompleted / Math.max(1, Math.ceil(maxPossiblePoints / 10))) : 0}/10
+            </span>
+          </div>
         </div>
       </div>
     </div>

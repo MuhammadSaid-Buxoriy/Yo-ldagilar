@@ -545,6 +545,7 @@
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   cursor: pointer;
+  border-radius: 3px 3px 2px 2px;
 }
 
 .chart-bar:hover {
@@ -579,6 +580,126 @@
   border-radius: 4px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   color: white;
+}
+
+/* =====================================================
+   HAFTALIK CHART YANGI STILLAR
+   ===================================================== */
+/* Chart column states */
+.chart-column-future {
+  opacity: 0.4;
+}
+
+.chart-column-today {
+  position: relative;
+}
+
+.chart-column-today::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: #3b82f6;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateX(-50%) scale(1.2);
+  }
+}
+
+/* Chart bar placeholder for future days */
+.chart-bar-placeholder {
+  width: 100%;
+  border-radius: 2px;
+  background: repeating-linear-gradient(
+    45deg,
+    #e5e7eb,
+    #e5e7eb 2px,
+    transparent 2px,
+    transparent 8px
+  );
+}
+
+/* Chart labels */
+.chart-label-today {
+  font-weight: 700;
+  color: #3b82f6;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.chart-value-future {
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+/* Weekly summary */
+.weekly-summary {
+  margin-top: 16px;
+  padding: 12px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 8px;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.summary-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.summary-value {
+  color: var(--text-primary);
+  font-weight: 600;
+  padding: 2px 6px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+/* Enhanced chart bar with better UX */
+.chart-bar {
+  position: relative;
+  transition: all 0.3s ease;
+  border-radius: 3px 3px 2px 2px;
+}
+
+.chart-bar:hover {
+  transform: scaleY(1.05);
+  filter: brightness(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Better visual feedback for zero values */
+.chart-bar[style*="height: 1px"],
+.chart-bar[style*="height: 3px"] {
+  background: repeating-linear-gradient(
+    45deg,
+    currentColor,
+    currentColor 1px,
+    transparent 1px,
+    transparent 3px
+  ) !important;
 }
 
 /* Achievements Section */
@@ -962,6 +1083,27 @@
     grid-template-columns: repeat(2, 1fr);
     max-width: 320px;
   }
+
+  /* Mobile responsive adjustments for weekly chart */
+  .weekly-summary {
+    padding: 10px;
+    margin-top: 12px;
+  }
+  
+  .summary-item {
+    font-size: 12px;
+  }
+  
+  .chart-column-today::before {
+    width: 4px;
+    height: 4px;
+    top: -6px;
+  }
+  
+  .weekly-chart {
+    padding: 10px;
+    gap: 6px;
+  }
 }
 
 @media (min-width: 640px) {
@@ -988,6 +1130,15 @@
 
   .weekly-chart {
     background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+  }
+
+  .weekly-summary {
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+  }
+
+  .summary-value {
+    background: #1f2937;
+    border-color: #374151;
   }
 }
 
