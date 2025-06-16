@@ -68,8 +68,8 @@ export const useTelegram = () => {
           // Initialize Telegram WebApp
           telegram.ready();
           telegram.expand();
-          telegram.setHeaderColor('#ffffff');
-          telegram.setBackgroundColor('#f8fafc');
+          telegram.setHeaderColor('#1f2937'); // ✅ Dark header
+          telegram.setBackgroundColor('#111827'); // ✅ Dark background
           
           setIsReady(true);
           
@@ -90,13 +90,14 @@ export const useTelegram = () => {
             close: () => console.log('🚀 Fake TG: close()'),
             platform: 'web',
             version: '6.0',
-            colorScheme: 'light',
+            colorScheme: 'dark', // ✅ FAQAT BU O'ZGARDI
             themeParams: {
-              bg_color: '#ffffff',
-              text_color: '#000000',
-              hint_color: '#999999',
-              link_color: '#3b82f6',
-              button_color: '#3b82f6',
+              // ✅ FAQAT BU DARK QILINDI
+              bg_color: '#111827',
+              text_color: '#f9fafb',
+              hint_color: '#9ca3af',
+              link_color: '#60a5fa',
+              button_color: '#60a5fa',
               button_text_color: '#ffffff',
             },
             setHeaderColor: (color) => console.log('🚀 Fake setHeaderColor:', color),
@@ -308,7 +309,7 @@ export const useTelegram = () => {
     mainButton,
     backButton,
     isDev: IS_DEV,
-    colorScheme: tg?.colorScheme || 'light',
+    colorScheme: tg?.colorScheme || 'dark', // ✅ FAQAT BU O'ZGARDI
     themeParams: tg?.themeParams || {},
   };
 };
