@@ -6,7 +6,7 @@
     "Helvetica Neue", sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: light dark;
+  color-scheme: dark; /* ✅ FAQAT BU O'ZGARDI: light dark → dark */
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -305,26 +305,24 @@ button:not(.nav-item):not(.share-icon-button):not(.retry-button):active {
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .container {
-    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%) !important;
-  }
+/* ✅ ALWAYS DARK MODE - @media olib tashlandi */
+.container {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%) !important;
+}
 
-  .participant-card,
-  .filter-group,
-  .error-container,
-  .empty-container {
-    background: #2d3748 !important;
-    color: #e2e8f0 !important;
-  }
+.participant-card,
+.filter-group,
+.error-container,
+.empty-container {
+  background: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
 
-  .participant-name,
-  .filter-title,
-  .error-title,
-  .empty-title {
-    color: #e2e8f0 !important;
-  }
+.participant-name,
+.filter-title,
+.error-title,
+.empty-title {
+  color: #e2e8f0 !important;
 }
 
 /* Better focus styles for accessibility */
