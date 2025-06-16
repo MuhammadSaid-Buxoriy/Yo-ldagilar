@@ -607,19 +607,6 @@ const StatisticsSection = ({ stats }) => {
           ))}
         </div>
 
-        {/* ✅ QOSHIMCHA HAFTALIK MA'LUMOT */}
-        <div className="weekly-summary">
-          <div className="summary-item">
-            <span className="summary-label">Shu hafta bajarilgan:</span>
-            <span className="summary-value">{weeklyCompleted}/{maxPossiblePoints} ball</span>
-          </div>
-          <div className="summary-item">
-            <span className="summary-label">O'rtacha kunlik:</span>
-            <span className="summary-value">
-              {maxPossiblePoints > 0 ? Math.round(weeklyCompleted / Math.max(1, Math.ceil(maxPossiblePoints / 10))) : 0}/10
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   );
