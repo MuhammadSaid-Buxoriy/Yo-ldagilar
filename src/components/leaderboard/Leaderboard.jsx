@@ -516,7 +516,7 @@ const CurrentUserPosition = ({ user, scoreLabel, onClick }) => (
         </div>
 
         <div className="current-user-score">
-          <div className="current-user-score-value">{}</div>
+          <div className="current-user-score-value">{user.score || 0}</div>
           <div className="current-user-score-label">{scoreLabel}</div>
         </div>
       </div>
@@ -736,9 +736,7 @@ const LeaderboardItem = ({
         </div>
         <div className="participant-score">
           <div className="participant-score-value">
-            {scoreLabel === "ball" && participant.score}
-            {scoreLabel === "bet" && participant.total_pages}
-            {scoreLabel === "km" && participant.total_distance}
+            {participant.score || 0}
           </div>
           <div className="participant-score-label">{scoreLabel}</div>
         </div>
