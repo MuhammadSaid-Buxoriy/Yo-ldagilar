@@ -6,6 +6,22 @@ import APIService from "../../services/api";
 import "./Leaderboard.css";
 import { useAuth } from "../context/AuthContext";
 
+/**
+ * Format score value based on type
+ */
+const formatScoreValue = (score, scoreLabel) => {
+  if (!score && score !== 0) return '0';
+  
+  if (scoreLabel === 'km') {
+    // Distance: 2 decimal places, but hide .00
+    const formatted = parseFloat(score).toFixed(2);
+    return formatted.endsWith('.00') ? parseInt(score).toString() : formatted;
+  }
+  
+  // Ball va bet: integer
+  return Math.floor(score).toString();
+};
+
 const PERIOD_OPTIONS = [
   {
     value: "all",
@@ -241,26 +257,89 @@ const Leaderboard = () => {
       setError(null);
 
       try {
-        const response = await APIService.getLeaderboard({
+        // ✅ ASOSIY TUZATISH: To'g'ri parametrlar bilan API call
+        const leaderboardParams = {
           period: selectedPeriod,
           type: selectedType,
-          limit: 100,
+          limit: 100
+        };
+
+        // Add current user ID if available
+        if (user?.id) {
+          leaderboardParams.tg_id = user.id;
+        }
+
+        console.log('🔍 Leaderboard request params:', leaderboardParams);
+
+        const response = await APIService.getLeaderboard(leaderboardParams);
+
+        // ✅ DEBUG: Response'ni tekshirish
+        console.log('📥 Leaderboard response received:', {
+          success: response.success,
+          period: response.period,
+          type: response.type,
+          leaderboard_count: response.leaderboard?.length || 0,
+          total_participants: response.total_participants,
+          current_user: response.current_user ? {
+            rank: response.current_user.rank,
+            score: response.current_user.score,
+            name: response.current_user.name
+          } : null,
+          query_info: response.query_info,
+          top_3_scores: response.leaderboard?.slice(0, 3).map(u => ({
+            name: u.name,
+            score: u.score,
+            rank: u.rank
+          })) || []
         });
+
+        // ✅ Validate response structure
+        if (!response.success) {
+          throw new Error(response.message || 'API returned success: false');
+        }
 
         setLeaderboardData(response);
 
         if (!silent) {
           hapticFeedback("light");
         }
+
+        // ✅ Additional debug info
+        console.log('🎯 Score calculation check:', {
+          selected_period: selectedPeriod,
+          selected_type: selectedType,
+          sample_user_scores: response.leaderboard?.slice(0, 3).map(user => ({
+            name: user.name,
+            displayed_score: user.score,
+            all_scores: {
+              total_points: user.total_points,
+              total_pages: user.total_pages,
+              total_distance: user.total_distance,
+              weekly_points: user.weekly_points,
+              weekly_pages: user.weekly_pages,
+              weekly_distance: user.weekly_distance,
+              daily_points: user.daily_points,
+              daily_pages: user.daily_pages,
+              daily_distance: user.daily_distance
+            }
+          })) || []
+        });
+
       } catch (error) {
         console.error("Failed to load leaderboard:", error);
+        console.error("Error details:", {
+          message: error.message,
+          selectedPeriod,
+          selectedType,
+          apiBaseUrl: APIService.baseURL
+        });
         setError(error.message);
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [selectedPeriod, selectedType, hapticFeedback]
+    [selectedPeriod, selectedType, hapticFeedback, user?.id]
   );
 
   const handlePeriodChange = useCallback(
@@ -312,6 +391,38 @@ const Leaderboard = () => {
         return "ball";
     }
   }, [selectedType]);
+
+  const testAllFilters = useCallback(async () => {
+    console.log('🧪 Testing all filter combinations...');
+    
+    const periods = ['all', 'weekly', 'daily'];
+    const types = ['overall', 'reading', 'distance'];
+    
+    for (const period of periods) {
+      for (const type of types) {
+        try {
+          console.log(`\n🔍 Testing: ${period} - ${type}`);
+          const response = await APIService.getLeaderboard({
+            period,
+            type,
+            limit: 10,
+            tg_id: user?.id
+          });
+          
+          console.log(`✅ Success: ${period}-${type}:`, {
+            count: response.leaderboard?.length || 0,
+            top_score: response.leaderboard?.[0]?.score || 0,
+            query_info: response.query_info
+          });
+        } catch (error) {
+          console.error(`❌ Failed: ${period}-${type}:`, error.message);
+        }
+        
+        // Delay between requests
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+  }, [user?.id]);
 
   const currentUser = useMemo(
     () => leaderboardData?.leaderboard?.find((item) => item.tg_id === user?.id),
@@ -378,6 +489,24 @@ const Leaderboard = () => {
           onUserClick={handleUserClick}
         />
       </div>
+      
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{ position: 'fixed', bottom: '10px', right: '10px', zIndex: 1000 }}>
+          <button 
+            onClick={testAllFilters}
+            style={{
+              background: '#007bff',
+              color: 'white',
+              border: 'none',
+              padding: '8px 12px',
+              borderRadius: '4px',
+              fontSize: '12px'
+            }}
+          >
+            Test Filters
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -516,7 +645,9 @@ const CurrentUserPosition = ({ user, scoreLabel, onClick }) => (
         </div>
 
         <div className="current-user-score">
-          <div className="current-user-score-value">{user.score || 0}</div>
+          <div className="current-user-score-value">
+            {formatScoreValue(user.score, scoreLabel)}
+          </div>
           <div className="current-user-score-label">{scoreLabel}</div>
         </div>
       </div>
@@ -700,7 +831,7 @@ const LeaderboardItem = ({
                 >
                   <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
                 </svg>
-                {participant.points}
+                {participant.total_points || 0}
               </span>
               <span className="detail-item detail-item-leaderboard">
                 <svg
@@ -714,7 +845,7 @@ const LeaderboardItem = ({
                   <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
                   <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
                 </svg>
-                {participant.total_pages}
+                {participant.total_pages || 0}
               </span>
               <span className="detail-item detail-item-leaderboard">
                 <svg
@@ -729,14 +860,14 @@ const LeaderboardItem = ({
                   <path d="M8 22v-7" />
                   <path d="M16 22v-7" />
                 </svg>
-                {participant.total_distance}
+                {participant.total_distance || 0}
               </span>
             </div>
           )}
         </div>
         <div className="participant-score">
           <div className="participant-score-value">
-            {participant.score || 0}
+            {formatScoreValue(participant.score, scoreLabel)}
           </div>
           <div className="participant-score-label">{scoreLabel}</div>
         </div>
