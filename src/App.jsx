@@ -1,4 +1,4 @@
-// src/App.jsx - FAQAT 2 QATOR O'ZGARISH
+// src/App.jsx - FIXED VERSION
 import { useState, useEffect, useCallback } from "react";
 import { useTelegram } from "./hooks/useTelegram";
 import AuthCheck from "./components/auth/AuthCheck";
@@ -94,8 +94,8 @@ function App() {
       tg.MainButton.hide();
       tg.BackButton.hide();
       tg.enableClosingConfirmation();
-      tg.setHeaderColor("#1f2937"); // ✅ FAQAT BU O'ZGARDI
-      tg.setBackgroundColor("#111827"); // ✅ FAQAT BU O'ZGARDI
+      tg.setHeaderColor("#ffffff");
+      tg.setBackgroundColor("#f8fafc");
     }
   }, [tg]);
 
