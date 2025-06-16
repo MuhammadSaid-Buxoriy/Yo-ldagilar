@@ -1,4 +1,4 @@
-// src/App.jsx - MAJBURIY DARK MODE VERSION
+// src/App.jsx - FAQAT 2 QATOR O'ZGARISH
 import { useState, useEffect, useCallback } from "react";
 import { useTelegram } from "./hooks/useTelegram";
 import AuthCheck from "./components/auth/AuthCheck";
@@ -69,63 +69,6 @@ function App() {
 
   console.log("ANA MAN :", user);
 
-  // ✅ MAJBURIY DARK MODE - GLOBAL SETUP
-  useEffect(() => {
-    console.log('🌙 Forcing dark mode globally...');
-    
-    // Force dark mode immediately
-    const forceDarkMode = () => {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.documentElement.style.colorScheme = 'dark';
-      document.documentElement.style.backgroundColor = '#111827';
-      document.body.style.backgroundColor = '#111827';
-      document.body.style.color = '#f9fafb';
-      
-      // Force dark mode in meta tag
-      let metaTheme = document.querySelector('meta[name="theme-color"]');
-      if (!metaTheme) {
-        metaTheme = document.createElement('meta');
-        metaTheme.name = 'theme-color';
-        document.head.appendChild(metaTheme);
-      }
-      metaTheme.content = '#1f2937';
-      
-      // Disable light mode media queries
-      const style = document.createElement('style');
-      style.innerHTML = `
-        * { color-scheme: dark !important; }
-        html, body, #root { 
-          background-color: #111827 !important; 
-          color: #f9fafb !important; 
-        }
-      `;
-      document.head.appendChild(style);
-      
-      console.log('✅ Dark mode forced successfully');
-    };
-
-    // Apply immediately
-    forceDarkMode();
-
-    // Apply on any theme change attempt
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'attributes' && 
-            (mutation.attributeName === 'data-theme' || 
-             mutation.attributeName === 'class')) {
-          forceDarkMode();
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-theme', 'class', 'style']
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
   useEffect(() => {
     // Mobile viewport setup
     const setVH = () => {
@@ -141,8 +84,6 @@ function App() {
 
   useEffect(() => {
     if (tg) {
-      console.log('🌙 Setting up Telegram with dark mode...');
-      
       tg.ready();
       
       if (tg.requestViewport) {
@@ -153,53 +94,10 @@ function App() {
       tg.MainButton.hide();
       tg.BackButton.hide();
       tg.enableClosingConfirmation();
-      
-      // ✅ FORCE DARK MODE COLORS IN TELEGRAM
-      tg.setHeaderColor("#1f2937"); // Dark header
-      tg.setBackgroundColor("#111827"); // Dark background
-      
-      // ✅ ADDITIONAL DARK MODE ENFORCEMENT
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.documentElement.style.colorScheme = 'dark';
-      document.body.style.backgroundColor = '#111827';
-      document.body.style.color = '#f9fafb';
-      
-      // Override Telegram's theme detection
-      if (tg.themeParams) {
-        console.log('🌙 Overriding Telegram theme params');
-        tg.themeParams.bg_color = '#111827';
-        tg.themeParams.text_color = '#f9fafb';
-        tg.themeParams.hint_color = '#9ca3af';
-        tg.themeParams.link_color = '#60a5fa';
-        tg.themeParams.button_color = '#60a5fa';
-        tg.themeParams.button_text_color = '#ffffff';
-      }
-
-      console.log('✅ Telegram dark mode setup complete');
+      tg.setHeaderColor("#1f2937"); // ✅ FAQAT BU O'ZGARDI
+      tg.setBackgroundColor("#111827"); // ✅ FAQAT BU O'ZGARDI
     }
   }, [tg]);
-
-  // ✅ PREVENT LIGHT MODE ON MEDIA QUERY CHANGE
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
-    
-    const handleChange = (e) => {
-      if (e.matches) {
-        console.log('🌙 Light mode detected, forcing dark mode override');
-        document.documentElement.setAttribute('data-theme', 'dark');
-        document.documentElement.style.colorScheme = 'dark';
-        document.body.style.backgroundColor = '#111827';
-        document.body.style.color = '#f9fafb';
-      }
-    };
-
-    mediaQuery.addListener(handleChange);
-    
-    // Check immediately
-    handleChange(mediaQuery);
-
-    return () => mediaQuery.removeListener(handleChange);
-  }, []);
 
   const handleTabChange = useCallback(
     (tabId) => {

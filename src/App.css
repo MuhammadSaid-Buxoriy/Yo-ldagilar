@@ -1,15 +1,15 @@
-/* App.css - MAJBURIY DARK MODE ONLY */
+/* App.css - SODDA DARK MODE */
 
-/* ✅ DARK MODE CSS VARIABLES - ALWAYS ACTIVE */
+/* ✅ DARK MODE CSS VARIABLES - FAQAT BU O'ZGARADI */
 :root {
   --vh: 1vh;
-  --primary-color: #60a5fa; /* Lighter blue for dark mode */
+  --primary-color: #60a5fa; /* ✅ Lighter blue for dark */
   --primary-hover: #3b82f6;
-  --success-color: #34d399; /* Lighter green */
-  --danger-color: #f87171; /* Lighter red */
-  --warning-color: #fbbf24; /* Lighter amber */
+  --success-color: #34d399; /* ✅ Lighter green */
+  --danger-color: #f87171; /* ✅ Lighter red */
+  --warning-color: #fbbf24; /* ✅ Lighter amber */
   
-  /* ✅ DARK MODE COLORS - ALWAYS */
+  /* ✅ DARK MODE COLORS */
   --text-primary: #f9fafb;
   --text-secondary: #d1d5db;
   --text-muted: #9ca3af;
@@ -18,9 +18,9 @@
   --bg-tertiary: #374151;
   --border-color: #374151;
   
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
@@ -29,21 +29,18 @@
   --nav-height: 70px;
 }
 
-/* ✅ FORCE DARK MODE GLOBALLY */
 html {
   height: 100%;
   height: calc(var(--vh, 1vh) * 100);
   font-size: 16px;
-  color-scheme: dark !important;
-  background-color: var(--bg-secondary) !important;
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
     "Helvetica Neue", sans-serif;
   line-height: 1.5;
-  color: var(--text-primary) !important;
-  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   height: 100%;
@@ -57,7 +54,6 @@ body {
 #root {
   height: 100%;
   height: calc(var(--vh, 1vh) * 100);
-  background-color: var(--bg-secondary) !important;
 }
 
 /* App Layout */
@@ -71,7 +67,7 @@ body {
   height: calc(var(--vh, 1vh) * 100);
   display: flex;
   flex-direction: column;
-  background-color: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary);
   position: relative;
 }
 
@@ -83,8 +79,8 @@ body {
   transform: translateX(-50%);
   width: 100%;
   max-width: 600px;
-  background-color: var(--bg-primary) !important;
-  border-bottom: 1px solid var(--border-color) !important;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
   padding: 0 20px;
   height: var(--header-height);
   z-index: 1000;
@@ -101,7 +97,7 @@ body {
 .app-title {
   font-size: 18px;
   font-weight: 700;
-  color: var(--text-primary) !important;
+  color: var(--text-primary);
   letter-spacing: -0.025em;
   line-height: 1.2;
 }
@@ -117,11 +113,11 @@ body {
   gap: 6px;
   padding: 4px 8px;
   border-radius: var(--radius-sm);
-  background-color: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary);
 }
 
 .status-indicator.online {
-  background-color: rgba(52, 211, 153, 0.15) !important;
+  background-color: rgba(52, 211, 153, 0.1); /* ✅ Updated for dark */
 }
 
 .status-dot {
@@ -135,7 +131,7 @@ body {
 .status-text {
   font-size: 10px;
   font-weight: 600;
-  color: var(--success-color) !important;
+  color: var(--success-color);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -152,7 +148,6 @@ body {
   width: 100%;
   position: relative;
   height: 100%;
-  background-color: var(--bg-secondary) !important;
 }
 
 .main-content.transitioning {
@@ -167,8 +162,8 @@ body {
   transform: translateX(-50%);
   width: 100%;
   max-width: 600px;
-  background-color: var(--bg-primary) !important;
-  border-top: 1px solid var(--border-color) !important;
+  background-color: var(--bg-primary);
+  border-top: 1px solid var(--border-color);
   height: var(--nav-height);
   z-index: 1000;
   backdrop-filter: blur(10px);
@@ -197,14 +192,14 @@ body {
   transition: all 0.2s ease;
   position: relative;
   min-width: 60px;
-  color: var(--text-muted) !important;
+  color: var(--text-muted);
   flex: 1;
   max-width: 80px;
 }
 
 .nav-item:hover {
-  background-color: var(--bg-tertiary) !important;
-  color: var(--text-secondary) !important;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
 }
 
 .nav-item:active {
@@ -212,12 +207,12 @@ body {
 }
 
 .nav-item-active {
-  color: var(--primary-color) !important;
-  background-color: rgba(96, 165, 250, 0.15) !important;
+  color: var(--primary-color);
+  background-color: rgba(96, 165, 250, 0.08); /* ✅ Updated for dark */
 }
 
 .nav-item-active:hover {
-  background-color: rgba(96, 165, 250, 0.2) !important;
+  background-color: rgba(96, 165, 250, 0.12); /* ✅ Updated for dark */
 }
 
 .nav-icon {
@@ -252,7 +247,7 @@ body {
   animation: slideIn 0.2s ease;
 }
 
-/* Loading Screen - DARK VERSION */
+/* Loading Screen */
 .loading-screen {
   position: fixed;
   top: 0;
@@ -264,7 +259,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); /* ✅ Dark gradient */
   color: white;
   z-index: 9999;
 }
@@ -300,7 +295,6 @@ body {
   font-weight: 700;
   margin-bottom: 24px;
   letter-spacing: -0.025em;
-  color: white !important;
 }
 
 .loading-dots {
@@ -431,7 +425,7 @@ body {
   backface-visibility: hidden;
 }
 
-/* Focus Styles - DARK VERSION */
+/* Focus Styles */
 .nav-item:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
@@ -443,13 +437,8 @@ body {
     color 0.2s ease;
 }
 
-/* ✅ REMOVE ALL LIGHT MODE SUPPORT */
-/* NO @media (prefers-color-scheme: dark) - Always dark! */
-
-/* ✅ FORCE DARK MODE FOR ANY NESTED COMPONENTS */
-* {
-  color-scheme: dark !important;
-}
+/* ✅ @media (prefers-color-scheme: dark) - O'CHIRILDI! */
+/* Chunki biz hamma vaqt dark mode'da bo'lishni xohlaymiz */
 
 /* Safe Area Support */
 @supports (padding: max(0px)) {
@@ -460,38 +449,4 @@ body {
   :root {
     --nav-height: calc(70px + env(safe-area-inset-bottom, 0px));
   }
-}
-
-/* ✅ ADDITIONAL DARK MODE ENFORCEMENTS */
-input, textarea, select {
-  background-color: var(--bg-tertiary) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border-color) !important;
-}
-
-button {
-  background-color: var(--primary-color) !important;
-  color: white !important;
-}
-
-button:hover {
-  background-color: var(--primary-hover) !important;
-}
-
-/* ✅ SCROLLBAR DARK MODE */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-tertiary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--text-muted);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
 }
