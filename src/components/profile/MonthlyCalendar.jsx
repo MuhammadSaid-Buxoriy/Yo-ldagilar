@@ -1,4 +1,4 @@
-// components/profile/MonthlyCalendar.jsx - DARK MODE + NAMUNAGA MOS VERSIYA
+// components/profile/MonthlyCalendar.jsx - DARK MODE + HAQIQIY MA'LUMOTLAR
 import { useState, useEffect } from "react";
 import APIService from "../../services/api";
 import "./MonthlyCalendar.css";
@@ -20,30 +20,17 @@ const MonthlyCalendar = ({ userId, stats }) => {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth() + 1;
       
-      // ✅ TEST MA'LUMOTLAR - Haqiqiy natijalarni ko'rsatish uchun
-      const testData = {};
-      for (let day = 1; day <= 31; day++) {
-        // Test natijalar - har xil foizlarda
-        const randomScore = Math.floor(Math.random() * 11); // 0-10
-        if (randomScore > 0) {
-          testData[day] = {
-            completed: randomScore,
-            total: 10
-          };
-        }
-      }
-      
       // API dan ma'lumot olishga harakat qilish
       let response;
       try {
         response = await APIService.getUserMonthlyStatistics(userId, year, month);
       } catch (error) {
-        console.warn("API monthly stats not available, using test data");
+        console.warn("API monthly stats not available");
         response = { daily_stats: [] };
       }
       
       // Backend ma'lumotlarini object formatiga o'tkazish
-      const dataMap = { ...testData }; // Test ma'lumotlar bilan boshlash
+      const dataMap = {};
       if (response.daily_stats && Array.isArray(response.daily_stats)) {
         response.daily_stats.forEach(day => {
           const dayKey = new Date(day.date).getDate();
@@ -128,35 +115,24 @@ const MonthlyCalendar = ({ userId, stats }) => {
     return Math.round((dayData.completed / dayData.total) * 100);
   };
 
-  // ✅ RANG VA TOJ LOGIKASI - NAMUNAGA MOS
+  // ✅ RANG LOGIKASI - SIZNING BERILGAN RANGLAR BILAN
+  const getProgressColor = (percent) => {
+    if (percent >= 90) return "#16ce40"; // yashil
+    if (percent >= 80) return "#FFFF00"; // sariq
+    if (percent >= 50) return "#FF8000"; // to'q sariq
+    if (percent > 0) return "#dc2626";   // qizil
+    return "rgba(255, 255, 255, 0.2)";  // neytral (dark mode uchun)
+  };
+
+  // ✅ KUN STILINI OLISH - FAQAT HAQIQIY MA'LUMOTLAR UCHUN
   const getDayStyle = (day) => {
     const percentage = getDayPercentage(day);
-    
-    // Asosiy rang va toj logikasi
-    let borderColor = "rgba(255, 255, 255, 0.2)"; // neytral
-    let hasCrown = false;
-    let borderWidth = "1px";
-    
-    if (percentage >= 90) {
-      borderColor = "#16ce40"; // yashil
-      hasCrown = true;
-      borderWidth = "2px";
-    } else if (percentage >= 80) {
-      borderColor = "#FFFF00"; // sariq
-      hasCrown = true; 
-      borderWidth = "2px";
-    } else if (percentage >= 50) {
-      borderColor = "#FF8000"; // sabzi rang
-      borderWidth = "2px";
-    } else if (percentage > 0) {
-      borderColor = "#dc2626"; // qizil
-      borderWidth = "1px";
-    }
+    const borderColor = getProgressColor(percentage);
     
     return {
       borderColor,
-      borderWidth,
-      hasCrown
+      borderWidth: percentage > 0 ? "2px" : "1px",
+      hasData: percentage > 0
     };
   };
 
@@ -219,6 +195,7 @@ const MonthlyCalendar = ({ userId, stats }) => {
           
           const dayStyle = getDayStyle(day);
           const todayClass = isToday(day) ? "today-dark" : "";
+          const percentage = getDayPercentage(day);
           
           return (
             <div 
@@ -228,9 +205,9 @@ const MonthlyCalendar = ({ userId, stats }) => {
                 borderColor: dayStyle.borderColor,
                 borderWidth: dayStyle.borderWidth,
               }}
+              title={dayStyle.hasData ? `${percentage}% bajarildi` : "Ma'lumot yo'q"}
             >
               <span className="day-number-dark">{day}</span>
-              {dayStyle.hasCrown && <span className="crown-emoji">👑</span>}
               {isToday(day) && <div className="today-dot"></div>}
             </div>
           );

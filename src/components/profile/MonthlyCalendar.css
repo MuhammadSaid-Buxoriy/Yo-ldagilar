@@ -1,15 +1,15 @@
-/* components/profile/MonthlyCalendar.css - DARK MODE + NAMUNAGA MOS STILLAR */
+/* components/profile/MonthlyCalendar.css - DARK MODE + KICHIK EKRANLAR UCHUN */
 
 /* ✅ ASOSIY KONTEYNER - DARK MODE */
 .monthly-calendar-dark {
     background: #1a1a1a;
     border-radius: 16px;
     border: 1px solid #333;
-    padding: 20px;
+    padding: 16px;
     margin-top: 16px;
     position: relative;
     max-width: 100%;
-    min-width: 300px;
+    min-width: 280px;
     box-sizing: border-box;
   }
   
@@ -18,20 +18,20 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
   
   .nav-button-dark {
     background: transparent;
     border: 1px solid #555;
     border-radius: 8px;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 16px;
     color: #fff;
     transition: all 0.2s;
   }
@@ -49,39 +49,39 @@
   .current-month-dark {
     font-weight: 600;
     color: #fff;
-    font-size: 18px;
+    font-size: 16px;
     text-align: center;
-    min-width: 120px;
+    min-width: 100px;
   }
   
-  /* ✅ KALENDAR GRID - DARK MODE */
+  /* ✅ KALENDAR GRID - KICHIK EKRANLAR UCHUN */
   .calendar-grid-dark {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
+    gap: 4px;
   }
   
-  /* ✅ HAFTA KUNLARI HEADER - DARK MODE */
+  /* ✅ HAFTA KUNLARI HEADER - KICHIK */
   .weekday-header-dark {
     text-align: center;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     color: #888;
-    padding: 8px 4px;
+    padding: 6px 2px;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
   }
   
   /* ✅ BO'SH KUNLAR */
   .empty-day-dark {
-    height: 48px;
+    height: 36px;
   }
   
-  /* ✅ KALENDAR KUNLARI - DUMALOQ VA DARK MODE */
+  /* ✅ KALENDAR KUNLARI - KICHIK DUMALOQ (360px+ UCHUN) */
   .calendar-day-dark {
     position: relative;
-    height: 48px;
-    width: 48px;
+    height: 36px;
+    width: 36px;
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.2);
     display: flex;
@@ -94,22 +94,13 @@
     margin: 0 auto;
   }
   
-  /* ✅ KUN RAQAMI - DARK MODE */
+  /* ✅ KUN RAQAMI - KICHIK */
   .day-number-dark {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
     color: #fff;
     z-index: 2;
     position: relative;
-  }
-  
-  /* ✅ TOJ EMOJI - NAMUNAGA MOS */
-  .crown-emoji {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    font-size: 12px;
-    z-index: 3;
   }
   
   /* ✅ BUGUNGI KUN - MAXSUS STIL */
@@ -125,11 +116,11 @@
   /* ✅ BUGUNGI KUN NUQTASI */
   .today-dot {
     position: absolute;
-    bottom: 4px;
+    bottom: 3px;
     left: 50%;
     transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
+    width: 3px;
+    height: 3px;
     background: #60a5fa;
     border-radius: 50%;
   }
@@ -151,8 +142,8 @@
   }
   
   .loading-spinner-dark {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     border: 2px solid #333;
     border-top: 2px solid #60a5fa;
     border-radius: 50%;
@@ -167,83 +158,95 @@
   /* ✅ MOBIL RESPONSIVE - 380px va undan kichik */
   @media (max-width: 380px) {
     .monthly-calendar-dark {
-      padding: 16px;
+      padding: 12px;
       border-radius: 12px;
-      min-width: 280px;
+      min-width: 260px;
     }
     
     .calendar-header-dark {
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
     
     .current-month-dark {
-      font-size: 16px;
-      min-width: 100px;
+      font-size: 14px;
+      min-width: 80px;
     }
     
     .nav-button-dark {
-      width: 28px;
-      height: 28px;
-      font-size: 16px;
+      width: 24px;
+      height: 24px;
+      font-size: 14px;
     }
     
     .calendar-grid-dark {
-      gap: 6px;
+      gap: 3px;
     }
     
     .calendar-day-dark {
-      height: 40px;
-      width: 40px;
+      height: 32px;
+      width: 32px;
     }
     
     .day-number-dark {
-      font-size: 12px;
+      font-size: 11px;
     }
     
     .weekday-header-dark {
-      font-size: 12px;
-      padding: 6px 2px;
+      font-size: 11px;
+      padding: 4px 1px;
     }
     
-    .crown-emoji {
-      font-size: 10px;
-      top: -3px;
-      right: -3px;
+    .today-dot {
+      width: 2px;
+      height: 2px;
+      bottom: 2px;
     }
   }
   
   /* ✅ KICHIK EKRANLAR - 320px va undan kichik */
   @media (max-width: 320px) {
     .monthly-calendar-dark {
-      min-width: 260px;
-      padding: 12px;
+      min-width: 240px;
+      padding: 10px;
     }
     
     .calendar-day-dark {
-      height: 36px;
-      width: 36px;
+      height: 28px;
+      width: 28px;
     }
     
     .day-number-dark {
-      font-size: 11px;
+      font-size: 10px;
     }
     
     .weekday-header-dark {
-      font-size: 11px;
+      font-size: 10px;
+      padding: 3px 1px;
     }
     
     .calendar-grid-dark {
-      gap: 4px;
+      gap: 2px;
     }
     
-    .crown-emoji {
-      font-size: 9px;
-      top: -2px;
-      right: -2px;
+    .today-dot {
+      width: 2px;
+      height: 2px;
+      bottom: 1px;
+    }
+    
+    .current-month-dark {
+      font-size: 13px;
+      min-width: 70px;
+    }
+    
+    .nav-button-dark {
+      width: 22px;
+      height: 22px;
+      font-size: 12px;
     }
   }
   
-  /* ✅ LIGHT MODE UCHUN FALLBACK (agar kerak bo'lsa) */
+  /* ✅ LIGHT MODE UCHUN FALLBACK */
   @media (prefers-color-scheme: light) {
     .monthly-calendar-dark {
       background: #ffffff;
