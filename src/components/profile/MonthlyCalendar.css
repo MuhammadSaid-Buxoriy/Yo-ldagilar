@@ -1,0 +1,250 @@
+/* components/profile/MonthlyCalendar.css - TO'LIQ TUZATILGAN STILLAR */
+
+/* ✅ ASOSIY KONTEYNER - MOBIL OPTIMIZED */
+.monthly-calendar {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    padding: 16px;
+    margin-top: 16px;
+    position: relative;
+    /* ✅ MOBIL UCHUN MAX WIDTH */
+    max-width: 100%;
+    min-width: 300px;
+    box-sizing: border-box;
+  }
+  
+  /* ✅ IXCHAM HEADER */
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .calendar-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    /* ✅ MOBIL UCHUN FLEX */
+    flex: 1;
+    min-width: 140px;
+  }
+  
+  /* ✅ NAVIGATION - IXCHAM */
+  .month-navigation {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* ✅ MOBIL UCHUN KICHIK */
+    font-size: 14px;
+  }
+  
+  .nav-button {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    color: #374151;
+    transition: all 0.2s;
+  }
+  
+  .nav-button:hover:not(:disabled) {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+  }
+  
+  .nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .current-month {
+    font-weight: 600;
+    color: #1f2937;
+    min-width: 110px;
+    text-align: center;
+    /* ✅ MOBIL UCHUN KICHIKROQ */
+    font-size: 13px;
+  }
+  
+  /* ✅ KALENDAR GRID - MOBIL OPTIMIZED */
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    /* ✅ MOBIL UCHUN KICHIK GAP */
+  }
+  
+  /* ✅ HAFTA KUNLARI HEADER - IXCHAM */
+  .weekday-header {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+    padding: 4px 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  /* ✅ BO'SH KUNLAR */
+  .empty-day {
+    height: 36px;
+    /* ✅ MOBIL UCHUN KICHIK */
+  }
+  
+  /* ✅ KALENDAR KUNLARI - DUMALOQ MINIMALISTIK */
+  .calendar-day {
+    position: relative;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+    /* ✅ MOBIL UCHUN RESPONSIVE */
+    min-width: 36px;
+    box-sizing: border-box;
+  }
+  
+  /* ✅ KUN RAQAMI */
+  .day-number {
+    font-size: 12px;
+    font-weight: 500;
+    color: #374151;
+    z-index: 2;
+    position: relative;
+  }
+  
+  /* ✅ BUGUNGI KUN - MAXSUS STIL */
+  .calendar-day.today {
+    box-shadow: 0 0 0 2px #3b82f6;
+    transform: scale(1.05);
+  }
+  
+  .calendar-day.today .day-number {
+    color: #3b82f6;
+    font-weight: 700;
+  }
+  
+  /* ✅ HOVER EFFEKT */
+  .calendar-day:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 3;
+  }
+  
+  /* ✅ LOADING SPINNER */
+  .calendar-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+  }
+  
+  .loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #f3f4f6;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* ✅ MOBIL RESPONSIVE - 380px va undan kichik */
+  @media (max-width: 380px) {
+    .monthly-calendar {
+      padding: 12px;
+      border-radius: 8px;
+      min-width: 280px;
+    }
+    
+    .calendar-header {
+      margin-bottom: 12px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    
+    .calendar-title {
+      font-size: 15px;
+      text-align: center;
+    }
+    
+    .month-navigation {
+      justify-content: center;
+      font-size: 13px;
+    }
+    
+    .current-month {
+      font-size: 12px;
+      min-width: 100px;
+    }
+    
+    .nav-button {
+      width: 26px;
+      height: 26px;
+      font-size: 14px;
+    }
+    
+    .calendar-grid {
+      gap: 3px;
+    }
+    
+    .calendar-day {
+      height: 32px;
+      min-width: 32px;
+    }
+    
+    .day-number {
+      font-size: 11px;
+    }
+    
+    .weekday-header {
+      font-size: 10px;
+      padding: 3px 1px;
+    }
+  }
+  
+  /* ✅ KICHIK EKRANLAR - 320px va undan kichik */
+  @media (max-width: 320px) {
+    .monthly-calendar {
+      min-width: 260px;
+      padding: 10px;
+    }
+    
+    .calendar-day {
+      height: 28px;
+      min-width: 28px;
+    }
+    
+    .day-number {
+      font-size: 10px;
+    }
+    
+    .weekday-header {
+      font-size: 9px;
+    }
+    
+    .calendar-grid {
+      gap: 2px;
+    }
+  }

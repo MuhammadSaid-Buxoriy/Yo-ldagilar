@@ -1,4 +1,4 @@
-// components/profile/MonthlyCalendar.jsx - PROFESSIONAL V2.0
+// components/profile/MonthlyCalendar.jsx - TO'LIQ TUZATILGAN VERSIYA
 import { useState, useEffect } from "react";
 import APIService from "../../services/api";
 import "./MonthlyCalendar.css";
@@ -20,11 +20,18 @@ const MonthlyCalendar = ({ userId, stats }) => {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth() + 1;
       
-      const response = await APIService.getUserMonthlyStatistics(userId, year, month);
+      // API dan ma'lumot olishga harakat qilish
+      let response;
+      try {
+        response = await APIService.getUserMonthlyStatistics(userId, year, month);
+      } catch (error) {
+        console.warn("API monthly stats not available, using fallback");
+        response = { daily_stats: [] };
+      }
       
       // Backend ma'lumotlarini object formatiga o'tkazish
       const dataMap = {};
-      if (response.daily_stats) {
+      if (response.daily_stats && Array.isArray(response.daily_stats)) {
         response.daily_stats.forEach(day => {
           const dayKey = new Date(day.date).getDate();
           dataMap[dayKey] = {
@@ -134,27 +141,27 @@ const MonthlyCalendar = ({ userId, stats }) => {
   ];
 
   return (
-    <div className="monthly-calendar-v2">
+    <div className="monthly-calendar">
       {/* ✅ IXCHAM HEADER */}
-      <div className="calendar-header-v2">
-        <h3 className="calendar-title-v2">📅 Oylik Natijalar</h3>
+      <div className="calendar-header">
+        <h3 className="calendar-title">📅 Oylik Natijalar</h3>
         
-        <div className="month-navigation-v2">
+        <div className="month-navigation">
           <button 
             onClick={() => changeMonth(-1)}
-            className="nav-button-v2"
+            className="nav-button"
             disabled={loading}
           >
             ‹
           </button>
           
-          <span className="current-month-v2">
+          <span className="current-month">
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </span>
           
           <button 
             onClick={() => changeMonth(1)}
-            className="nav-button-v2"  
+            className="nav-button"  
             disabled={loading}
           >
             ›
@@ -163,10 +170,10 @@ const MonthlyCalendar = ({ userId, stats }) => {
       </div>
 
       {/* ✅ KALENDAR GRID */}
-      <div className="calendar-grid-v2">
+      <div className="calendar-grid">
         {/* Hafta kunlari */}
         {weekDays.map(day => (
-          <div key={day} className="weekday-header-v2">
+          <div key={day} className="weekday-header">
             {day}
           </div>
         ))}
@@ -174,32 +181,32 @@ const MonthlyCalendar = ({ userId, stats }) => {
         {/* Kalendar kunlari */}
         {getDaysInMonth().map((day, index) => {
           if (!day) {
-            return <div key={index} className="empty-day-v2"></div>;
+            return <div key={index} className="empty-day"></div>;
           }
           
           const percentage = getDayPercentage(day);
           const color = getProgressColor(percentage);
-          const todayClass = isToday(day) ? "today-v2" : "";
+          const todayClass = isToday(day) ? "today" : "";
           
           return (
             <div 
               key={day} 
-              className={`calendar-day-v2 ${todayClass}`}
+              className={`calendar-day ${todayClass}`}
               style={{
                 borderColor: color,
                 borderWidth: percentage > 0 ? "2px" : "1px",
                 backgroundColor: percentage > 0 ? `${color}15` : "transparent"
               }}
             >
-              <span className="day-number-v2">{day}</span>
+              <span className="day-number">{day}</span>
             </div>
           );
         })}
       </div>
       
       {loading && (
-        <div className="calendar-loading-v2">
-          <div className="loading-spinner-v2"></div>
+        <div className="calendar-loading">
+          <div className="loading-spinner"></div>
         </div>
       )}
     </div>
