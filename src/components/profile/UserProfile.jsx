@@ -448,13 +448,31 @@ const StatisticsSection = ({ stats }) => {
   const days = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"];
   const dailyCompletedFromWeek = getCurrentWeekDailyData();
 
-  // Haftaning o'tgan kunlari uchun foiz hisoblanadi
-  const weeklyCompleted = dailyCompletedFromWeek
-    .slice(0, (new Date().getDay() === 0 ? 6 : new Date().getDay() - 1) + 1) // Faqat o'tgan va bugungi kunlar
-    .reduce((sum, val) => sum + val, 0);
+  // ✅ YANGI HAFTA UNUMDORLIGI HISOBLASH - SIZNING TALABINGIZ BO'YICHA
+  const calculateWeeklyProductivity = () => {
+    let totalPercentage = 0;
     
-  const maxPossiblePoints = ((new Date().getDay() === 0 ? 6 : new Date().getDay() - 1) + 1) * 10; // O'tgan kunlar * 10
-  const weeklyPercent = maxPossiblePoints > 0 ? Math.round((weeklyCompleted / maxPossiblePoints) * 100) : 0;
+    // Barcha 7 kun uchun foizlarni yig'ish
+    for (let i = 0; i < 7; i++) {
+      const dayPoints = dailyCompletedFromWeek[i] || 0;
+      const dayPercent = Math.round((dayPoints / 10) * 100);
+      totalPercentage += dayPercent;
+    }
+    
+    // Hafta unumdorligi = umumiy foiz / 7
+    const weeklyProductivity = Math.round(totalPercentage / 7);
+    
+    console.log('📈 Weekly productivity calculation:', {
+      dailyPoints: dailyCompletedFromWeek,
+      dailyPercentages: dailyCompletedFromWeek.map(points => Math.round((points / 10) * 100)),
+      totalPercentage: totalPercentage,
+      weeklyProductivity: weeklyProductivity
+    });
+    
+    return weeklyProductivity;
+  };
+
+  const weeklyPercent = calculateWeeklyProductivity();
 
   const getProgressColor = (percent) => {
     if (percent >= 90) return "#16ce40";
@@ -531,10 +549,10 @@ const StatisticsSection = ({ stats }) => {
         </div>
       </div>
 
-      {/* ✅ HAFTALIK NATIJA TUZATILGAN */}
+      {/* ✅ HAFTALIK NATIJA - YANGI HISOBLASH USULI */}
       <div className="progress-card">
         <div className="progress-header">
-          <h3 className="progress-title">Haftalik natija</h3>
+          <h3 className="progress-title">Hafta unumdorligi</h3>
           <span
             className="progress-percentage"
             style={{ color: getProgressColor(weeklyPercent) }}
@@ -612,6 +630,23 @@ const StatisticsSection = ({ stats }) => {
           ))}
         </div>
 
+        {/* ✅ QOʻSHIMCHA: Hafta unumdorligi tushuntirish */}
+        <div className="progress-details" style={{ marginTop: "10px", borderTop: "1px solid #e5e7eb", paddingTop: "10px" }}>
+          <div className="detail-item">
+            <span className="detail-label">Hisoblash usuli</span>
+            <span className="detail-value" style={{ fontSize: "12px", color: "#6b7280" }}>
+              Barcha kunlik foizlar yig'indisi ÷ 7
+            </span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">Jami kunlik foizlar</span>
+            <span className="detail-value">
+              {dailyCompletedFromWeek.reduce((sum, points) => 
+                sum + Math.round((points / 10) * 100), 0
+              )}%
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
