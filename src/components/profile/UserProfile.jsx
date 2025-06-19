@@ -625,17 +625,22 @@ const ProgressBar = ({ percentage, color }) => (
   </div>
 );
 
+// ✅ ASOSIY TUZATISH: AchievementsSection component'da backend ma'lumotlarini to'g'ri ishlatish
 const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
+  // ✅ TUZATILDI: Backend ma'lumotlarini to'g'ri ishlatish
   const achievementMap = new Map();
   achievementsProgress.forEach((a) => achievementMap.set(a.id, a));
-
+  
+  console.log('🏆 AchievementsSection - achievementsProgress:', achievementsProgress);
+  console.log('🏆 AchievementsSection - achievementMap:', achievementMap);
+  
   const achievements = [
     {
       id: "consistent",
       title: "Faol",
       description: "21 kun har kuni faol",
       target: 21,
-      current: stats?.all_time?.total_days || 0,
+      current: achievementMap.get("consistent")?.current || 0, // ✅ TUZATILDI: Backend dan kelgan progress
       icon: "zap",
       color: "#ef4444",
     },
@@ -644,7 +649,7 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
       title: "Kitobxon",
       description: "10,000 bet kitob o'qish",
       target: 10000,
-      current: stats?.all_time?.total_pages || 0,
+      current: achievementMap.get("reader")?.current || 0, // ✅ TUZATILDI: Backend dan kelgan progress
       icon: "book",
       color: "#3b82f6",
     },
@@ -653,7 +658,7 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
       title: "Sportchi",
       description: "100 km yugurish",
       target: 100,
-      current: stats?.all_time?.total_distance || 0,
+      current: achievementMap.get("athlete")?.current || 0, // ✅ TUZATILDI: Backend dan kelgan progress
       icon: "activity",
       color: "#10b981",
     },
@@ -662,7 +667,7 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
       title: "Uyg'oq",
       description: "21 kun ketma-ket erta turish",
       target: 21,
-      current: achievementMap.get("early_bird")?.current || 0,
+      current: achievementMap.get("early_bird")?.current || 0, // ✅ TUZATILDI: Backend dan kelgan progress
       icon: "moon",
       color: "#8b5cf6",
     },
@@ -671,11 +676,16 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
       title: "Olov",
       description: "21 kun ketma-ket 10/10 vazifa bajarish",
       target: 21,
-      current: achievementMap.get("perfectionist")?.current || 0,
+      current: achievementMap.get("perfectionist")?.current || 0, // ✅ TUZATILDI: Backend dan kelgan progress
       icon: "fire",
       color: "#f59e0b",
     },
   ];
+
+  // ✅ DEBUG LOG: Har bir achievement uchun progress ko'rsatish
+  achievements.forEach(achievement => {
+    console.log(`🏆 ${achievement.title}: ${achievement.current}/${achievement.target} (${Math.round((achievement.current / achievement.target) * 100)}%)`);
+  });
 
   return (
     <div className="achievements-section">
