@@ -20,12 +20,15 @@ const MonthlyCalendar = ({ userId, stats }) => {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth() + 1;
       
+      console.log(`📅 Loading data for ${year}-${month.toString().padStart(2, '0')}`);
+      
       // API dan ma'lumot olishga harakat qilish
       let response;
       try {
         response = await APIService.getUserMonthlyStatistics(userId, year, month);
+        console.log('📥 API Response:', response);
       } catch (error) {
-        console.warn("API monthly stats not available");
+        console.warn("API monthly stats not available", error);
         response = { daily_stats: [] };
       }
       
@@ -33,15 +36,20 @@ const MonthlyCalendar = ({ userId, stats }) => {
       const dataMap = {};
       if (response.daily_stats && Array.isArray(response.daily_stats)) {
         response.daily_stats.forEach(day => {
-          const dayKey = new Date(day.date).getDate();
-          dataMap[dayKey] = {
-            completed: day.completed || 0,
-            total: 10
-          };
+          try {
+            const dayKey = new Date(day.date).getDate();
+            dataMap[dayKey] = {
+              completed: day.completed || 0,
+              total: day.total || 10
+            };
+            console.log(`Day ${dayKey}: ${day.completed}/${day.total || 10}`);
+          } catch (dateError) {
+            console.warn('Date parsing error:', day.date);
+          }
         });
       }
       
-      // ✅ BUGUNGI KUN MA'LUMOTINI QO'SHISH (agar bu oy bo'lsa)
+      // ✅ BUGUNGI KUN MA'LUMOTINI QO'SHISH (faqat joriy oy bo'lsa)
       const today = new Date();
       const isCurrentMonth = today.getFullYear() === year && (today.getMonth() + 1) === month;
       
@@ -51,8 +59,10 @@ const MonthlyCalendar = ({ userId, stats }) => {
           completed: stats.today.completed || 0,
           total: 10
         };
+        console.log(`Today (${todayDate}): ${stats.today.completed}/10`);
       }
       
+      console.log('📊 Final data map:', dataMap);
       setMonthlyData(dataMap);
     } catch (error) {
       console.error("Failed to load monthly data:", error);
@@ -62,7 +72,7 @@ const MonthlyCalendar = ({ userId, stats }) => {
     }
   };
 
-  // ✅ TO'G'RI HAFTA KUNLARI TARTIBINI OLISH
+  // ✅ TO'G'RI HAFTA KUNLARI TARTIBINI OLISH - TUZATILGAN
   const getDaysInMonth = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -78,15 +88,34 @@ const MonthlyCalendar = ({ userId, stats }) => {
     const daysInMonth = lastDay.getDate();
     const calendarDays = [];
     
-    // Oldingi oydan bo'sh joylarni to'ldirish
+    // ✅ TUZATISH: Oldingi oydan bo'sh joylarni to'ldirish
     for (let i = 0; i < uzbekStartDay; i++) {
       calendarDays.push(null);
     }
     
-    // Joriy oyning kunlarini qo'shish
+    // ✅ TUZATISH: Joriy oyning kunlarini qo'shish
     for (let day = 1; day <= daysInMonth; day++) {
       calendarDays.push(day);
     }
+    
+    // ✅ YANGI: Qator tugallanishi uchun keyingi oydan kunlar qo'shish
+    const totalCells = calendarDays.length;
+    const remainingCells = totalCells % 7;
+    if (remainingCells > 0) {
+      const nextMonthDays = 7 - remainingCells;
+      for (let day = 1; day <= nextMonthDays; day++) {
+        calendarDays.push(null); // Keyingi oy kunlari uchun null
+      }
+    }
+    
+    console.log(`📅 Calendar for ${year}-${month + 1}:`, {
+      firstDay: firstDay.toDateString(),
+      uzbekStartDay,
+      daysInMonth,
+      totalDays: calendarDays.length,
+      firstWeek: calendarDays.slice(0, 7),
+      lastWeek: calendarDays.slice(-7)
+    });
     
     return calendarDays;
   };
