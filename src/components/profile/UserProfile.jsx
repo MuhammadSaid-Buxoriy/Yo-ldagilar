@@ -630,23 +630,7 @@ const StatisticsSection = ({ stats }) => {
           ))}
         </div>
 
-        {/* ✅ QOʻSHIMCHA: Hafta unumdorligi tushuntirish */}
-        <div className="progress-details" style={{ marginTop: "10px", borderTop: "1px solid #e5e7eb", paddingTop: "10px" }}>
-          <div className="detail-item">
-            <span className="detail-label">Hisoblash usuli</span>
-            <span className="detail-value" style={{ fontSize: "12px", color: "#6b7280" }}>
-              Barcha kunlik foizlar yig'indisi ÷ 7
-            </span>
-          </div>
-          <div className="detail-item">
-            <span className="detail-label">Jami kunlik foizlar</span>
-            <span className="detail-value">
-              {dailyCompletedFromWeek.reduce((sum, points) => 
-                sum + Math.round((points / 10) * 100), 0
-              )}%
-            </span>
-          </div>
-        </div>
+
       </div>
     </div>
   );
