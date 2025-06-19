@@ -52,6 +52,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
             total_distance: 0,
             total_days: 0,
             perfectionist_streak: 0,
+            early_bird_streak: 0,
           },
         });
         // Don't set profileUser - let it remain null to show error
@@ -657,6 +658,15 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
       color: "#10b981",
     },
     {
+      id: "early_bird",
+      title: "Uyg'oq",
+      description: "21 kun ketma-ket erta turish",
+      target: 21,
+      current: achievementMap.get("early_bird")?.current || 0,
+      icon: "moon",
+      color: "#8b5cf6",
+    },
+    {
       id: "perfectionist",
       title: "Olov",
       description: "21 kun ketma-ket 10/10 vazifa bajarish",
@@ -669,7 +679,7 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
 
   return (
     <div className="achievements-section">
-      <h2 className="section-title">Yutuqlar</h2>
+      <h2 className="section-title">Unvonlar</h2>
 
       <div className="achievements-grid">
         {achievements.map((achievement) => {
@@ -821,6 +831,19 @@ const StatIcon = ({ type }) => {
         <polygon points="13 2 3 14 12 14 11 22 21 10 13 10 13 2" />
       </svg>
     ),
+    moon: (
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        <path d="M12 6v6l4 2" />
+      </svg>
+    ),
   };
 
   return icons[type] || icons.star;
@@ -831,7 +854,7 @@ const ShareIcon = () => (
   <svg
     width="16"
     height="16"
-    viewBox="0 0 24 24"
+    viewBox="0 0 26 26"
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
