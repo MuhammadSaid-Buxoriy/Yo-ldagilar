@@ -25,17 +25,21 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       setError(null);
 
       // Always fetch user profile and stats from API
-      const [statsResponse, userResponse, progressResponse] = await Promise.all(
+      const [statsResponse, userResponse] = await Promise.all(
         [
           APIService.getUserStatistics(userId),
           APIService.getUserProfile(userId),
-          APIService.getUserAchievementsProgress(userId),
         ]
       );
 
       setStats(statsResponse);
       setProfileUser(userResponse.user);
-      setAchievementsProgress(progressResponse || []);
+      
+      // ✅ TUZATISH: achievementProgress user obyektidan olish
+      const achievementsData = userResponse.user?.achievementProgress || [];
+      console.log('🏆 loadUserData - achievements from user:', achievementsData);
+      setAchievementsProgress(achievementsData);
+      
     } catch (error) {
       console.error("Failed to load user data:", error);
       setError(APIService.getErrorMessage(error));
@@ -633,14 +637,24 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
   
   console.log('🏆 AchievementsSection - achievementsProgress:', achievementsProgress);
   console.log('🏆 AchievementsSection - achievementMap:', achievementMap);
+  console.log('🏆 AchievementsSection - stats:', stats);
+  
+  // ✅ YANGI STRATEGIYA: current qiymatini to'g'ri olish
+  const getAchievementCurrent = (achievementId, fallbackValue) => {
+    const achievement = achievementMap.get(achievementId);
+    if (achievement && typeof achievement.current === 'number') {
+      return achievement.current;
+    }
+    return fallbackValue || 0;
+  };
   
   const achievements = [
     {
       id: "consistent",
       title: "Faol",
-      description: "21 kun har kuni faol",
+      description: "21 kun ketma-ket faol bo'lish",
       target: 21,
-      current: achievementMap.get("consistent")?.current || 0, // ✅ TUZATILDI: Backend dan kelgan progress
+      current: getAchievementCurrent("consistent", stats?.all_time?.total_days), // ✅ Backend + fallback
       icon: "zap",
       color: "#ef4444",
     },
@@ -649,7 +663,7 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
       title: "Kitobxon",
       description: "10,000 bet kitob o'qish",
       target: 10000,
-      current: achievementMap.get("reader")?.current || 0, // ✅ TUZATILDI: Backend dan kelgan progress
+      current: getAchievementCurrent("reader", stats?.all_time?.total_pages), // ✅ Backend + fallback
       icon: "book",
       color: "#3b82f6",
     },
@@ -658,7 +672,7 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
       title: "Sportchi",
       description: "100 km yugurish",
       target: 100,
-      current: achievementMap.get("athlete")?.current || 0, // ✅ TUZATILDI: Backend dan kelgan progress
+      current: getAchievementCurrent("athlete", stats?.all_time?.total_distance), // ✅ Backend + fallback
       icon: "activity",
       color: "#10b981",
     },
@@ -667,7 +681,7 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
       title: "Uyg'oq",
       description: "21 kun ketma-ket erta turish",
       target: 21,
-      current: achievementMap.get("early_bird")?.current || 0, // ✅ TUZATILDI: Backend dan kelgan progress
+      current: getAchievementCurrent("early_bird", stats?.all_time?.early_bird_streak), // ✅ Backend + fallback
       icon: "moon",
       color: "#8b5cf6",
     },
@@ -676,7 +690,7 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
       title: "Olov",
       description: "21 kun ketma-ket 10/10 vazifa bajarish",
       target: 21,
-      current: achievementMap.get("perfectionist")?.current || 0, // ✅ TUZATILDI: Backend dan kelgan progress
+      current: getAchievementCurrent("perfectionist", stats?.all_time?.perfectionist_streak), // ✅ Backend + fallback
       icon: "fire",
       color: "#f59e0b",
     },
