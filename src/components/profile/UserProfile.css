@@ -1111,427 +1111,247 @@
   }
 }
 
-/* =====================================================
-   MONTHLY CALENDAR STYLES - UserProfile.css ga qo'shing
-   ===================================================== */
+/* components/profile/MonthlyCalendar.css - PROFESSIONAL V2.0 */
 
-/* Section subtitle for monthly calendar */
-.section-subtitle {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 24px 0 16px 0;
-  padding-bottom: 8px;
+/* ✅ ASOSIY KONTEYNER - MOBIL OPTIMIZED */
+.monthly-calendar-v2 {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 16px;
+  margin-top: 16px;
   position: relative;
+  /* ✅ MOBIL UCHUN MAX WIDTH */
+  max-width: 100%;
+  min-width: 320px;
+  box-sizing: border-box;
+}
+
+/* ✅ IXCHAM HEADER */
+.calendar-header-v2 {
   display: flex;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.section-subtitle::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 40px;
-  height: 2px;
-  background: linear-gradient(90deg, var(--primary-color) 0%, #6366f1 100%);
-  border-radius: 1px;
-}
-
-/* Monthly Calendar Container */
-.monthly-calendar-section {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  padding: 20px;
-  margin-bottom: 20px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.monthly-calendar-section::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary-color) 0%, #6366f1 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.monthly-calendar-section:hover {
-  border-color: var(--primary-color);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-
-.monthly-calendar-section:hover::before {
-  opacity: 1;
-}
-
-/* Calendar Header (Navigation) */
-.calendar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, var(--bg-tertiary) 0%, #f1f5f9 100%);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(59, 130, 246, 0.1);
-}
-
-.calendar-month-year {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text-primary);
+.calendar-title-v2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
   margin: 0;
-  text-align: center;
+  /* ✅ MOBIL UCHUN FLEX */
+  flex: 1;
   min-width: 140px;
 }
 
-.calendar-nav-btn {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  width: 36px;
-  height: 36px;
+/* ✅ NAVIGATION - IXCHAM */
+.month-navigation-v2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* ✅ MOBIL UCHUN KICHIK */
+  font-size: 14px;
+}
+
+.nav-button-v2 {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  color: var(--text-secondary);
+  font-size: 16px;
+  color: #374151;
+  transition: all 0.2s;
 }
 
-.calendar-nav-btn:hover:not(.disabled) {
-  background: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+.nav-button-v2:hover:not(:disabled) {
+  background: #e5e7eb;
+  border-color: #9ca3af;
 }
 
-.calendar-nav-btn.disabled {
-  opacity: 0.4;
+.nav-button-v2:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
-  background: var(--bg-tertiary);
 }
 
-.calendar-nav-btn:active:not(.disabled) {
-  transform: translateY(0);
+.current-month-v2 {
+  font-weight: 600;
+  color: #1f2937;
+  min-width: 110px;
+  text-align: center;
+  /* ✅ MOBIL UCHUN KICHIKROQ */
+  font-size: 13px;
 }
 
-/* Calendar Loading State */
-.calendar-loading {
+/* ✅ KALENDAR GRID - MOBIL OPTIMIZED */
+.calendar-grid-v2 {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  /* ✅ MOBIL UCHUN KICHIK GAP */
+}
+
+/* ✅ HAFTA KUNLARI HEADER - IXCHAM */
+.weekday-header-v2 {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 4px 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ✅ BO'SH KUNLAR */
+.empty-day-v2 {
+  height: 36px;
+  /* ✅ MOBIL UCHUN KICHIK */
+}
+
+/* ✅ KALENDAR KUNLARI - DUMALOQ MINIMALISTIK */
+.calendar-day-v2 {
+  position: relative;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 40px 20px;
-  color: var(--text-muted);
-  font-size: 14px;
-  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  /* ✅ MOBIL UCHUN RESPONSIVE */
+  min-width: 36px;
+  box-sizing: border-box;
 }
 
-.loading-spinner-small {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--bg-tertiary);
-  border-top: 2px solid var(--primary-color);
+/* ✅ KUN RAQAMI */
+.day-number-v2 {
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  z-index: 2;
+  position: relative;
+}
+
+/* ✅ BUGUNGI KUN - MAXSUS STIL */
+.calendar-day-v2.today-v2 {
+  box-shadow: 0 0 0 2px #3b82f6;
+  transform: scale(1.05);
+}
+
+.calendar-day-v2.today-v2 .day-number-v2 {
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+/* ✅ HOVER EFFEKT */
+.calendar-day-v2:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 3;
+}
+
+/* ✅ LOADING SPINNER */
+.calendar-loading-v2 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+.loading-spinner-v2 {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #f3f4f6;
+  border-top: 2px solid #3b82f6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
-/* Calendar Grid */
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-bottom: 20px;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-/* Weekday Headers */
-.calendar-weekday {
-  padding: 8px 4px;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-  background: var(--bg-tertiary);
-  border-radius: var(--radius-sm);
-}
-
-/* Calendar Days */
-.calendar-day {
-  aspect-ratio: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  border-radius: var(--radius-md);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  min-height: 60px;
-  background: var(--bg-primary);
-  border: 1px solid transparent;
-}
-
-.calendar-day.empty {
-  cursor: default;
-  background: transparent;
-}
-
-.calendar-day.has-data {
-  border-color: var(--border-color);
-}
-
-.calendar-day.has-data:hover {
-  border-color: var(--primary-color);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-  transform: translateY(-2px);
-}
-
-.calendar-day.today {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.calendar-day.future {
-  opacity: 0.5;
-  background: var(--bg-tertiary);
-  cursor: not-allowed;
-}
-
-/* Day Number */
-.day-number {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 4px;
-  z-index: 2;
-}
-
-.calendar-day.today .day-number {
-  color: var(--primary-color);
-  font-weight: 700;
-}
-
-.calendar-day.future .day-number {
-  color: var(--text-muted);
-}
-
-/* Completion Circle */
-.completion-circle {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 2px;
-}
-
-.circle-inner {
-  width: 22px;
-  height: 22px;
-  background: var(--bg-primary);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.completion-percent {
-  font-size: 8px;
-  font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1;
-}
-
-/* Today Indicator */
-.today-indicator {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 6px;
-  height: 6px;
-  background: var(--primary-color);
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-/* Future Indicator */
-.future-indicator {
-  font-size: 10px;
-  opacity: 0.6;
-  margin-top: 2px;
-}
-
-/* Calendar Summary */
-.calendar-summary {
-  margin: 16px 0;
-  padding: 16px;
-  background: linear-gradient(135deg, var(--bg-tertiary) 0%, #f1f5f9 100%);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(59, 130, 246, 0.1);
-}
-
-.summary-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.summary-item {
-  text-align: center;
-}
-
-.summary-number {
-  display: block;
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--primary-color);
-  line-height: 1;
-  margin-bottom: 4px;
-}
-
-.summary-label {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-/* Calendar Legend */
-.calendar-legend {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 12px;
-  background: var(--bg-tertiary);
-  border-radius: var(--radius-md);
-  margin-top: 8px;
-  flex-wrap: wrap;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.legend-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-/* Mobile Responsive */
-@media (max-width: 480px) {
-  .monthly-calendar-section {
-    padding: 16px;
+/* ✅ MOBIL RESPONSIVE - 360px+ */
+@media (max-width: 380px) {
+  .monthly-calendar-v2 {
+    padding: 12px;
+    border-radius: 8px;
   }
-
-  .calendar-header {
-    padding: 10px 12px;
+  
+  .calendar-header-v2 {
+    margin-bottom: 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
   }
-
-  .calendar-month-year {
-    font-size: 16px;
-    min-width: 120px;
+  
+  .calendar-title-v2 {
+    font-size: 15px;
+    text-align: center;
   }
-
-  .calendar-nav-btn {
-    width: 32px;
-    height: 32px;
+  
+  .month-navigation-v2 {
+    justify-content: center;
+    font-size: 13px;
   }
-
-  .calendar-day {
-    min-height: 50px;
-  }
-
-  .completion-circle {
-    width: 24px;
-    height: 24px;
-  }
-
-  .circle-inner {
-    width: 18px;
-    height: 18px;
-  }
-
-  .completion-percent {
-    font-size: 7px;
-  }
-
-  .day-number {
+  
+  .current-month-v2 {
     font-size: 12px;
+    min-width: 100px;
   }
-
-  .summary-stats {
-    gap: 12px;
+  
+  .nav-button-v2 {
+    width: 26px;
+    height: 26px;
+    font-size: 14px;
   }
-
-  .summary-number {
-    font-size: 20px;
+  
+  .calendar-grid-v2 {
+    gap: 3px;
   }
-
-  .summary-label {
+  
+  .calendar-day-v2 {
+    height: 32px;
+    min-width: 32px;
+  }
+  
+  .day-number-v2 {
     font-size: 11px;
   }
-
-  .calendar-legend {
-    gap: 12px;
-    padding: 10px;
-  }
-
-  .legend-item {
-    font-size: 11px;
+  
+  .weekday-header-v2 {
+    font-size: 10px;
+    padding: 3px 1px;
   }
 }
 
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  .calendar-header {
-    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+/* ✅ KICHIK EKRANLAR - 320px+ */
+@media (max-width: 320px) {
+  .calendar-day-v2 {
+    height: 28px;
+    min-width: 28px;
   }
-
-  .calendar-summary {
-    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+  
+  .day-number-v2 {
+    font-size: 10px;
   }
-
-  .circle-inner {
-    background: #1f2937;
+  
+  .weekday-header-v2 {
+    font-size: 9px;
   }
-}
-
-/* Performance Optimizations */
-.calendar-day {
-  will-change: transform;
-  backface-visibility: hidden;
-  transform: translateZ(0);
-}
-
-/* Accessibility */
-@media (prefers-reduced-motion: reduce) {
-  .calendar-day,
-  .calendar-nav-btn,
-  .today-indicator {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
+  
+  .calendar-grid-v2 {
+    gap: 2px;
   }
 }
