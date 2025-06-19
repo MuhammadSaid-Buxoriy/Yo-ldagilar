@@ -284,6 +284,32 @@ class APIService {
     return this.apiCall(`/stats/monthly/${userId}`);
   }
 
+    // =====================================================
+  // ✅ YANGI: OYLIK KALENDAR UCHUN STATISTIKA
+  // =====================================================
+
+  static async getUserMonthlyStatistics(userId, year, month) {
+    try {
+      const params = new URLSearchParams({
+        year: year.toString(),
+        month: month.toString()
+      });
+
+      const endpoint = `/users/${userId}/statistics/monthly?${params.toString()}`;
+      console.log(`📅 Getting monthly stats for ${year}-${month}`);
+      
+      const response = await this.apiCall(endpoint);
+      return response;
+    } catch (error) {
+      console.error('Failed to get monthly statistics:', error);
+      
+      // ✅ FALLBACK - bo'sh ma'lumot qaytarish
+      return {
+        daily_stats: []
+      };
+    }
+  }
+  
   // =====================================================
   // ADMIN FUNCTIONS
   // =====================================================
