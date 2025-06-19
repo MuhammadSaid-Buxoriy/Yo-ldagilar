@@ -35,7 +35,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   / REMOVED: display: flex; place-items: center; /
   / REMOVED: min-width: 320px; min-height: 100vh; */
-}
+
 
 /* Professional animations */
 @keyframes spin {

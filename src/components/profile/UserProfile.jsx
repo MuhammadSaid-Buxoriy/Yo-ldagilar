@@ -1,9 +1,11 @@
-// components/profile/UserProfile.jsx - API DATA FIRST VERSION + Ulashish optimallashtirilgan
+// components/profile/UserProfile.jsx - API DATA FIRST VERSION + Ulashish optimallashtirilgan + ThemeToggle
 import { useState, useEffect, useCallback } from "react";
 import { useTelegram } from "../../hooks/useTelegram";
 import APIService from "../../services/api";
 import "./UserProfile.css";
 import { ACHIEVEMENT_BADGES } from "../leaderboard/Leaderboard";
+import ThemeToggle from '../ui/ThemeToggle';
+import '../ui/ThemeToggle.css';
 
 const UserProfile = ({ isOwnProfile = true, userId = null }) => {
   const { hapticFeedback, showAlert, tg } = useTelegram();
@@ -242,7 +244,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
   );
 };
 
-const ProfileHeader = ({ user, stats, onShare }) => {
+const ProfileHeader = ({ user, stats, onShare, isOwnProfile }) => {
   // ✅ User display name helper (lokalni)
   const getUserDisplayName = () => {
     if (!user) return "Unknown User";
@@ -339,7 +341,10 @@ const ProfileHeader = ({ user, stats, onShare }) => {
   return (
     <div className="profile-header">
       <div className="profile-header-content">
-        {/* ✅ Share tugmasi (o'zgarishsiz) */}
+        {/* ✅ YANGI: Theme Toggle Button - faqat o'z profilida, chap tomonda */}
+        {isOwnProfile && <ThemeToggle />}
+
+        {/* ✅ Share tugmasi (o'zgarishsiz, o'ng tomonda) */}
         <button
           onClick={onShare}
           className="share-icon-button"
@@ -629,8 +634,6 @@ const StatisticsSection = ({ stats }) => {
             </div>
           ))}
         </div>
-
-
       </div>
     </div>
   );

@@ -1,0 +1,91 @@
+/* components/ui/ThemeToggle.css */
+
+.theme-toggle-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--primary-color);
+    z-index: 10;
+  }
+  
+  .theme-toggle-button:hover {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  }
+  
+  .theme-toggle-button:active {
+    transform: translateY(0);
+  }
+  
+  /* Dark theme styles */
+  :root.dark-theme {
+    --primary-color: #60a5fa;
+    --primary-hover: #3b82f6;
+    --success-color: #34d399;
+    --danger-color: #f87171;
+    --warning-color: #fbbf24;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    --bg-primary: #1f2937;
+    --bg-secondary: #111827;
+    --bg-tertiary: #374151;
+    --border-color: #374151;
+  }
+  
+  /* Light theme styles (default) */
+  :root.light-theme {
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --border-color: #e5e7eb;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 480px) {
+    .theme-toggle-button {
+      top: 16px;
+      left: 16px;
+      width: 24px;
+      height: 24px;
+    }
+    
+    .theme-toggle-button svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+  
+  @media (max-width: 380px) {
+    .theme-toggle-button {
+      top: 14px;
+      left: 14px;
+      width: 22px;
+      height: 22px;
+    }
+    
+    .theme-toggle-button svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
