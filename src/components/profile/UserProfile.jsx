@@ -4,6 +4,7 @@ import { useTelegram } from "../../hooks/useTelegram";
 import APIService from "../../services/api";
 import "./UserProfile.css";
 import { ACHIEVEMENT_BADGES } from "../leaderboard/Leaderboard";
+import MonthlyCalendar from "./MonthlyCalendar";
 
 const UserProfile = ({ isOwnProfile = true, userId = null }) => {
   const { hapticFeedback, showAlert, tg } = useTelegram();
@@ -232,7 +233,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       />
 
       <div className="profile-content">
-        <StatisticsSection stats={stats} />
+        <StatisticsSection stats={stats} userId={userId} />
         <AchievementsSection
           stats={stats}
           achievementsProgress={achievementsProgress}
@@ -402,7 +403,7 @@ const StatCard = ({ label, value, icon }) => (
 );
 
 // ✅ TUZATILGAN: StatisticsSection component'da haftalik logic
-const StatisticsSection = ({ stats }) => {
+const StatisticsSection = ({ stats, userId }) => {
   const dailyCompleted = stats?.today?.completed || 0;
   const dailyPercent = Math.round((dailyCompleted / 10) * 100);
 
@@ -630,8 +631,10 @@ const StatisticsSection = ({ stats }) => {
           ))}
         </div>
 
-
       </div>
+
+      {/* ✅ OYLIK KALENDAR QO'SHILDI */}
+      <MonthlyCalendar userId={userId} stats={stats} />
     </div>
   );
 };
