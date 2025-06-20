@@ -23,14 +23,14 @@ const TASKS_CONFIG = [
   {
     id: 3,
     title: "Qur'on tinglash",
-    description: "Kamida 1/114 qism",
+    description: "1/114 qism",
     icon: "audio",
     type: "simple",
   },
   {
     id: 4,
     title: "Ehson qilish",
-    description: "1000 so'mdan ko'p",
+    description: "500 so'm +",
     icon: "donate",
     type: "simple",
   },
@@ -57,7 +57,7 @@ const TASKS_CONFIG = [
   },
   {
     id: 7,
-    title: "Audio kitob",
+    title: "Audio kitob/Podkast",
     description: "Kamida 30 daqiqa",
     icon: "headphones",
     type: "simple",
@@ -78,8 +78,8 @@ const TASKS_CONFIG = [
   },
   {
     id: 10,
-    title: "Sport/Mashqlar",
-    description: "Yugurish yoki mashqlar",
+    title: "Sport",
+    description: "Yugurish, sayr qilish yoki mashqlar",
     icon: "activity",
     type: "input",
     inputConfig: {
@@ -118,17 +118,17 @@ const DailyTasks = () => {
 
       // Backend dan bugungi kun ma'lumotlarini olish
       const response = await APIService.apiCall(`/tasks/daily/${user.id}`);
-      
+
       console.log("📊 Backend dan kelgan ma'lumot:", response);
 
       if (response.success) {
         setDailyData(response);
         setTodayStats(response.today || response);
-        
+
         // ✅ ASOSIY TUZATISH: Backend dan kelgan vazifa holatlarini o'rnatish
         const loadedTasks = {};
         const loadedInputs = {};
-        
+
         // Har bir vazifa uchun completed holatini tekshirish
         if (response.tasks && Array.isArray(response.tasks)) {
           response.tasks.forEach((task) => {
@@ -138,13 +138,13 @@ const DailyTasks = () => {
             }
           });
         }
-        
+
         // Pages va distance ma'lumotlarini o'rnatish
         if (response.pages_read > 0) {
           loadedTasks[5] = true; // Kitob o'qish vazifasi
           loadedInputs[5] = response.pages_read;
         }
-        
+
         if (response.distance_km > 0) {
           loadedTasks[10] = true; // Sport vazifasi
           loadedInputs[10] = response.distance_km;
@@ -153,24 +153,24 @@ const DailyTasks = () => {
         setTasks(loadedTasks);
         setTaskInputs(loadedInputs);
         setHasChanges(false);
-        
+
         console.log("✅ Vazifalar yuklandi:", loadedTasks);
         console.log("✅ Input ma'lumotlar:", loadedInputs);
       }
     } catch (error) {
       console.error("❌ Vazifalarni yuklashda xatolik:", error);
       // Xatolik bo'lsa ham ishni davom ettirish
-      setDailyData({ 
-        success: true, 
-        tasks: [], 
-        completedCount: 0, 
-        pages_read: 0, 
-        distance_km: 0 
+      setDailyData({
+        success: true,
+        tasks: [],
+        completedCount: 0,
+        pages_read: 0,
+        distance_km: 0,
       });
       setTodayStats({
         completed: 0,
         pages_read: 0,
-        distance_km: 0
+        distance_km: 0,
       });
     } finally {
       setLoading(false);
@@ -181,8 +181,8 @@ const DailyTasks = () => {
   const handleTaskToggle = useCallback(
     (taskId) => {
       hapticFeedback("light");
-      
-      setTasks(prev => {
+
+      setTasks((prev) => {
         const newTasks = { ...prev };
         if (newTasks[taskId]) {
           delete newTasks[taskId];
@@ -199,7 +199,7 @@ const DailyTasks = () => {
         }
         return newTasks;
       });
-      
+
       setHasChanges(true);
     },
     [hapticFeedback]
@@ -256,8 +256,8 @@ const DailyTasks = () => {
         shart_8: tasks[8] ? 1 : 0,
         shart_9: tasks[9] ? 1 : 0,
         shart_10: tasks[10] ? 1 : 0,
-        pages_read: tasks[5] ? (taskInputs[5] || 0) : 0,
-        distance_km: tasks[10] ? (taskInputs[10] || 0) : 0,
+        pages_read: tasks[5] ? taskInputs[5] || 0 : 0,
+        distance_km: tasks[10] ? taskInputs[10] || 0 : 0,
       };
 
       console.log("📤 Yuborilayotgan ma'lumot:", submitData);
@@ -269,7 +269,9 @@ const DailyTasks = () => {
       if (response.success !== false) {
         hapticFeedback("success");
         const totalPoints = response.totalPoints || Object.keys(tasks).length;
-        showAlert(`✅ Muvaffaqiyatli saqlandi!\n🎯 Bugungi ball: ${totalPoints}/10`);
+        showAlert(
+          `✅ Muvaffaqiyatli saqlandi!\n🎯 Bugungi ball: ${totalPoints}/10`
+        );
 
         // ✅ MUHIM: Yuborish muvaffaqiyatli bo'lsa, qayta yuklash
         await loadTodayTasks();

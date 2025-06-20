@@ -674,7 +674,7 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
     {
       id: "consistent",
       title: "Faol",
-      description: "21 kun ketma-ket faol bo'lish",
+      description: "21 kun faol bo'lish",
       target: 21,
       current: getAchievementCurrent("consistent", stats?.all_time?.total_days), // ✅ Backend + fallback
       icon: "zap",
@@ -683,8 +683,8 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
     {
       id: "reader",
       title: "Kitobxon",
-      description: "10,000 bet kitob o'qish",
-      target: 10000,
+      description: "6,000 bet kitob o'qish",
+      target: 6000,
       current: getAchievementCurrent("reader", stats?.all_time?.total_pages), // ✅ Backend + fallback
       icon: "book",
       color: "#3b82f6",

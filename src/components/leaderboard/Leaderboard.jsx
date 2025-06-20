@@ -803,7 +803,7 @@ const LeaderboardItem = ({
         <div className="participant-info">
           <div className="participant-name">
             {participant.name}
-            {isCurrentUser && <span className="you-badge">Sen</span>}
+            {isCurrentUser && <span className="you-badge">Siz</span>}
             {participant.achievements &&
               participant.achievements.length > 0 && (
                 <div className="achievement-badges">
