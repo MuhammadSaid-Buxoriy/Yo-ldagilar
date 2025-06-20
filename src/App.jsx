@@ -187,7 +187,7 @@ const LoadingScreen = () => (
           </svg>
         </div>
       </div>
-      <h1 className="loading-title">Yoldagilar</h1>
+      <h1 className="loading-title">Yo'ldagilar</h1>
       <div className="loading-dots">
         <span></span>
         <span></span>
