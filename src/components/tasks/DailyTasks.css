@@ -306,7 +306,7 @@
 
 .task-checkbox:hover {
   border-color: var(--primary-color);
-  background: red;
+  background: #2563eb;
 }
 
 .checkbox-checked {
