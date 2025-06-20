@@ -114,6 +114,11 @@
   transition: all 0.3s ease;
 }
 
+.auth-logo-mini {
+  width: 48px !important;
+  height: 48px !important;
+}
+
 .auth-logo:hover {
   transform: scale(1.05);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
@@ -476,8 +481,6 @@
   }
 
   .auth-logo {
-    width: 56px;
-    height: 56px;
     margin-bottom: 12px;
   }
 

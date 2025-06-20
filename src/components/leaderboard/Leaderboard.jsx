@@ -547,13 +547,13 @@ const LeaderboardHeader = ({ leaderboardData, onRefresh, refreshing }) => (
       </button>
 
       <div className="bot-section">
-        <div className="auth-logo">
+        <div className="auth-logo auth-logo-mini">
           <img
             src={photoUrl}
             alt={"Yo'ldagilar logo"}
             className="avatar-image profile-avatar auth-logo-img"
-            width={80}
-            height={80}
+            width={48}
+            height={48}
             onError={(e) => {
               // If image fails to load, hide it and show placeholder
               e.target.style.display = "none";
