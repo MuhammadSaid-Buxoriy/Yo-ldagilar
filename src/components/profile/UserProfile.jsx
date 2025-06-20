@@ -920,7 +920,10 @@ const LoadingSkeleton = () => (
       <div className="loading-skeleton">
         <div className="skeleton-avatar"></div>
         <div className="skeleton-text"></div>
-        <div className="skeleton-stats"></div>
+        <div className="skeleton-stats-container">
+          <div className="skeleton-stats"></div>
+          <div className="skeleton-stats"></div>
+        </div>
       </div>
     </div>
   </div>

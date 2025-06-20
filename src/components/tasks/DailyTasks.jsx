@@ -652,13 +652,17 @@ const CheckIcon = () => (
   </svg>
 );
 
-const LoadingSkeleton = () => (
+export const LoadingSkeleton = () => (
   <div className="tasks-container">
     <div className="tasks-header">
       <div className="loading-skeleton">
         <div className="skeleton-title"></div>
         <div className="skeleton-progress"></div>
-        <div className="skeleton-stats"></div>
+        <div className="skeleton-stats-container">
+          <div className="skeleton-stats"></div>
+          <div className="skeleton-stats"></div>
+          <div className="skeleton-stats"></div>
+        </div>
       </div>
     </div>
   </div>

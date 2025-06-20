@@ -443,7 +443,7 @@
 }
 
 .loading-skeleton {
-  padding: 20px;
+  padding: 20px 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -481,7 +481,7 @@
 .skeleton-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 12px !important;
 }
 
 .skeleton-stats::before,
