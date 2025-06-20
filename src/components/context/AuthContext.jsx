@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
           setLoading(false);
         })
         .catch((err) => {
-          setError(err?.message || "User ma’lumotini olishda xatolik.");
+          setError(err?.message || "User ma'lumotini olishda xatolik.");
           setLoading(false);
         });
     }

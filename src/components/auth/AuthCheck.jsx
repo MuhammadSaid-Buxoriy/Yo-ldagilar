@@ -286,7 +286,7 @@ const AuthCheck = ({ children }) => {
               <img
                 src={photoUrl}
                 alt={"Yo'ldagilar logo"}
-                className="avatar-image profile-avatar"
+                className="avatar-image profile-avatar auth-logo-img"
                 width={80}
                 height={80}
                 onError={(e) => {

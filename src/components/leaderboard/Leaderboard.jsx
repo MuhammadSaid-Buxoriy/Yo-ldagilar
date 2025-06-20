@@ -5,6 +5,7 @@ import UserProfile from "../profile/UserProfile";
 import APIService from "../../services/api";
 import "./Leaderboard.css";
 import { useAuth } from "../context/AuthContext";
+import photoUrl from "../../assets/image.png";
 
 /**
  * Format score value based on type
@@ -547,16 +548,19 @@ const LeaderboardHeader = ({ leaderboardData, onRefresh, refreshing }) => (
 
       <div className="bot-section">
         <div className="bot-avatar">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-          </svg>
+          <div className="auth-logo">
+            <img
+              src={photoUrl}
+              alt={"Yo'ldagilar logo"}
+              className="avatar-image profile-avatar auth-logo-img"
+              width={80}
+              height={80}
+              onError={(e) => {
+                // If image fails to load, hide it and show placeholder
+                e.target.style.display = "none";
+              }}
+            />
+          </div>
         </div>
         <h1 className="bot-title">Yo'ldagilar</h1>
         <p className="bot-subtitle">Yo'lga chiq - Yo'ldan chiqma!</p>
