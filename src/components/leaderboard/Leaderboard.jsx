@@ -713,7 +713,6 @@ const LeaderboardItem = ({
   typeConfig,
   onClick,
 }) => {
-  const isTopThree = index < 3;
   const isGold = index === 0;
   const isSilver = index === 1;
   const isBronze = index === 2;

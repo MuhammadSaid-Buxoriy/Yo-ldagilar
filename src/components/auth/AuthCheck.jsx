@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useTelegram } from "../../hooks/useTelegram";
 import APIService from "../../services/api";
 import "./AuthCheck.css";
+import photoUrl from "../../assets/image.png";
 
 const AuthCheck = ({ children }) => {
   const { user, isReady, tg } = useTelegram();
@@ -282,16 +283,17 @@ const AuthCheck = ({ children }) => {
           <div className="auth-header-decoration"></div>
           <div className="auth-header-content">
             <div className="auth-logo">
-              <svg
-                width="28"
-                height="28"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-              </svg>
+              <img
+                src={photoUrl}
+                alt={"Yo'ldagilar logo"}
+                className="avatar-image profile-avatar"
+                width={80}
+                height={80}
+                onError={(e) => {
+                  // If image fails to load, hide it and show placeholder
+                  e.target.style.display = "none";
+                }}
+              />
             </div>
             <h1 className="auth-header-title">Yo'ldagilar</h1>
             <p className="auth-header-subtitle">
