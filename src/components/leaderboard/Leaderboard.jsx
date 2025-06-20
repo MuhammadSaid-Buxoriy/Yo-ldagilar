@@ -547,20 +547,18 @@ const LeaderboardHeader = ({ leaderboardData, onRefresh, refreshing }) => (
       </button>
 
       <div className="bot-section">
-        <div className="bot-avatar">
-          <div className="auth-logo">
-            <img
-              src={photoUrl}
-              alt={"Yo'ldagilar logo"}
-              className="avatar-image profile-avatar auth-logo-img"
-              width={80}
-              height={80}
-              onError={(e) => {
-                // If image fails to load, hide it and show placeholder
-                e.target.style.display = "none";
-              }}
-            />
-          </div>
+        <div className="auth-logo">
+          <img
+            src={photoUrl}
+            alt={"Yo'ldagilar logo"}
+            className="avatar-image profile-avatar auth-logo-img"
+            width={80}
+            height={80}
+            onError={(e) => {
+              // If image fails to load, hide it and show placeholder
+              e.target.style.display = "none";
+            }}
+          />
         </div>
         <h1 className="bot-title">Yo'ldagilar</h1>
         <p className="bot-subtitle">Yo'lga chiq - Yo'ldan chiqma!</p>
