@@ -608,6 +608,11 @@ class APIService {
     return new Date(date).toISOString().split("T")[0];
   }
 
+  static async getUserTodayTasks(userId) {
+    return this.apiCall(`/tasks/daily/${userId}`);
+  }
+  
+
   static getTodayDate() {
     return this.formatDate(new Date());
   }

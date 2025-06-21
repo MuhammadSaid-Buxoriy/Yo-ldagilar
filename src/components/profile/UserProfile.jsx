@@ -15,6 +15,9 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [achievementsProgress, setAchievementsProgress] = useState([]);
+  const [todayTasks, setTodayTasks] = useState([]); // 🔥 YANGI: Bugungi vazifalar
+  
+
 
   useEffect(() => {
     if (userId) {
@@ -33,6 +36,10 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
           APIService.getUserStatistics(userId),
           APIService.getUserProfile(userId),
         ]);
+
+        const todayTasksResponse = await APIService.getUserTodayTasks(userId);
+        setTodayTasks(todayTasksResponse?.tasks || []);
+
 
         setStats(statsResponse);
         setProfileUser(userResponse.user);
@@ -125,14 +132,13 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
 
 // Bugungi vazifalar listi
 let taskList = "";
-if (stats?.today?.tasks && Array.isArray(stats.today.tasks)) {
+if (todayTasks && todayTasks.length > 0) {
   taskList = TASKS_CONFIG.map((task, i) => {
-    const doneTask = stats.today.tasks.find((t) => t.id === task.id);
+    const doneTask = todayTasks.find((t) => t.id === task.id);
     const done = doneTask?.completed ? "✅" : "❌";
     return `${i + 1}. ${task.title} - ${done}`;
   }).join("\n");
 } else {
-  // Agar ma'lumot bo'lmasa, barchasini ❌ deb ko'rsat
   taskList = TASKS_CONFIG.map((task, i) => `${i + 1}. ${task.title} - ❌`).join("\n");
 }
 
