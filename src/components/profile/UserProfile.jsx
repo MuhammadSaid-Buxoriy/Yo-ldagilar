@@ -5,6 +5,8 @@ import APIService from "../../services/api";
 import "./UserProfile.css";
 import { ACHIEVEMENT_BADGES } from "../leaderboard/Leaderboard";
 import MonthlyCalendar from "./MonthlyCalendar";
+import { TASKS_CONFIG } from "../tasks/DailyTasks";
+
 
 const UserProfile = ({ isOwnProfile = true, userId = null }) => {
   const { hapticFeedback, showAlert, tg } = useTelegram();
@@ -117,21 +119,42 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       const totalDistance = stats.all_time?.total_distance || 0;
       const totalDays = stats.all_time?.total_days || 0;
 
-      const shareText = `🚀 ${isOwnProfile ? "Mening Yo'ldagilar challenge natijalarim" : `${userName}ning Yo'ldagilar challenge natijalari`}:
+      
+      const userName = getUserDisplayName(profileUser);
+      const fullNameTitle = `${userName}ning Yo'ldagilar challenge natijalari`;
 
-📈 Bugungi unumdorlik: ${dailyPercent}% (${dailyCompleted}/10 vazifa)
-📚 Bugun o'qilgan betlar: ${stats.today?.pages_read || 0} bet
-🏃‍♂️ Bugun yugurgan masofa: ${stats.today?.distance_km || 0} km
+// Bugungi vazifalar listi
+let taskList = "";
+if (stats?.today?.tasks && Array.isArray(stats.today.tasks)) {
+  taskList = TASKS_CONFIG.map((task, i) => {
+    const doneTask = stats.today.tasks.find((t) => t.id === task.id);
+    const done = doneTask?.completed ? "✅" : "❌";
+    return `${i + 1}. ${task.title} - ${done}`;
+  }).join("\n");
+} else {
+  // Agar ma'lumot bo'lmasa, barchasini ❌ deb ko'rsat
+  taskList = TASKS_CONFIG.map((task, i) => `${i + 1}. ${task.title} - ❌`).join("\n");
+}
 
-🏆 Umumiy yutuqlar:
-⭐ Jami ball: ${totalPoints.toLocaleString()} ball
-📖 Jami betlar: ${totalPages.toLocaleString()} bet
-🏃‍♂️ Umumiy masofa: ${totalDistance} km
-📅 Faol kunlar: ${totalDays} kun
+const shareText =
+  `🚀 ${fullNameTitle}:\n\n` +
+  
+  `📈 Bugungi unumdorlik: ${dailyPercent}% (${dailyCompleted}/10 vazifa)\n` +
+  `📚 Bugun o'qilgan betlar: ${stats.today?.pages_read || 0} bet\n` +
+  `🏃‍♂️ Bugun yugurgan masofa: ${stats.today?.distance_km || 0} km\n\n` +
+  
+  `Vazifalar:\n${taskList}\n\n` +
+  
+  `🏆 Umumiy yutuqlar:\n` +
+  `⭐ Jami ball: ${totalPoints.toLocaleString()} ball\n` +
+  `📖 Jami betlar: ${totalPages.toLocaleString()} bet\n` +
+  `🏃‍♂️ Umumiy masofa: ${totalDistance} km\n` +
+  `📅 Faol kunlar: ${totalDays} kun\n\n` +
+  
+  `🔥 Yo'lga chiq-Yo'ldan chiqma!\n\n` +
+  
+  `👉🏻 https://t.me/yuldagilar_bot`;
 
-🔥 Yo'lga chiq-Yo'ldan chiqma! 
-
-👉🏻 https://t.me/yuldagilar_bot`;
 
       // Share strategiyalari prioritet bo'yicha
       const shareStrategies = [
