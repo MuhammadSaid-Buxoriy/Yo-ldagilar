@@ -645,3 +645,4 @@ export const LoadingSkeleton = () => (
 );
 
 export default DailyTasks;
+export { TASKS_CONFIG };

@@ -120,8 +120,8 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       const totalDays = stats.all_time?.total_days || 0;
 
       
-      const userName = getUserDisplayName(profileUser);
-      const fullNameTitle = `${userName}ning Yo'ldagilar challenge natijalari`;
+      const fullNameTitle = `${getUserDisplayName(profileUser)}ning Yo'ldagilar challenge natijalari`;
+
 
 // Bugungi vazifalar listi
 let taskList = "";
