@@ -1,4 +1,4 @@
-// components/profile/MonthlyCalendar.jsx - DARK MODE + HAQIQIY MA'LUMOTLAR
+// components/profile/MonthlyCalendar.jsx - API BILAN TO'LIQ ISHLAYDI
 import { useState, useEffect } from "react";
 import APIService from "../../services/api";
 import "./MonthlyCalendar.css";
@@ -20,36 +20,67 @@ const MonthlyCalendar = ({ userId, stats }) => {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth() + 1;
       
-      console.log(`📅 Loading data for ${year}-${month.toString().padStart(2, '0')}`);
+      console.log(`📅 Loading calendar data for ${year}-${month.toString().padStart(2, '0')}`);
       
-      // API dan ma'lumot olishga harakat qilish
+      // ✅ TUZATISH 1: getUserStatistics'dan calendar parametri bilan ma'lumot olish
       let response;
       try {
-        response = await APIService.getUserMonthlyStatistics(userId, year, month);
-        console.log('📥 API Response:', response);
+        response = await APIService.getUserStatistics(userId, { 
+          year, 
+          month,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone 
+        });
+        console.log('📥 Calendar API Response:', response);
       } catch (error) {
-        console.warn("API monthly stats not available", error);
-        response = { daily_stats: [] };
+        console.warn("Calendar API not available, using alternative approach", error);
+        
+        // ✅ TUZATISH 2: Progress history'dan ma'lumot olish (fallback)
+        try {
+          const historyResponse = await APIService.getUserProgressHistory(userId, 31);
+          console.log('📥 History fallback response:', historyResponse);
+          
+          // History formatini calendar formatiga o'tkazish
+          const historyData = historyResponse.history || [];
+          response = {
+            calendar: {
+              days: historyData.map(day => ({
+                date: new Date(day.date).getDate(),
+                fullDate: day.date,
+                hasProgress: day.total_points > 0,
+                completionPercentage: Math.round((day.total_points / 10) * 100),
+                totalPoints: day.total_points,
+                pagesRead: day.pages_read,
+                distanceKm: day.distance_km
+              }))
+            }
+          };
+        } catch (historyError) {
+          console.warn("History API also failed", historyError);
+          response = { calendar: { days: [] } };
+        }
       }
       
-      // Backend ma'lumotlarini object formatiga o'tkazish
+      // ✅ TUZATISH 3: Ma'lumotlarni to'g'ri formatda object'ga o'tkazish
       const dataMap = {};
-      if (response.daily_stats && Array.isArray(response.daily_stats)) {
-        response.daily_stats.forEach(day => {
+      
+      // Backend calendar formatidan ma'lumot olish
+      if (response.calendar && response.calendar.days) {
+        response.calendar.days.forEach(day => {
           try {
-            const dayKey = new Date(day.date).getDate();
+            const dayKey = day.date || new Date(day.fullDate).getDate();
             dataMap[dayKey] = {
-              completed: day.completed || 0,
-              total: day.total || 10
+              completed: day.totalPoints || 0,
+              total: 10,
+              completionPercentage: day.completionPercentage || Math.round((day.totalPoints / 10) * 100)
             };
-            console.log(`Day ${dayKey}: ${day.completed}/${day.total || 10}`);
+            console.log(`Day ${dayKey}: ${day.totalPoints || 0}/10 (${dataMap[dayKey].completionPercentage}%)`);
           } catch (dateError) {
-            console.warn('Date parsing error:', day.date);
+            console.warn('Date parsing error:', day);
           }
         });
       }
       
-      // ✅ BUGUNGI KUN MA'LUMOTINI QO'SHISH (faqat joriy oy bo'lsa)
+      // ✅ TUZATISH 4: Bugungi kun ma'lumotini qo'shish (faqat joriy oy bo'lsa)
       const today = new Date();
       const isCurrentMonth = today.getFullYear() === year && (today.getMonth() + 1) === month;
       
@@ -57,13 +88,15 @@ const MonthlyCalendar = ({ userId, stats }) => {
         const todayDate = today.getDate();
         dataMap[todayDate] = {
           completed: stats.today.completed || 0,
-          total: 10
+          total: 10,
+          completionPercentage: Math.round(((stats.today.completed || 0) / 10) * 100)
         };
         console.log(`Today (${todayDate}): ${stats.today.completed}/10`);
       }
       
-      console.log('📊 Final data map:', dataMap);
+      console.log('📊 Final calendar data map:', dataMap);
       setMonthlyData(dataMap);
+      
     } catch (error) {
       console.error("Failed to load monthly data:", error);
       setMonthlyData({});
@@ -72,55 +105,52 @@ const MonthlyCalendar = ({ userId, stats }) => {
     }
   };
 
-  // ✅ TO'G'RI HAFTA KUNLARI TARTIBINI OLISH - TUZATILGAN
+  // ✅ TUZATILGAN: Hafta kunlari tartibini to'g'ri olish
   const getDaysInMonth = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     
-    // Oyning birinchi va oxirgi kunini topish
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     
-    // ✅ UZBEK HAFTA TARTIBIGA O'TKAZISH (Dushanba = 0, Yakshanba = 6)
+    // ✅ Uzbek hafta tartibiga o'tkazish (Dushanba = 0)
     const startDayOfWeek = firstDay.getDay(); // 0=Yak, 1=Du, 2=Se...
-    const uzbekStartDay = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1; // Uzbek formatiga
+    const uzbekStartDay = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
     
     const daysInMonth = lastDay.getDate();
     const calendarDays = [];
     
-    // ✅ TUZATISH: Oldingi oydan bo'sh joylarni to'ldirish
+    // Oldingi oydan bo'sh joylar
     for (let i = 0; i < uzbekStartDay; i++) {
       calendarDays.push(null);
     }
     
-    // ✅ TUZATISH: Joriy oyning kunlarini qo'shish
+    // Joriy oyning kunlari
     for (let day = 1; day <= daysInMonth; day++) {
       calendarDays.push(day);
     }
     
-    // ✅ YANGI: Qator tugallanishi uchun keyingi oydan kunlar qo'shish
+    // Qator tugallanishi uchun keyingi oydan kunlar
     const totalCells = calendarDays.length;
     const remainingCells = totalCells % 7;
     if (remainingCells > 0) {
       const nextMonthDays = 7 - remainingCells;
       for (let day = 1; day <= nextMonthDays; day++) {
-        calendarDays.push(null); // Keyingi oy kunlari uchun null
+        calendarDays.push(null);
       }
     }
     
-    console.log(`📅 Calendar for ${year}-${month + 1}:`, {
+    console.log(`📅 Calendar structure for ${year}-${month + 1}:`, {
       firstDay: firstDay.toDateString(),
       uzbekStartDay,
       daysInMonth,
-      totalDays: calendarDays.length,
-      firstWeek: calendarDays.slice(0, 7),
-      lastWeek: calendarDays.slice(-7)
+      totalDays: calendarDays.length
     });
     
     return calendarDays;
   };
 
-  // ✅ BUGUNGI KUNNI TO'G'RI ANIQLASH
+  // ✅ Bugungi kunni to'g'ri aniqlash
   const isToday = (day) => {
     if (!day) return false;
     
@@ -136,24 +166,24 @@ const MonthlyCalendar = ({ userId, stats }) => {
     );
   };
 
-  // ✅ KUN FOIZINI HISOBLASH
+  // ✅ TUZATILGAN: Kun foizini hisoblash
   const getDayPercentage = (day) => {
     if (!day || !monthlyData[day]) return 0;
     
     const dayData = monthlyData[day];
-    return Math.round((dayData.completed / dayData.total) * 100);
+    return dayData.completionPercentage || Math.round((dayData.completed / dayData.total) * 100);
   };
 
-  // ✅ RANG LOGIKASI - SIZNING BERILGAN RANGLAR BILAN
+  // ✅ SIZNING BERILGAN RANGLAR - TO'G'RI LOGIKA
   const getProgressColor = (percent) => {
-    if (percent >= 90) return "#16ce40"; // yashil
-    if (percent >= 80) return "#FFFF00"; // sariq
-    if (percent >= 50) return "#FF8000"; // to'q sariq
-    if (percent > 0) return "#dc2626";   // qizil
-    return "rgba(255, 255, 255, 0.2)";  // neytral (dark mode uchun)
+    if (percent >= 90) return "#16ce40"; // yashil - 90%+
+    if (percent >= 80) return "#FFFF00"; // sariq - 80-89%
+    if (percent >= 50) return "#FF8000"; // to'q sariq - 50-79%
+    if (percent > 0) return "#dc2626";   // qizil - 1-49%
+    return "rgba(255, 255, 255, 0.2)";  // neytral - 0%
   };
 
-  // ✅ KUN STILINI OLISH - FAQAT HAQIQIY MA'LUMOTLAR UCHUN
+  // ✅ Kun stilini olish
   const getDayStyle = (day) => {
     const percentage = getDayPercentage(day);
     const borderColor = getProgressColor(percentage);
@@ -165,26 +195,30 @@ const MonthlyCalendar = ({ userId, stats }) => {
     };
   };
 
-  // ✅ OYNI O'ZGARTIRISH
+  // ✅ Oyni o'zgartirish
   const changeMonth = (direction) => {
     const newDate = new Date(currentDate);
     newDate.setMonth(currentDate.getMonth() + direction);
     setCurrentDate(newDate);
   };
 
-  // ✅ HAFTA KUNLARI (INGLIZCHA FORMATDA)
-  const weekDays = ["M", "T", "W", "T", "F", "S", "S"];
+  // ✅ Hafta kunlari
+  const weekDays = ["D", "S", "C", "P", "J", "S", "Y"]; // Du, Se, Ch, Pa, Ju, Sh, Ya
   
-  // ✅ OY NOMI
+  // ✅ Oy nomi
   const getMonthYear = () => {
-    const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+    const monthNames = [
+      'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun',
+      'Iyul', 'Avgust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr'
+    ];
+    const monthName = monthNames[currentDate.getMonth()];
     const year = currentDate.getFullYear();
-    return `${month}.${year}`;
+    return `${monthName} ${year}`;
   };
 
   return (
     <div className="monthly-calendar-dark">
-      {/* ✅ DARK MODE HEADER */}
+      {/* Header */}
       <div className="calendar-header-dark">
         <button 
           onClick={() => changeMonth(-1)}
@@ -207,7 +241,7 @@ const MonthlyCalendar = ({ userId, stats }) => {
         </button>
       </div>
 
-      {/* ✅ KALENDAR GRID */}
+      {/* Kalendar Grid */}
       <div className="calendar-grid-dark">
         {/* Hafta kunlari */}
         {weekDays.map(day => (
@@ -229,7 +263,7 @@ const MonthlyCalendar = ({ userId, stats }) => {
           return (
             <div 
               key={day} 
-              className={`calendar-day-dark ${todayClass}`}
+              className={`calendar-day-dark ${todayClass} ${dayStyle.hasData ? 'has-data' : ''}`}
               style={{
                 borderColor: dayStyle.borderColor,
                 borderWidth: dayStyle.borderWidth,
@@ -238,6 +272,16 @@ const MonthlyCalendar = ({ userId, stats }) => {
             >
               <span className="day-number-dark">{day}</span>
               {isToday(day) && <div className="today-dot"></div>}
+              {/* ✅ YANGI: Progress indicator */}
+              {dayStyle.hasData && (
+                <div 
+                  className="day-progress-indicator"
+                  style={{
+                    backgroundColor: getProgressColor(percentage),
+                    opacity: 0.3
+                  }}
+                ></div>
+              )}
             </div>
           );
         })}
@@ -248,6 +292,26 @@ const MonthlyCalendar = ({ userId, stats }) => {
           <div className="loading-spinner-dark"></div>
         </div>
       )}
+
+      {/* ✅ YANGI: Legend */}
+      <div className="calendar-legend">
+        <div className="legend-item">
+          <div className="legend-color" style={{ backgroundColor: "#16ce40" }}></div>
+          <span>90%+</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-color" style={{ backgroundColor: "#FFFF00" }}></div>
+          <span>80-89%</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-color" style={{ backgroundColor: "#FF8000" }}></div>
+          <span>50-79%</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-color" style={{ backgroundColor: "#dc2626" }}></div>
+          <span>1-49%</span>
+        </div>
+      </div>
     </div>
   );
 };

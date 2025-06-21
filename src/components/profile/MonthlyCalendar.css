@@ -1,286 +1,511 @@
-/* components/profile/MonthlyCalendar.css - DARK MODE + KICHIK EKRANLAR UCHUN */
+/* components/profile/MonthlyCalendar.css - YANGI FEATURES BILAN */
 
 /* ✅ ASOSIY KONTEYNER - DARK MODE */
 .monthly-calendar-dark {
-    background: #1f2937;
-    border-radius: 16px;
-    border: 1px solid #374151;
-    padding: 16px;
-    margin-top: 16px;
-    position: relative;
-    max-width: 100%;
-    min-width: 280px;
-    box-sizing: border-box;
+  background: #1f2937;
+  border-radius: 16px;
+  border: 1px solid #374151;
+  padding: 16px;
+  margin-top: 16px;
+  position: relative;
+  max-width: 100%;
+  min-width: 280px;
+  box-sizing: border-box;
+}
+
+/* ✅ DARK MODE HEADER */
+.calendar-header-dark {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.nav-button-dark {
+  background: transparent;
+  border: 1px solid #555;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  color: #fff;
+  transition: all 0.2s;
+  font-weight: bold;
+}
+
+.nav-button-dark:hover:not(:disabled) {
+  background: #374151;
+  border-color: #6b7280;
+  transform: scale(1.05);
+}
+
+.nav-button-dark:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.current-month-dark {
+  font-weight: 600;
+  color: #fff;
+  font-size: 18px;
+  text-align: center;
+  min-width: 140px;
+}
+
+/* ✅ KALENDAR GRID - RESPONSIVE */
+.calendar-grid-dark {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+/* ✅ HAFTA KUNLARI HEADER */
+.weekday-header-dark {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #9ca3af;
+  padding: 8px 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #374151;
+}
+
+/* ✅ BO'SH KUNLAR */
+.empty-day-dark {
+  height: 40px;
+}
+
+/* ✅ KALENDAR KUNLARI - YANGI DESIGN */
+.calendar-day-dark {
+  position: relative;
+  height: 40px;
+  width: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: transparent;
+  box-sizing: border-box;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* ✅ MA'LUMOT MAVJUD BO'LGAN KUNLAR */
+.calendar-day-dark.has-data {
+  border-width: 2px;
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ✅ KUN RAQAMI */
+.day-number-dark {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  z-index: 2;
+  position: relative;
+}
+
+/* ✅ PROGRESS INDICATOR - YANGI */
+.day-progress-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 12px;
+  z-index: 1;
+}
+
+/* ✅ BUGUNGI KUN - MAXSUS STIL */
+.calendar-day-dark.today-dark {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: #3b82f6;
+  animation: todayPulse 2s infinite;
+}
+
+.calendar-day-dark.today-dark .day-number-dark {
+  color: #60a5fa;
+  font-weight: 700;
+}
+
+@keyframes todayPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* ✅ BUGUNGI KUN NUQTASI */
+.today-dot {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: #60a5fa;
+  border-radius: 50%;
+  animation: dotPulse 1.5s infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ✅ HOVER EFFEKT */
+.calendar-day-dark:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 3;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ✅ LOADING SPINNER - DARK MODE */
+.calendar-loading-dark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  background: rgba(31, 41, 55, 0.9);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.loading-spinner-dark {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #374151;
+  border-top: 3px solid #60a5fa;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ✅ YANGI: LEGEND SECTION */
+.calendar-legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #374151;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ✅ MOBIL RESPONSIVE - 380px va undan kichik */
+@media (max-width: 380px) {
+  .monthly-calendar-dark {
+    padding: 12px;
+    border-radius: 12px;
+    min-width: 260px;
   }
   
-  /* ✅ DARK MODE HEADER */
   .calendar-header-dark {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-  
-  .nav-button-dark {
-    background: transparent;
-    border: 1px solid #555;
-    border-radius: 8px;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 16px;
-    color: #fff;
-    transition: all 0.2s;
-  }
-  
-  .nav-button-dark:hover:not(:disabled) {
-    background: #333;
-    border-color: #777;
-  }
-  
-  .nav-button-dark:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    margin-bottom: 12px;
   }
   
   .current-month-dark {
-    font-weight: 600;
-    color: #fff;
     font-size: 16px;
-    text-align: center;
-    min-width: 100px;
+    min-width: 120px;
   }
   
-  /* ✅ KALENDAR GRID - KICHIK EKRANLAR UCHUN */
+  .nav-button-dark {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+  }
+  
   .calendar-grid-dark {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+  
+  .calendar-day-dark {
+    height: 36px;
+    width: 36px;
+    border-radius: 10px;
+  }
+  
+  .day-number-dark {
+    font-size: 12px;
+  }
+  
+  .weekday-header-dark {
+    font-size: 12px;
+    padding: 6px 2px;
+  }
+  
+  .today-dot {
+    width: 3px;
+    height: 3px;
+    bottom: 3px;
+  }
+  
+  .legend-item {
+    font-size: 10px;
     gap: 4px;
   }
   
-  /* ✅ HAFTA KUNLARI HEADER - KICHIK */
-  .weekday-header-dark {
-    text-align: center;
-    font-size: 12px;
-    font-weight: 600;
-    color: #888;
-    padding: 6px 2px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  .legend-color {
+    width: 10px;
+    height: 10px;
   }
   
-  /* ✅ BO'SH KUNLAR */
-  .empty-day-dark {
-    height: 36px;
+  .calendar-legend {
+    gap: 12px;
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+}
+
+/* ✅ KICHIK EKRANLAR - 320px va undan kichik */
+@media (max-width: 320px) {
+  .monthly-calendar-dark {
+    min-width: 240px;
+    padding: 10px;
   }
   
-  /* ✅ KALENDAR KUNLARI - KICHIK DUMALOQ (360px+ UCHUN) */
   .calendar-day-dark {
-    position: relative;
-    height: 36px;
-    width: 36px;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    background: transparent;
-    box-sizing: border-box;
-    margin: 0 auto;
+    height: 32px;
+    width: 32px;
+    border-radius: 8px;
   }
   
-  /* ✅ KUN RAQAMI - KICHIK */
   .day-number-dark {
-    font-size: 12px;
-    font-weight: 500;
-    color: #fff;
-    z-index: 2;
-    position: relative;
+    font-size: 11px;
   }
   
-  /* ✅ BUGUNGI KUN - MAXSUS STIL */
-  .calendar-day-dark.today-dark {
-    background: rgba(59, 130, 246, 0.2);
+  .weekday-header-dark {
+    font-size: 11px;
+    padding: 5px 1px;
   }
   
-  .calendar-day-dark.today-dark .day-number-dark {
-    color: #60a5fa;
-    font-weight: 700;
+  .calendar-grid-dark {
+    gap: 2px;
   }
   
-  /* ✅ BUGUNGI KUN NUQTASI */
   .today-dot {
-    position: absolute;
-    bottom: 3px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 3px;
-    height: 3px;
-    background: #60a5fa;
-    border-radius: 50%;
+    width: 2px;
+    height: 2px;
+    bottom: 2px;
   }
   
-  /* ✅ HOVER EFFEKT */
+  .current-month-dark {
+    font-size: 15px;
+    min-width: 100px;
+  }
+  
+  .nav-button-dark {
+    width: 26px;
+    height: 26px;
+    font-size: 14px;
+  }
+  
+  .calendar-legend {
+    gap: 8px;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .legend-item {
+    font-size: 9px;
+  }
+}
+
+/* ✅ DARK MODE PREFERENCES */
+@media (prefers-color-scheme: dark) {
+  .monthly-calendar-dark {
+    border-color: #4b5563;
+    background: #111827;
+  }
+  
+  .nav-button-dark {
+    border-color: #6b7280;
+  }
+  
+  .nav-button-dark:hover:not(:disabled) {
+    background: #1f2937;
+    border-color: #9ca3af;
+  }
+  
+  .weekday-header-dark {
+    color: #6b7280;
+    border-bottom-color: #4b5563;
+  }
+  
+  .calendar-day-dark {
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .calendar-legend {
+    border-top-color: #4b5563;
+  }
+}
+
+/* ✅ LIGHT MODE FALLBACK */
+@media (prefers-color-scheme: light) {
+  .monthly-calendar-dark {
+    background: #ffffff;
+    border-color: #e5e7eb;
+    color: #1f2937;
+  }
+  
+  .nav-button-dark {
+    border-color: #d1d5db;
+    color: #374151;
+  }
+  
+  .nav-button-dark:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+  }
+  
+  .current-month-dark {
+    color: #1f2937;
+  }
+  
+  .weekday-header-dark {
+    color: #6b7280;
+    border-bottom-color: #e5e7eb;
+  }
+  
+  .day-number-dark {
+    color: #374151;
+  }
+  
+  .calendar-day-dark {
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+  
   .calendar-day-dark:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    z-index: 3;
+    background: rgba(0, 0, 0, 0.05);
   }
   
-  /* ✅ LOADING SPINNER - DARK MODE */
-  .calendar-loading-dark {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
+  .calendar-day-dark.has-data {
+    background: rgba(0, 0, 0, 0.02);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
   
   .loading-spinner-dark {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #333;
-    border-top: 2px solid #60a5fa;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+    border-color: #f3f4f6;
+    border-top-color: #3b82f6;
   }
   
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  .calendar-loading-dark {
+    background: rgba(255, 255, 255, 0.9);
   }
   
-  /* ✅ MOBIL RESPONSIVE - 380px va undan kichik */
-  @media (max-width: 380px) {
-    .monthly-calendar-dark {
-      padding: 12px;
-      border-radius: 12px;
-      min-width: 260px;
-    }
-    
-    .calendar-header-dark {
-      margin-bottom: 12px;
-    }
-    
-    .current-month-dark {
-      font-size: 14px;
-      min-width: 80px;
-    }
-    
-    .nav-button-dark {
-      width: 24px;
-      height: 24px;
-      font-size: 14px;
-    }
-    
-    .calendar-grid-dark {
-      gap: 3px;
-    }
-    
-    .calendar-day-dark {
-      height: 32px;
-      width: 32px;
-    }
-    
-    .day-number-dark {
-      font-size: 11px;
-    }
-    
-    .weekday-header-dark {
-      font-size: 11px;
-      padding: 4px 1px;
-    }
-    
-    .today-dot {
-      width: 2px;
-      height: 2px;
-      bottom: 2px;
-    }
+  .calendar-legend {
+    border-top-color: #e5e7eb;
   }
   
-  /* ✅ KICHIK EKRANLAR - 320px va undan kichik */
-  @media (max-width: 320px) {
-    .monthly-calendar-dark {
-      min-width: 240px;
-      padding: 10px;
-    }
-    
-    .calendar-day-dark {
-      height: 28px;
-      width: 28px;
-    }
-    
-    .day-number-dark {
-      font-size: 10px;
-    }
-    
-    .weekday-header-dark {
-      font-size: 10px;
-      padding: 3px 1px;
-    }
-    
-    .calendar-grid-dark {
-      gap: 2px;
-    }
-    
-    .today-dot {
-      width: 2px;
-      height: 2px;
-      bottom: 1px;
-    }
-    
-    .current-month-dark {
-      font-size: 13px;
-      min-width: 70px;
-    }
-    
-    .nav-button-dark {
-      width: 22px;
-      height: 22px;
-      font-size: 12px;
-    }
+  .legend-item {
+    color: #6b7280;
   }
   
-  /* ✅ LIGHT MODE UCHUN FALLBACK */
-  @media (prefers-color-scheme: light) {
-    .monthly-calendar-dark {
-      background: #ffffff;
-      border-color: #e5e7eb;
-    }
-    
-    .nav-button-dark {
-      border-color: #d1d5db;
-      color: #374151;
-    }
-    
-    .nav-button-dark:hover:not(:disabled) {
-      background: #f3f4f6;
-      border-color: #9ca3af;
-    }
-    
-    .current-month-dark {
-      color: #1f2937;
-    }
-    
-    .weekday-header-dark {
-      color: #6b7280;
-    }
-    
-    .day-number-dark {
-      color: #374151;
-    }
-    
-    .calendar-day-dark {
-      border-color: rgba(0, 0, 0, 0.1);
-    }
-    
-    .loading-spinner-dark {
-      border-color: #f3f4f6;
-      border-top-color: #3b82f6;
-    }
+  .legend-color {
+    border-color: rgba(0, 0, 0, 0.2);
   }
+}
+
+/* ✅ YANGI: ANIMATIONS & TRANSITIONS */
+.calendar-day-dark {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.calendar-day-dark.has-data {
+  animation: dataAppear 0.5s ease-out;
+}
+
+@keyframes dataAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ✅ ACCESSIBILITY IMPROVEMENTS */
+.calendar-day-dark:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.nav-button-dark:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* ✅ HIGH DPI SUPPORT */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .today-dot {
+    width: 3px;
+    height: 3px;
+  }
+  
+  .legend-color {
+    border-width: 0.5px;
+  }
+}
+
+/* ✅ YANGI: TOOLTIP STYLE (agar kerak bo'lsa) */
+.calendar-day-dark[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 10;
+  border: 1px solid #374151;
+  margin-bottom: 4px;
+}
+
+/* ✅ PERFORMANCE OPTIMIZATIONS */
+.calendar-grid-dark {
+  will-change: transform;
+}
+
+.calendar-day-dark {
+  will-change: transform, border-color;
+}
+
+.loading-spinner-dark {
+  will-change: transform;
+}

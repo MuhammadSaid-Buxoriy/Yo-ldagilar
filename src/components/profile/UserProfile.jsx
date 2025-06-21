@@ -1,4 +1,4 @@
-// components/profile/UserProfile.jsx - API DATA FIRST VERSION + Ulashish optimallashtirilgan
+// components/profile/UserProfile.jsx - TO'LIQ OPTIMALLASHTIRILGAN VERSIYA
 import { useState, useEffect, useCallback } from "react";
 import { useTelegram } from "../../hooks/useTelegram";
 import APIService from "../../services/api";
@@ -25,29 +25,54 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       setLoading(true);
       setError(null);
 
-      // Always fetch user profile and stats from API
-      const [statsResponse, userResponse] = await Promise.all(
-        [
+      // ✅ Birinchi strategiya: getUserProfile va getUserStatistics parallel chaqirish
+      try {
+        const [statsResponse, userResponse] = await Promise.all([
           APIService.getUserStatistics(userId),
           APIService.getUserProfile(userId),
-        ]
-      );
+        ]);
 
-      setStats(statsResponse);
-      setProfileUser(userResponse.user);
-      
-      // ✅ TUZATISH: achievementProgress user obyektidan olish
-      const achievementsData = userResponse.user?.achievementProgress || [];
-      console.log('🏆 loadUserData - achievements from user:', achievementsData);
-      setAchievementsProgress(achievementsData);
+        setStats(statsResponse);
+        setProfileUser(userResponse.user);
+        
+        // ✅ Achievement progress'ni user obyektidan olish
+        const achievementsData = userResponse.user?.achievementProgress || [];
+        console.log('🏆 Achievement progress from user:', achievementsData);
+        setAchievementsProgress(achievementsData);
+        
+      } catch (apiError) {
+        console.warn("getUserProfile endpoint not available, trying fallback approach");
+        
+        // ✅ Fallback strategiya: Faqat getUserStatistics + manual achievement API
+        const statsResponse = await APIService.getUserStatistics(userId);
+        setStats(statsResponse);
+        
+        // Manual user data yaratish
+        setProfileUser({
+          id: userId,
+          tg_id: userId,
+          name: `User ${userId}`,
+          photo_url: `https://ui-avatars.com/api/?name=U&size=100&background=4ECDC4&color=fff&bold=true`,
+          achievements: []
+        });
+        
+        // ✅ Alohida achievement endpoint sinash
+        try {
+          const achievementsData = await APIService.getUserAchievementsProgress(userId);
+          console.log('🏆 Achievements progress from separate API:', achievementsData);
+          setAchievementsProgress(achievementsData || []);
+        } catch (achievementError) {
+          console.warn("Achievements endpoint not available:", achievementError);
+          setAchievementsProgress([]);
+        }
+      }
       
     } catch (error) {
       console.error("Failed to load user data:", error);
       setError(APIService.getErrorMessage(error));
 
-      // Only set fallback data if it's own profile and we have telegram data
+      // Minimal fallback data faqat own profile uchun
       if (isOwnProfile && userId) {
-        console.warn("Using minimal fallback data structure");
         setStats({
           today: { completed: 0, pages_read: 0, distance_km: 0 },
           weekly: { dailyPoints: [0, 0, 0, 0, 0, 0, 0] },
@@ -60,14 +85,21 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
             early_bird_streak: 0,
           },
         });
-        // Don't set profileUser - let it remain null to show error
+        setProfileUser({
+          id: userId,
+          tg_id: userId,
+          name: `User ${userId}`,
+          photo_url: null,
+          achievements: []
+        });
+        setAchievementsProgress([]);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ OPTIMALLASHTIRILGAN: Share funksiyasi
+  // ✅ Optimallashtirilgan Share funksiyasi
   const shareProfile = useCallback(async () => {
     if (!stats || !profileUser) {
       showAlert("❌ Ma'lumotlar yuklanmagan");
@@ -77,7 +109,6 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
     hapticFeedback("light");
 
     try {
-      // Ma'lumotlarni tayyorlash
       const dailyCompleted = stats.today?.completed || 0;
       const dailyPercent = Math.round((dailyCompleted / 10) * 100);
       const userName = getUserDisplayName(profileUser);
@@ -86,7 +117,6 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
       const totalDistance = stats.all_time?.total_distance || 0;
       const totalDays = stats.all_time?.total_days || 0;
 
-      // ✅ YANGILANGAN: Yaxshiroq share text formati
       const shareText = `🚀 ${isOwnProfile ? "Mening Yo'ldagilar challenge natijalarim" : `${userName}ning Yo'ldagilar challenge natijalari`}:
 
 📈 Bugungi unumdorlik: ${dailyPercent}% (${dailyCompleted}/10 vazifa)
@@ -103,9 +133,7 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
 
 👉🏻 https://t.me/yuldagilar_bot`;
 
-      console.log("📝 Share text prepared:", shareText.substring(0, 100) + "...");
-
-      // ✅ OPTIMALLASHTIRILGAN: Share usullari prioritet bo'yicha
+      // Share strategiyalari prioritet bo'yicha
       const shareStrategies = [
         {
           name: "Telegram WebApp",
@@ -146,7 +174,6 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
         }
       ];
 
-      // ✅ Share strategiyalarini ketma-ket sinash
       for (const strategy of shareStrategies) {
         if (strategy.condition()) {
           try {
@@ -155,16 +182,15 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
             if (success) {
               hapticFeedback("success");
               console.log(`✅ ${strategy.name} successful`);
-              return; // Muvaffaqiyatli bo'lsa, chiqish
+              return;
             }
           } catch (error) {
             console.warn(`⚠️ ${strategy.name} failed:`, error);
-            // Keyingi strategiyaga o'tish
           }
         }
       }
 
-      // ✅ Oxirgi fallback - eski usul bilan copy
+      // Fallback copy
       fallbackCopyToClipboard(shareText);
 
     } catch (error) {
@@ -174,7 +200,6 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
     }
   }, [stats, profileUser, isOwnProfile, hapticFeedback, showAlert, tg]);
 
-  // ✅ Fallback copy funksiyasi (o'zgarishsiz)
   const fallbackCopyToClipboard = (text) => {
     try {
       const textArea = document.createElement("textarea");
@@ -201,7 +226,6 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
     }
   };
 
-  // ✅ User display name helper (o'zgarishsiz)
   const getUserDisplayName = (user) => {
     if (!user) return "Unknown User";
     if (user.name) return user.name;
@@ -229,7 +253,6 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
         stats={stats}
         onShare={shareProfile}
         isOwnProfile={isOwnProfile}
-        onUserUpdate={setProfileUser}
       />
 
       <div className="profile-content">
@@ -244,20 +267,14 @@ const UserProfile = ({ isOwnProfile = true, userId = null }) => {
 };
 
 const ProfileHeader = ({ user, stats, onShare }) => {
-  // ✅ User display name helper (lokalni)
   const getUserDisplayName = () => {
     if (!user) return "Unknown User";
 
-    const name =
-      user.name || user.first_name || user.username || `User ${user.id}`;
+    const name = user.name || user.first_name || user.username || `User ${user.id}`;
 
-    // Add achievement badges if available
     if (user.achievements && user.achievements.length > 0) {
       return (
-        <span
-          className="user-display-name-badge-wrap"
-          style={{ display: "flex", alignItems: "center", gap: 4 }}
-        >
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
           {name}
           {user.achievements.slice(0, 2).map((badgeKey) => {
             const badge = ACHIEVEMENT_BADGES[badgeKey];
@@ -270,7 +287,6 @@ const ProfileHeader = ({ user, stats, onShare }) => {
                   marginLeft: 4,
                   color: badge.color,
                   display: "inline-flex",
-                  verticalAlign: "middle",
                 }}
                 title={badge.title}
               >
@@ -285,10 +301,9 @@ const ProfileHeader = ({ user, stats, onShare }) => {
   };
 
   const getAvatarContent = () => {
-    // Use photo_url from API user data only
     const photoUrl = user?.photo_url || user?.avatar_url;
 
-    if (photoUrl) {
+    if (photoUrl && photoUrl.includes('http')) {
       return (
         <img
           src={photoUrl}
@@ -297,24 +312,13 @@ const ProfileHeader = ({ user, stats, onShare }) => {
           width={80}
           height={80}
           onError={(e) => {
-            // If image fails to load, hide it and show placeholder
             e.target.style.display = "none";
           }}
         />
       );
     }
 
-    // Generate placeholder based on API user data
-    const colors = [
-      "#3b82f6",
-      "#ef4444",
-      "#10b981",
-      "#f59e0b",
-      "#8b5cf6",
-      "#ec4899",
-      "#06b6d4",
-      "#84cc16",
-    ];
+    const colors = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6"];
     const colorIndex = (user?.id || 0) % colors.length;
 
     return (
@@ -329,23 +333,14 @@ const ProfileHeader = ({ user, stats, onShare }) => {
 
   const getUserSubtitle = () => {
     if (!user) return "Unknown";
-
-    // Show username from API data, fallback to ID
-    if (user.username) {
-      return `@${user.username}`;
-    }
+    if (user.username) return `@${user.username}`;
     return `User ID: ${user.id}`;
   };
 
   return (
     <div className="profile-header">
       <div className="profile-header-content">
-        {/* ✅ Share tugmasi (o'zgarishsiz) */}
-        <button
-          onClick={onShare}
-          className="share-icon-button"
-          title="Ulashish"
-        >
+        <button onClick={onShare} className="share-icon-button" title="Ulashish">
           <ShareIcon />
         </button>
 
@@ -389,7 +384,6 @@ const ProfileHeader = ({ user, stats, onShare }) => {
   );
 };
 
-// StatCard component (o'zgarishsiz)
 const StatCard = ({ label, value, icon }) => (
   <div className="stat-card">
     <div className="stat-icon">
@@ -402,54 +396,22 @@ const StatCard = ({ label, value, icon }) => (
   </div>
 );
 
-// ✅ TUZATILGAN: StatisticsSection component'da haftalik logic
+// ✅ StatisticsSection - Backend ma'lumotlarini to'g'ri ishlatish
 const StatisticsSection = ({ stats, userId }) => {
   const dailyCompleted = stats?.today?.completed || 0;
   const dailyPercent = Math.round((dailyCompleted / 10) * 100);
 
-  // ✅ HAFTALIK LOGIC TUZATISH
-  const getCurrentWeekDailyData = () => {
-    const today = new Date();
-    const currentDayOfWeek = today.getDay(); // 0 = Yakshanba, 1 = Dushanba, ...
-    
-    // Dushanba = 1, Seshanba = 2, ..., Yakshanba = 0 (7)
-    // O'zbek hafta tartibiga o'tkazish: Du=0, Se=1, Ch=2, Pa=3, Ju=4, Sh=5, Ya=6
-    const uzbekDayIndex = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-    
-    console.log('📅 Current week calculation:', {
-      today: today.toDateString(),
-      jsDay: currentDayOfWeek,
-      uzbekDay: uzbekDayIndex,
-      todayName: ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'][currentDayOfWeek]
-    });
-
-    // Backend'dan kelgan haftalik ma'lumotlar (bu haftadagi barcha kunlar uchun)
-    const weeklyPointsFromAPI = stats?.weekly?.dailyPoints || [0, 0, 0, 0, 0, 0, 0];
-    
-    // Yangi haftalik array yaratish
-    const currentWeekData = [0, 0, 0, 0, 0, 0, 0]; // Du, Se, Ch, Pa, Ju, Sh, Ya
-    
-    // Faqat o'tgan kunlar va bugungi kunni ko'rsatish
-    for (let i = 0; i <= uzbekDayIndex; i++) {
-      // Backend ma'lumotlaridan tegishli kun ma'lumotini olish
-      currentWeekData[i] = weeklyPointsFromAPI[i] || 0;
-    }
-    
-    // Kelajakdagi kunlar 0 bo'lib qoladi (ko'rsatilmaydi)
-    
-    console.log('📊 Weekly data processing:', {
-      apiData: weeklyPointsFromAPI,
-      currentWeekData: currentWeekData,
-      todayIndex: uzbekDayIndex
-    });
-    
-    return currentWeekData;
+  // ✅ Haftalik ma'lumotlarni to'g'ri olish
+  const getCurrentWeekData = () => {
+    const backendWeeklyPoints = stats?.weekly?.dailyPoints || [0, 0, 0, 0, 0, 0, 0];
+    console.log('📅 Backend weekly data:', backendWeeklyPoints);
+    return backendWeeklyPoints;
   };
 
   const days = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"];
-  const dailyCompletedFromWeek = getCurrentWeekDailyData();
+  const dailyCompletedFromWeek = getCurrentWeekData();
 
-  // ✅ YANGI HAFTA UNUMDORLIGI HISOBLASH - SIZNING TALABINGIZ BO'YICHA
+  // ✅ Haftalik unumdorlik hisoblash - barcha 7 kun bo'yicha o'rtacha
   const calculateWeeklyProductivity = () => {
     let totalPercentage = 0;
     
@@ -463,11 +425,10 @@ const StatisticsSection = ({ stats, userId }) => {
     // Hafta unumdorligi = umumiy foiz / 7
     const weeklyProductivity = Math.round(totalPercentage / 7);
     
-    console.log('📈 Weekly productivity calculation:', {
+    console.log('📈 Weekly productivity:', {
       dailyPoints: dailyCompletedFromWeek,
-      dailyPercentages: dailyCompletedFromWeek.map(points => Math.round((points / 10) * 100)),
-      totalPercentage: totalPercentage,
-      weeklyProductivity: weeklyProductivity
+      totalPercentage,
+      weeklyProductivity
     });
     
     return weeklyProductivity;
@@ -477,21 +438,19 @@ const StatisticsSection = ({ stats, userId }) => {
 
   const getProgressColor = (percent) => {
     if (percent >= 90) return "#16ce40";
-    if (percent >= 80) return "#FFFF00";
+    if (percent >= 80) return "#FFFF00";  
     if (percent >= 50) return "#FF8000";
     return "#dc2626";
   };
 
-  // ✅ HAFTALIK CHART DATA TUZATISH
+  // ✅ Haftalik chart data
   const weeklyData = days.map((day, i) => {
     const today = new Date();
     const currentUzbekDayIndex = today.getDay() === 0 ? 6 : today.getDay() - 1;
     
-    // Kun o'tganmi yoki bugunmi?
     const isDayPassed = i <= currentUzbekDayIndex;
     const isFutureDay = i > currentUzbekDayIndex;
     
-    // Foizni hisoblash
     let percent = 0;
     if (isDayPassed) {
       percent = Math.round((dailyCompletedFromWeek[i] / 10) * 100);
@@ -506,8 +465,6 @@ const StatisticsSection = ({ stats, userId }) => {
       points: dailyCompletedFromWeek[i] || 0
     };
   });
-
-  console.log('📈 Weekly chart data:', weeklyData);
 
   return (
     <div className="statistics-section">
@@ -537,20 +494,16 @@ const StatisticsSection = ({ stats, userId }) => {
           </div>
           <div className="detail-item">
             <span className="detail-label">O'qilgan betlar</span>
-            <span className="detail-value">
-              {stats?.today?.pages_read || 0}
-            </span>
+            <span className="detail-value">{stats?.today?.pages_read || 0}</span>
           </div>
           <div className="detail-item">
             <span className="detail-label">Yugurgan masofa</span>
-            <span className="detail-value">
-              {stats?.today?.distance_km || 0} km
-            </span>
+            <span className="detail-value">{stats?.today?.distance_km || 0} km</span>
           </div>
         </div>
       </div>
 
-      {/* ✅ HAFTALIK NATIJA - YANGI HISOBLASH USULI */}
+      {/* Haftalik natija */}
       <div className="progress-card">
         <div className="progress-header">
           <h3 className="progress-title">Hafta unumdorligi</h3>
@@ -567,7 +520,6 @@ const StatisticsSection = ({ stats, userId }) => {
           color={getProgressColor(weeklyPercent)}
         />
 
-        {/* ✅ YANGI HAFTALIK CHART */}
         <div className="weekly-chart" style={{ minHeight: "170px" }}>
           {weeklyData.map((dayData) => (
             <div
@@ -579,7 +531,6 @@ const StatisticsSection = ({ stats, userId }) => {
               }`}
               style={{ height: "100%" }}
             >
-              {/* Chart bar faqat o'tgan va bugungi kunlar uchun */}
               {!dayData.isFuture && (
                 <div
                   className="chart-bar"
@@ -592,7 +543,6 @@ const StatisticsSection = ({ stats, userId }) => {
                 ></div>
               )}
               
-              {/* Kelajakdagi kunlar uchun placeholder */}
               {dayData.isFuture && (
                 <div
                   className="chart-bar-placeholder"
@@ -604,13 +554,10 @@ const StatisticsSection = ({ stats, userId }) => {
                 ></div>
               )}
               
-              <span className={`chart-label ${
-                dayData.isToday ? 'chart-label-today' : ''
-              }`}>
+              <span className={`chart-label ${dayData.isToday ? 'chart-label-today' : ''}`}>
                 {dayData.day}
               </span>
               
-              {/* Foiz faqat o'tgan va bugungi kunlar uchun */}
               {!dayData.isFuture && (
                 <span
                   className="chart-value"
@@ -623,17 +570,15 @@ const StatisticsSection = ({ stats, userId }) => {
                 </span>
               )}
               
-              {/* Kelajakdagi kunlar uchun hech narsa ko'rsatilmaydi */}
               {dayData.isFuture && (
                 <span className="chart-value-future">-</span>
               )}
             </div>
           ))}
         </div>
-
       </div>
 
-      {/* ✅ OYLIK KALENDAR QO'SHILDI */}
+      {/* Oylik kalendar */}
       <MonthlyCalendar userId={userId} stats={stats} />
     </div>
   );
@@ -651,17 +596,11 @@ const ProgressBar = ({ percentage, color }) => (
   </div>
 );
 
-// ✅ ASOSIY TUZATISH: AchievementsSection component'da backend ma'lumotlarini to'g'ri ishlatish
+// ✅ AchievementsSection - Backend achievement progress bilan
 const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
-  // ✅ TUZATILDI: Backend ma'lumotlarini to'g'ri ishlatish
   const achievementMap = new Map();
   achievementsProgress.forEach((a) => achievementMap.set(a.id, a));
   
-  console.log('🏆 AchievementsSection - achievementsProgress:', achievementsProgress);
-  console.log('🏆 AchievementsSection - achievementMap:', achievementMap);
-  console.log('🏆 AchievementsSection - stats:', stats);
-  
-  // ✅ YANGI STRATEGIYA: current qiymatini to'g'ri olish
   const getAchievementCurrent = (achievementId, fallbackValue) => {
     const achievement = achievementMap.get(achievementId);
     if (achievement && typeof achievement.current === 'number') {
@@ -676,25 +615,25 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
       title: "Faol",
       description: "21 kun faol bo'lish",
       target: 21,
-      current: getAchievementCurrent("consistent", stats?.all_time?.total_days), // ✅ Backend + fallback
+      current: getAchievementCurrent("consistent", stats?.all_time?.total_days),
       icon: "zap",
       color: "#ef4444",
     },
     {
-      id: "reader",
+      id: "reader", 
       title: "Kitobxon",
       description: "6,000 bet kitob o'qish",
       target: 6000,
-      current: getAchievementCurrent("reader", stats?.all_time?.total_pages), // ✅ Backend + fallback
+      current: getAchievementCurrent("reader", stats?.all_time?.total_pages),
       icon: "book",
       color: "#3b82f6",
     },
     {
       id: "athlete",
-      title: "Sportchi",
+      title: "Sportchi", 
       description: "100 km yugurish",
       target: 100,
-      current: getAchievementCurrent("athlete", stats?.all_time?.total_distance), // ✅ Backend + fallback
+      current: getAchievementCurrent("athlete", stats?.all_time?.total_distance),
       icon: "activity",
       color: "#10b981",
     },
@@ -703,25 +642,20 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
       title: "Uyg'oq",
       description: "21 kun ketma-ket erta turish",
       target: 21,
-      current: getAchievementCurrent("early_bird", stats?.all_time?.early_bird_streak), // ✅ Backend + fallback
+      current: getAchievementCurrent("early_bird", stats?.all_time?.early_bird_streak),
       icon: "moon",
       color: "#8b5cf6",
     },
     {
       id: "perfectionist",
       title: "Olov",
-      description: "21 kun ketma-ket 10/10 vazifa bajarish",
+      description: "21 kun ketma-ket 10/10 vazifa",
       target: 21,
-      current: getAchievementCurrent("perfectionist", stats?.all_time?.perfectionist_streak), // ✅ Backend + fallback
+      current: getAchievementCurrent("perfectionist", stats?.all_time?.perfectionist_streak),
       icon: "fire",
       color: "#f59e0b",
     },
   ];
-
-  // ✅ DEBUG LOG: Har bir achievement uchun progress ko'rsatish
-  achievements.forEach(achievement => {
-    console.log(`🏆 ${achievement.title}: ${achievement.current}/${achievement.target} (${Math.round((achievement.current / achievement.target) * 100)}%)`);
-  });
 
   return (
     <div className="achievements-section">
@@ -729,10 +663,7 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
 
       <div className="achievements-grid">
         {achievements.map((achievement) => {
-          const progress = Math.min(
-            (achievement.current / achievement.target) * 100,
-            100
-          );
+          const progress = Math.min((achievement.current / achievement.target) * 100, 100);
           const isCompleted = progress >= 100;
 
           return (
@@ -784,110 +715,48 @@ const AchievementsSection = ({ stats, achievementsProgress = [] }) => {
   );
 };
 
-// Icon Components (o'zgarishsiz)
+// Icon va boshqa yordamchi komponentlar
 const StatIcon = ({ type }) => {
   const icons = {
     star: (
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
       </svg>
     ),
     book: (
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
       </svg>
     ),
     activity: (
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M6 2v6h.01L8 14.01V22h8v-7.99L17.99 8H18V2" />
         <path d="M8 22v-7" />
         <path d="M16 22v-7" />
       </svg>
     ),
     calendar: (
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
         <line x1="16" y1="2" x2="16" y2="6" />
         <line x1="8" y1="2" x2="8" y2="6" />
         <line x1="3" y1="10" x2="21" y2="10" />
       </svg>
     ),
-    flame: (
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
-        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
-      </svg>
-    ),
-    fire: (
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
-        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
-      </svg>
-    ),
     zap: (
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <polygon points="13 2 3 14 12 14 11 22 21 10 13 10 13 2" />
       </svg>
     ),
     moon: (
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-        <path d="M12 6v6l4 2" />
+      </svg>
+    ),
+    fire: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
       </svg>
     ),
   };
@@ -895,16 +764,8 @@ const StatIcon = ({ type }) => {
   return icons[type] || icons.star;
 };
 
-// Share icon (o'zgarishsiz)
 const ShareIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 26 26"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-  >
+  <svg width="16" height="16" viewBox="0 0 26 26" fill="none" stroke="currentColor" strokeWidth="2">
     <circle cx="18" cy="5" r="3" />
     <circle cx="6" cy="12" r="3" />
     <circle cx="18" cy="19" r="3" />
@@ -913,7 +774,6 @@ const ShareIcon = () => (
   </svg>
 );
 
-// Loading & Error States (o'zgarishsiz)
 const LoadingSkeleton = () => (
   <div className="profile-container">
     <div className="profile-header">
@@ -933,14 +793,7 @@ const ErrorState = ({ error, onRetry }) => (
   <div className="error-state">
     <div className="error-content">
       <div className="error-icon">
-        <svg
-          width="48"
-          height="48"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="8" x2="12" y2="12" />
           <line x1="12" y1="16" x2="12.01" y2="16" />
