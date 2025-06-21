@@ -125,7 +125,7 @@ const DailyTasks = () => {
   const loadTodayTasks = async (silent = false) => {
     try {
       if (!silent) setLoading(true);
-      
+
       console.log("📅 Bugungi vazifalarni yuklayapman...", user.id);
 
       // ✅ MUHIM: Timezone ma'lumotini yuborish
@@ -135,9 +135,9 @@ const DailyTasks = () => {
       // Backend dan bugungi kun ma'lumotlarini olish
       const response = await APIService.apiCall(`/tasks/daily/${user.id}`, {
         headers: {
-          'Content-Type': 'application/json',
-          'X-Timezone': userTimezone // ✅ YANGI: Timezone header
-        }
+          "Content-Type": "application/json",
+          "X-Timezone": userTimezone, // ✅ YANGI: Timezone header
+        },
       });
 
       console.log("📊 Backend dan kelgan ma'lumot:", response);
@@ -268,7 +268,7 @@ const DailyTasks = () => {
     try {
       // ✅ MUHIM: Timezone ma'lumotini qo'shish
       const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      
+
       const submitData = {
         tg_id: user.id,
         name: user.name || user.first_name || `User ${user.id}`,
@@ -296,21 +296,21 @@ const DailyTasks = () => {
       if (response.success !== false) {
         hapticFeedback("success");
         const totalPoints = response.totalPoints || Object.keys(tasks).length;
-        
+
         // ✅ YAXSHILANGAN: User'ga ko'proq ma'lumot berish
         const completedTasksCount = Object.keys(tasks).length;
         const pagesRead = tasks[5] ? taskInputs[5] || 0 : 0;
         const distanceKm = tasks[10] ? taskInputs[10] || 0 : 0;
-        
+
         let successMessage = `✅ Muvaffaqiyatli saqlandi!\n🎯 Bugungi ball: ${totalPoints}/10`;
-        
+
         if (pagesRead > 0) {
           successMessage += `\n📖 Betlar: ${pagesRead}`;
         }
         if (distanceKm > 0) {
           successMessage += `\n🏃‍♂️ Masofa: ${distanceKm} km`;
         }
-        
+
         showAlert(successMessage);
 
         // ✅ MUHIM: Yuborish muvaffaqiyatli bo'lsa, qayta yuklash
@@ -342,7 +342,8 @@ const DailyTasks = () => {
           <div className="header-title-section">
             <h1 className="tasks-title">Bugungi vazifalar</h1>
             <p className="tasks-subtitle">
-              Har kuni o'zingizni rivojlantiring • {new Date().toLocaleDateString('uz-UZ')}
+              Har kuni o'zingizni rivojlantiring •{" "}
+              {new Date().toLocaleDateString("uz-UZ")}
             </p>
           </div>
 
@@ -445,23 +446,10 @@ const DailyTasks = () => {
         </div>
 
         {/* ✅ YANGI: Tips section */}
-        <div className="tasks-tips">
-          <h3 className="tips-title">💡 Maslahatlar</h3>
-          <div className="tips-list">
-            <div className="tip-item">
-              <span className="tip-icon">⏰</span>
-              <span className="tip-text">Vazifalarni tong vaqtida belgilash yaxshiroq</span>
-            </div>
-            <div className="tip-item">
-              <span className="tip-icon">🔄</span>
-              <span className="tip-text">Ma'lumotlar har 30 soniyada yangilanadi</span>
-            </div>
-            <div className="tip-item">
-              <span className="tip-icon">🌍</span>
-              <span className="tip-text">Sizning timezone: {Intl.DateTimeFormat().resolvedOptions().timeZone}</span>
-            </div>
-          </div>
-        </div>
+
+        <h3 className="tips-title">
+          {Intl.DateTimeFormat().resolvedOptions().timeZone}
+        </h3>
       </div>
     </div>
   );
@@ -522,54 +510,117 @@ const TaskItem = ({ task, isChecked, inputValue, onToggle, onInputChange }) => {
 const getTaskIcon = (iconType) => {
   const icons = {
     prayer: () => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M12 2L2 7v10c0 5.55 3.84 10 9 9 5.16-1 9-3.45 9-9V7l-10-5z" />
         <path d="M12 17.5c-2.5 0-4.5-2-4.5-4.5S9.5 8.5 12 8.5s4.5 2 4.5 4.5-2 4.5-4.5 4.5z" />
       </svg>
     ),
     heart: () => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
     ),
     audio: () => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <polygon points="11 5,6 9,2 9,2 15,6 15,11 19,11 5" />
         <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
         <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
       </svg>
     ),
     donate: () => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <circle cx="12" cy="12" r="10" />
         <path d="M12 6v6l4 2" />
       </svg>
     ),
     book: () => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
       </svg>
     ),
     education: () => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
         <path d="M6 12v5c3 3 9 3 12 0v-5" />
       </svg>
     ),
     headphones: () => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
         <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
       </svg>
     ),
     sleep: () => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
       </svg>
     ),
     sunrise: () => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M17 18a5 5 0 0 0-10 0" />
         <line x1="12" y1="2" x2="12" y2="9" />
         <line x1="4.22" y1="10.22" x2="5.64" y2="11.64" />
@@ -581,7 +632,14 @@ const getTaskIcon = (iconType) => {
       </svg>
     ),
     activity: () => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M6 2v6h.01L8 14.01V22h8v-7.99L17.99 8H18V2" />
         <path d="M8 22v-7" />
         <path d="M16 22v-7" />
@@ -594,20 +652,41 @@ const getTaskIcon = (iconType) => {
 
 // Helper icon'lar
 const StarIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
     <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
   </svg>
 );
 
 const BookIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
     <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
   </svg>
 );
 
 const ActivityIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
     <path d="M6 2v6h.01L8 14.01V22h8v-7.99L17.99 8H18V2" />
     <path d="M8 22v-7" />
     <path d="M16 22v-7" />
@@ -615,7 +694,14 @@ const ActivityIcon = () => (
 );
 
 const SaveIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
     <polyline points="17,21 17,13 7,13 7,21" />
     <polyline points="7,3 7,8 15,8" />
@@ -623,7 +709,14 @@ const SaveIcon = () => (
 );
 
 const CheckIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
     <polyline points="20,6 9,17 4,12" />
   </svg>
 );
