@@ -86,8 +86,8 @@ const TASKS_CONFIG = [
       type: "number",
       placeholder: "Masofa (km)",
       unit: "km",
-      min: 0.1,
-      step: 0.1,
+      min: 1,
+      step: 1,
     },
   },
 ];
